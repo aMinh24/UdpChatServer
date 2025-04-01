@@ -1,6 +1,5 @@
 package UdpChatServer;
 
-import java.net.DatagramSocket;
 import java.sql.Timestamp;
 import java.util.Set;
 
@@ -18,18 +17,14 @@ public class SendMessageHandler {
     private static final Logger log = LoggerFactory.getLogger(SendMessageHandler.class);
 
     private final ClientSessionManager sessionManager;
-    private final RoomManager roomManager;
     private final MessageDAO messageDAO; // Needed to save the message
     private final RoomDAO roomDAO;       // Needed to check participation
-    private final DatagramSocket socket; // Needed for sending potential error replies directly? (Maybe not needed anymore)
     private final UdpRequestHandler requestHandler; // To initiate S2C flow for forwarding
 
-    public SendMessageHandler(ClientSessionManager sessionManager, RoomManager roomManager, MessageDAO messageDAO, RoomDAO roomDAO, DatagramSocket socket, UdpRequestHandler requestHandler) {
+    public SendMessageHandler(ClientSessionManager sessionManager, RoomManager roomManager, MessageDAO messageDAO, RoomDAO roomDAO, UdpRequestHandler requestHandler) {
         this.sessionManager = sessionManager;
-        this.roomManager = roomManager;
         this.messageDAO = messageDAO;
         this.roomDAO = roomDAO;
-        this.socket = socket; // Keep for now, might remove if error handling is centralized
         this.requestHandler = requestHandler;
     }
 
@@ -53,9 +48,10 @@ public class SendMessageHandler {
         String senderChatId = messageData.get(Constants.KEY_CHAT_ID).getAsString();  // Read from 'data'
         String roomId = messageData.get(Constants.KEY_ROOM_ID).getAsString();  // Read from 'data'
         String content = messageData.get(Constants.KEY_CONTENT).getAsString(); // Read from 'data'
-        String sessionKey = pendingInfo.getSessionKey(); // Key of the sender
+        // String sessionKey = pendingInfo.getSessionKey(); // Key of the sender - Use getTransactionKey now
+        String transactionKey = pendingInfo.getTransactionKey(); // Get the key used for this transaction
 
-        log.info("Processing confirmed send_message from '{}' to room '{}' (Transaction ID: {})", senderChatId, roomId, pendingInfo.getTransactionId());
+        log.info("Processing confirmed send_message from '{}' to room '{}' (Transaction ID: {}) using key type: {}", senderChatId, roomId, pendingInfo.getTransactionId(), transactionKey.equals(Constants.FIXED_LOGIN_KEY_STRING) ? "Fixed" : "Session");
 
         try {
             // 0. Double-check if user is still in the room (optional, but good practice)
@@ -134,7 +130,7 @@ public class SendMessageHandler {
                         messageJson,
                         recipientSession.getIpAddress(),
                         recipientSession.getPort(),
-                        recipientSession.getKey() // Use recipient's key
+                        recipientSession.getKey() // Use recipient's session key
                     );
                 } else {
                     log.debug("Recipient '{}' in room '{}' is offline or key missing. Message saved in DB, not forwarded in real-time.", recipientChatId, roomId);
@@ -144,16 +140,4 @@ public class SendMessageHandler {
         }
     }
 
-    // Note: sendErrorReply might not be needed here anymore if UdpRequestHandler handles ACKs
-    /**
-     * Sends an error reply to the client. (Potentially deprecated if ACKs handle errors)
-     */
-    // private void sendErrorReply(InetAddress clientAddress, int clientPort, String action, String errorMessage, String keyToSendWith) {
-    //     if (keyToSendWith == null || keyToSendWith.isEmpty()) {
-    //         log.error("Cannot send error reply for action '{}' to {}:{}, key is missing!", action, clientAddress.getHostAddress(), clientPort);
-    //         return;
-    //     }
-    //     JsonObject replyJson = JsonHelper.createErrorReply(action, errorMessage);
-    //     JsonHelper.sendPacket(socket, clientAddress, clientPort, replyJson, keyToSendWith, log);
-    // }
 }

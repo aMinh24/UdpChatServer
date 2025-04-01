@@ -51,9 +51,8 @@ public class ServerMain {
             UdpRequestHandler finalRequestHandler = requestHandler; // Need final variable for lambda
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 log.info("Shutdown hook triggered. Stopping server...");
-                if (finalRequestHandler != null) {
-                    finalRequestHandler.stop(); // Stop the handler loop and thread pool
-                }
+                // Removed null check as finalRequestHandler should not be null here if hook runs
+                finalRequestHandler.stop(); // Stop the handler loop and thread pool
                 DatabaseConnectionManager.closeDataSource(); // Close the database connection pool
                 log.info("Server shut down gracefully.");
             }, "Server-Shutdown-Hook"));

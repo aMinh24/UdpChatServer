@@ -1,7 +1,5 @@
 package UdpChatServer;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import org.slf4j.Logger;
@@ -18,99 +16,104 @@ public class LoginHandler {
 
     private final UserDAO userDAO;
     private final ClientSessionManager sessionManager;
-    private final DatagramSocket socket; // Still needed for sending potential error replies with fixed key
+    // private final DatagramSocket socket; // Removed: UdpRequestHandler handles sending
     private final UdpRequestHandler requestHandler; // To initiate S2C flow
 
-    public LoginHandler(UserDAO userDAO, ClientSessionManager sessionManager, DatagramSocket socket, UdpRequestHandler requestHandler) {
+    public LoginHandler(UserDAO userDAO, ClientSessionManager sessionManager, UdpRequestHandler requestHandler) {
         this.userDAO = userDAO;
         this.sessionManager = sessionManager;
-        this.socket = socket;
+        // this.socket = socket; // Removed
         this.requestHandler = requestHandler; // Store the request handler
     }
 
+    // Removed handleLogin method as it's replaced by the C2S flow initiated in UdpRequestHandler
+    // and the confirmation logic in processConfirmedLogin.
+
     /**
-     * Processes a login request received via UDP.
-     * Assumes the requestJson has already been decrypted using the FIXED_LOGIN_KEY.
-     * Authenticates the user, generates a session key, stores the session,
-     * and initiates the Server -> Client confirmation flow by sending the login success message.
-     *
-     * @param requestPacket The original DatagramPacket (needed for address/port).
-     * @param requestJson   The decrypted JsonObject from the request packet.
+     * Sends an error reply to the client, encrypted with the specified key.
+     * Used for login failures (fixed key) or other pre-login errors.
+     * NOTE: This method is likely no longer needed here as UdpRequestHandler handles errors. Kept for reference.
      */
-    public void handleLogin(DatagramPacket requestPacket, JsonObject requestJson) {
-        InetAddress clientAddress = requestPacket.getAddress();
-        int clientPort = requestPacket.getPort();
-        String chatid = null; // Initialize to null
-        String sessionKey = null;
+    // private void sendErrorReply(InetAddress clientAddress, int clientPort, String errorMessage, String key) {
+    //     JsonObject replyJson = JsonHelper.createErrorReply(Constants.ACTION_LOGIN, errorMessage);
+    //      // Encrypt with the provided key (usually FIXED key for login errors)
+    //      // JsonHelper.sendPacket(socket, clientAddress, clientPort, replyJson, key, log); // Socket removed
+    //      log.warn("sendErrorReply called in LoginHandler, but socket is removed. Error not sent: {}", errorMessage);
+    // }
+
+    /**
+     * Processes the login action AFTER the client has confirmed via CONFIRM_COUNT.
+     * Authenticates the user, generates session key, stores session, and initiates S2C flow for login_success.
+     * This method is called by UdpRequestHandler.handleConfirmCount.
+     *
+     * @param pendingInfo Information about the confirmed login transaction.
+     * @return true if authentication was successful, false otherwise.
+     */
+    public boolean processConfirmedLogin(PendingMessageInfo pendingInfo) {
+        if (pendingInfo == null || pendingInfo.getDirection() != PendingMessageInfo.Direction.CLIENT_TO_SERVER ||
+            !Constants.ACTION_LOGIN.equals(pendingInfo.getOriginalAction())) {
+            log.error("Invalid pending info passed to processConfirmedLogin: {}", pendingInfo);
+            return false;
+        }
+
+        JsonObject originalRequest = pendingInfo.getOriginalMessageJson();
+        JsonObject requestData = originalRequest.getAsJsonObject(Constants.KEY_DATA);
+        InetAddress clientAddress = pendingInfo.getPartnerAddress();
+        int clientPort = pendingInfo.getPartnerPort();
+        String chatid = null;
+        String sessionKey;
 
         try {
-            // 1. Extract credentials from the 'data' object within the decrypted JSON
-            if (!requestJson.has(Constants.KEY_DATA) || !requestJson.getAsJsonObject(Constants.KEY_DATA).has(Constants.KEY_CHAT_ID) || !requestJson.getAsJsonObject(Constants.KEY_DATA).has(Constants.KEY_PASSWORD)) {
-                log.warn("Login request missing 'data' object or 'chatid'/'password' within data from {}:{}", clientAddress.getHostAddress(), clientPort);
-                // Send error using fixed key as login hasn't succeeded
-                sendErrorReply(clientAddress, clientPort, Constants.ERROR_MSG_MISSING_FIELD + "'data', 'chatid' or 'password'", Constants.FIXED_LOGIN_KEY_STRING);
-                return;
-            }
-            JsonObject data = requestJson.getAsJsonObject(Constants.KEY_DATA);
-            chatid = data.get(Constants.KEY_CHAT_ID).getAsString();
-            String password = data.get(Constants.KEY_PASSWORD).getAsString();
+            // 1. Extract credentials (already validated for presence by UdpRequestHandler before C2S flow)
+            chatid = requestData.get(Constants.KEY_CHAT_ID).getAsString();
+            String password = requestData.get(Constants.KEY_PASSWORD).getAsString();
 
-            log.info("Processing login request for user '{}' from {}:{}", chatid, clientAddress.getHostAddress(), clientPort);
+            log.info("Processing confirmed login request for user '{}' from {}:{} (Transaction ID: {})",
+                     chatid, clientAddress.getHostAddress(), clientPort, pendingInfo.getTransactionId());
 
             // 2. Authenticate user via UserDAO
             boolean isAuthenticated = userDAO.authenticateUser(chatid, password);
 
             if (isAuthenticated) {
-                // 3. Generate session key
-                sessionKey = KeyGenerator.generateKey();
+                // 3. Generate session key for authenticated user
+                String newSessionKey = KeyGenerator.generateKey();
 
                 // 4. Add session to ClientSessionManager
-                sessionManager.addSession(chatid, clientAddress, clientPort, sessionKey);
+                sessionManager.addSession(chatid, clientAddress, clientPort, newSessionKey);
 
-                // 5. Prepare success reply JSON
+                // 5. Prepare login_success reply JSON (to be sent via S2C flow)
                 JsonObject replyData = new JsonObject();
                 replyData.addProperty(Constants.KEY_CHAT_ID, chatid);
-                replyData.addProperty(Constants.KEY_SESSION_KEY, sessionKey); // Send the new key
+                replyData.addProperty(Constants.KEY_SESSION_KEY, newSessionKey); // Send the new key
 
                 JsonObject replyJson = JsonHelper.createReply(
                     Constants.ACTION_LOGIN_SUCCESS,
                     Constants.STATUS_SUCCESS,
-                    "Login successful. Confirm receipt.", // Updated message
+                    "Login successful. Confirm receipt.",
                     replyData
                 );
 
-                // 6. Initiate Server -> Client flow using the *new* session key
-                log.info("Login successful for user '{}'. Initiating S2C flow with new session key.", chatid);
+                // 6. Initiate Server -> Client flow for the login_success message using the *new* session key
+                log.info("Login successful for user '{}'. Initiating S2C flow for login_success with new session key.", chatid);
                 requestHandler.initiateServerToClientFlow(
                     Constants.ACTION_LOGIN_SUCCESS,
                     replyJson,
                     clientAddress,
                     clientPort,
-                    Constants.FIXED_LOGIN_KEY_STRING // Use the fixed key for login success
+                    newSessionKey // Use the NEW session key for this flow
                 );
+                return true; // Indicate success to UdpRequestHandler for sending ACK(success) with fixed key
 
             } else {
-                // 7. Send authentication failure reply, encrypted with the fixed key
-                log.warn("Login failed for user '{}' from {}:{}", chatid, clientAddress.getHostAddress(), clientPort);
-                sendErrorReply(clientAddress, clientPort, Constants.ERROR_MSG_AUTHENTICATION_FAILED, Constants.FIXED_LOGIN_KEY_STRING);
+                // 7. Authentication failed
+                log.warn("Confirmed login failed for user '{}' from {}:{}", chatid, clientAddress.getHostAddress(), clientPort);
+                return false; // Indicate failure to UdpRequestHandler for sending ACK(failure) with fixed key
             }
 
         } catch (Exception e) {
-            // Catch potential exceptions during JSON parsing or processing
-            log.error("Error processing login request for user '{}' from {}:{}: {}",
+            log.error("Error processing confirmed login for user '{}' from {}:{}: {}",
                       (chatid != null ? chatid : "UNKNOWN"), clientAddress.getHostAddress(), clientPort, e.getMessage(), e);
-            // Send error using fixed key
-            sendErrorReply(clientAddress, clientPort, Constants.ERROR_MSG_INTERNAL_SERVER_ERROR, Constants.FIXED_LOGIN_KEY_STRING);
+            return false; // Indicate failure
         }
-    }
-
-    /**
-     * Sends an error reply to the client, encrypted with the specified key.
-     * Used for login failures (fixed key) or other pre-login errors.
-     */
-    private void sendErrorReply(InetAddress clientAddress, int clientPort, String errorMessage, String key) {
-        JsonObject replyJson = JsonHelper.createErrorReply(Constants.ACTION_LOGIN, errorMessage);
-         // Encrypt with the provided key (usually FIXED key for login errors)
-         JsonHelper.sendPacket(socket, clientAddress, clientPort, replyJson, key, log);
     }
 }

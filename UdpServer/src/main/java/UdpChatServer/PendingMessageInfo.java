@@ -34,14 +34,14 @@ public class PendingMessageInfo {
     private final Map<Character, Integer> expectedLetterFrequencies; // Frequencies calculated from originalDecryptedJsonString
     private final InetAddress partnerAddress; // The IP address of the other party (Client for S->C, Server for C->S - though server address is fixed)
     private final int partnerPort; // The port of the other party (Client for S->C, Server for C->S)
-    private final String sessionKey; // Session key used for encryption/decryption with the partner
+    private final String transactionKey; // Key used for this transaction (session or fixed)
     private final long creationTimestamp;
     private long lastUpdateTime;
 
     public PendingMessageInfo(String transactionId, Direction direction, State initialState,
                             JsonObject originalMessageJson, String originalDecryptedJsonString,
                             Map<Character, Integer> expectedLetterFrequencies,
-                            InetAddress partnerAddress, int partnerPort, String sessionKey) {
+                            InetAddress partnerAddress, int partnerPort, String transactionKey) {
         this.transactionId = transactionId;
         this.direction = direction;
         this.currentState = initialState;
@@ -50,7 +50,7 @@ public class PendingMessageInfo {
         this.expectedLetterFrequencies = expectedLetterFrequencies;
         this.partnerAddress = partnerAddress;
         this.partnerPort = partnerPort;
-        this.sessionKey = sessionKey;
+        this.transactionKey = transactionKey; // Store the key used for this transaction
         this.creationTimestamp = System.currentTimeMillis();
         this.lastUpdateTime = this.creationTimestamp;
     }
@@ -89,8 +89,8 @@ public class PendingMessageInfo {
         return partnerPort;
     }
 
-    public String getSessionKey() {
-        return sessionKey;
+    public String getTransactionKey() {
+        return transactionKey;
     }
 
     public long getCreationTimestamp() {

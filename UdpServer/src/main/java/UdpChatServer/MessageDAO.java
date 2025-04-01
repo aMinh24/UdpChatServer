@@ -45,7 +45,7 @@ public class MessageDAO {
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                log.debug("Message saved successfully from '{}' in room '{}'.", message.getSenderChatid(), message.getRoomId());
+                log.info("Message saved successfully from '{}' in room '{}'.", message.getSenderChatid(), message.getRoomId());
                 return true;
             } else {
                 log.warn("Failed to save message from '{}' in room '{}'. No rows affected.", message.getSenderChatid(), message.getRoomId());
@@ -97,7 +97,7 @@ public class MessageDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Message message = new Message(
-                            Long.valueOf(rs.getLong("message_id")), // Explicitly convert long to Long
+                            rs.getLong("message_id"), // Autoboxing handles long -> Long
                             rs.getString("room_id"),
                             rs.getString("sender_chatid"),
                             rs.getString("content"),
@@ -151,7 +151,7 @@ public class MessageDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Message message = new Message(
-                            Long.valueOf(rs.getLong("message_id")), // Explicitly convert long to Long
+                            rs.getLong("message_id"), // Autoboxing handles long -> Long
                             rs.getString("room_id"),
                             rs.getString("sender_chatid"),
                             rs.getString("content"),

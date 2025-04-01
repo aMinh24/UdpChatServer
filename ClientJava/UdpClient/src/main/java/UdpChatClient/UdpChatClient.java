@@ -123,7 +123,7 @@ public class UdpChatClient {
 
                     JsonObject responseJson = decryptedResult.jsonObject;
                     String decryptedJsonString = decryptedResult.decryptedJsonString;
-                    log.debug("Received decrypted JSON: {}", decryptedJsonString);
+                    log.info("Received decrypted JSON: {}", decryptedJsonString);
 
                     if (!responseJson.has(Constants.KEY_ACTION)) {
                         log.error("Received packet missing 'action' field: {}", decryptedJsonString);
@@ -146,40 +146,10 @@ public class UdpChatClient {
                             continue;
                     }
 
-                    // --- Special Handling for Login Success ---
-                    if (Constants.ACTION_LOGIN_SUCCESS.equals(action)) {
-                        String status = responseJson.has(Constants.KEY_STATUS) ? responseJson.get(Constants.KEY_STATUS).getAsString() : null;
-                        if (Constants.STATUS_SUCCESS.equals(status) && responseJson.has(Constants.KEY_DATA)) {
-                            JsonObject data = responseJson.getAsJsonObject(Constants.KEY_DATA);
-                            if (data.has(Constants.KEY_SESSION_KEY) && data.has(Constants.KEY_CHAT_ID) && data.has("transaction_id")) {
-                                // Update session key and chat ID IMMEDIATELY
-                                sessionKey = data.get(Constants.KEY_SESSION_KEY).getAsString();
-                                currentChatId = data.get(Constants.KEY_CHAT_ID).getAsString();
-                                String loginTxId = data.get("transaction_id").getAsString();
-                                log.info("Login successful! Updated sessionKey for user '{}'. Session: {}", currentChatId, sessionKey);
-                                System.out.println("\nLogin successful! (Session: " + sessionKey + ")");
-                                System.out.println("Type /help");
-                                System.out.print("> ");
-
-                                // Store pending action and initiate handshake using the NEW key
-                                pendingServerActionsJson.put(loginTxId, decryptedJsonString);
-                                sendCharacterCount(decryptedJsonString, loginTxId, receivePacket.getAddress(), receivePacket.getPort());
-                                continue; // Skip generic S->C handling below
-                            } else {
-                                log.error("Login success message missing required fields (session_key, chatid, transaction_id) in data.");
-                                // Don't proceed with handshake if data is incomplete
-                                continue;
-                            }
-                        } else {
-                            // Handle login failure case if needed (though usually sent as ERROR)
-                            log.warn("Received login action with status '{}', not processing as success.", status);
-                            System.out.println("\nLogin failed: " + (responseJson.has(Constants.KEY_MESSAGE) ? responseJson.get(Constants.KEY_MESSAGE).getAsString() : "Unknown reason"));
-                            System.out.print("> ");
-                            continue; // Don't proceed
-                        }
-                    }
-
-                    // --- Handle Other Initial Server Actions (Start of S->C Flow) ---
+                    // --- Handle Initial Server Actions (Start of S->C Flow) ---
+                    // If it's not a handshake/terminal action, it must be an initial action from the server
+                    // starting a Server -> Client flow (e.g., receive_message, rooms_list, messages_list).
+                    // Note: login_success is no longer handled here as it's part of the ACK for login.
                     log.info("Received initial action '{}' from server, starting S->C flow", action);
                     String transactionId = null;
                     if (responseJson.has(Constants.KEY_DATA)) {
@@ -227,7 +197,7 @@ public class UdpChatClient {
         String transactionId = data.get("transaction_id").getAsString();
         String originalAction = data.get(Constants.KEY_ORIGINAL_ACTION).getAsString(); // Get original action from data
         JsonObject serverFrequenciesJson = data.getAsJsonObject(Constants.KEY_LETTER_FREQUENCIES);
-        log.debug("Received CHARACTER_COUNT for original action '{}', server tx ID: {}", originalAction, transactionId);
+        log.info("Received CHARACTER_COUNT for original action '{}', server tx ID: {}", originalAction, transactionId);
 
         // Find the pending request using the originalAction received from the server.
         // Iterate through requests stored by temp ID to find the one matching the original action
@@ -240,7 +210,7 @@ public class UdpChatClient {
             if (entry.getValue().originalAction.equals(originalAction) && entry.getValue().serverTransactionId == null) {
                 pendingReq = entry.getValue();
                 tempIdToRemove = entry.getKey();
-                log.debug("Found matching pending request (TempID: {}) for original action {}", tempIdToRemove, originalAction);
+                log.info("Found matching pending request (TempID: {}) for original action {}", tempIdToRemove, originalAction);
                 break; // Found the first matching pending request
             }
         }
@@ -258,7 +228,7 @@ public class UdpChatClient {
              log.warn("Could not find tempIdToRemove while processing CHARACTER_COUNT for tx {}", transactionId); // Should not happen if pendingReq was found
         }
         pendingClientRequestsByServerId.put(transactionId, pendingReq); // Store by server ID
-        log.debug("Associated server tx ID {} with pending action {} (TempID: {})", transactionId, originalAction, tempIdToRemove);
+        log.info("Associated server tx ID {} with pending action {} (TempID: {})", transactionId, originalAction, tempIdToRemove);
 
 
         // Compare frequencies
@@ -270,7 +240,7 @@ public class UdpChatClient {
             log.warn("Frequency check failed for transaction: {}. Client: {}, Server: {}",
                      transactionId, clientCalculatedFrequencies, serverFrequencies);
         } else {
-             log.debug("Frequency check successful for transaction: {}", transactionId);
+             log.info("Frequency check successful for transaction: {}", transactionId);
         }
 
         // Send CONFIRM_COUNT back
@@ -297,7 +267,7 @@ public class UdpChatClient {
         }
         String transactionId = data.get("transaction_id").getAsString();
         boolean confirmed = data.get(Constants.KEY_CONFIRM).getAsBoolean();
-        log.debug("Received CONFIRM_COUNT for transaction: {} (confirmed: {})", transactionId, confirmed);
+        log.info("Received CONFIRM_COUNT for transaction: {} (confirmed: {})", transactionId, confirmed);
 
         String pendingJson = pendingServerActionsJson.remove(transactionId); // Use correct map
         if (pendingJson == null) {
@@ -342,15 +312,46 @@ public class UdpChatClient {
             return;
         }
         String transactionId = data.get("transaction_id").getAsString();
-        log.info("Received Server ACK for transaction: {} with status: {}", transactionId, status);
+        String originalAction = data.has(Constants.KEY_ORIGINAL_ACTION) ? data.get(Constants.KEY_ORIGINAL_ACTION).getAsString() : "unknown"; // Get original action from ACK data
+        log.info("Received Server ACK for transaction: {} (Original Action: {}) with status: {}", transactionId, originalAction, status);
 
         // Find the pending request using the server's transaction ID
         ClientPendingRequest pendingReq = pendingClientRequestsByServerId.remove(transactionId); // Use the correct map
 
         if (pendingReq != null) {
-            pendingReq.ackData = responseJson;
-            pendingReq.latch.countDown();
-            log.debug("Signaled completion for pending request associated with transaction {}", transactionId);
+            pendingReq.ackData = responseJson; // Store the full ACK response
+
+            // --- Special Handling for Login ACK ---
+            if (Constants.ACTION_LOGIN.equals(originalAction)) {
+                if (Constants.STATUS_SUCCESS.equals(status)) {
+                    // Extract session key and chatid from ACK data
+                    if (data.has(Constants.KEY_SESSION_KEY) && data.has(Constants.KEY_CHAT_ID)) {
+                        sessionKey = data.get(Constants.KEY_SESSION_KEY).getAsString();
+                        currentChatId = data.get(Constants.KEY_CHAT_ID).getAsString();
+                        log.info("Login successful via ACK! Updated sessionKey for user '{}'. Session: {}", currentChatId, sessionKey);
+                        System.out.println("\nLogin successful! Welcome " + currentChatId + ".");
+                        System.out.println("Type /help");
+                    } else {
+                        log.error("Login ACK successful but missing session_key or chatid in data!");
+                        System.out.println("\nLogin successful, but server response was incomplete. Please try again.");
+                        // Mark as failed locally? Or keep pendingReq.ackData as is?
+                        // For simplicity, let latch countdown but user sees error.
+                    }
+                } else {
+                    // Login failed or cancelled
+                    String message = responseJson.has(Constants.KEY_MESSAGE) ? responseJson.get(Constants.KEY_MESSAGE).getAsString() : "Unknown reason";
+                    log.warn("Login failed via ACK. Status: {}, Message: {}", status, message);
+                    System.out.println("\nLogin failed: " + message + " (Status: " + status + ")");
+                }
+                // Login attempt is complete (success or fail), signal the latch
+                pendingReq.latch.countDown();
+                log.info("Signaled completion for pending login request associated with transaction {}", transactionId);
+
+            } else {
+                // --- Handle ACK for other actions ---
+                pendingReq.latch.countDown();
+                log.info("Signaled completion for pending request (Action: {}) associated with transaction {}", originalAction, transactionId);
+            }
         } else {
             log.warn("Received ACK for unknown, timed-out, or already processed transaction: {}", transactionId);
         }
@@ -411,7 +412,7 @@ public class UdpChatClient {
             String action = responseJson.get(Constants.KEY_ACTION).getAsString();
             String status = responseJson.has(Constants.KEY_STATUS) ? responseJson.get(Constants.KEY_STATUS).getAsString() : null;
             String message = responseJson.has(Constants.KEY_MESSAGE) ? responseJson.get(Constants.KEY_MESSAGE).getAsString() : null;
-            log.debug("Processing confirmed server action: {}", action);
+            log.info("Processing confirmed server action: {}", action);
             switch (action) {
                  case Constants.ACTION_LOGIN_SUCCESS: if (Constants.STATUS_SUCCESS.equals(status)) { JsonObject d=responseJson.getAsJsonObject(Constants.KEY_DATA); sessionKey=d.get(Constants.KEY_SESSION_KEY).getAsString(); currentChatId=d.get(Constants.KEY_CHAT_ID).getAsString(); System.out.println("\nLogin successful! (Session: "+sessionKey+")"); System.out.println("Type /help"); } else { System.out.println("\nLogin failed: "+message); } break;
                  case Constants.ACTION_ROOM_CREATED: if (Constants.STATUS_SUCCESS.equals(status)) { JsonObject d=responseJson.getAsJsonObject(Constants.KEY_DATA); String r=d.get(Constants.KEY_ROOM_ID).getAsString(); System.out.println("\nRoom created! ID: "+r); System.out.println("Use: /send "+r+" <msg>"); } else { System.out.println("\nRoom creation failed: "+message); } break;
@@ -460,18 +461,8 @@ public class UdpChatClient {
         data.addProperty(Constants.KEY_CHAT_ID, chatId);
         data.addProperty(Constants.KEY_PASSWORD, password);
         JsonObject request = JsonHelper.createRequest(Constants.ACTION_LOGIN, data);
-        // Send directly, don't wait for ACK here. Listener handles response.
-        boolean sent = JsonHelper.sendPacket(socket, serverAddress, serverPort, request, Constants.FIXED_LOGIN_KEY_STRING, log);
-
-        if (sent) {
-            log.info("Sent login request for user: {}", chatId);
-            System.out.println("Login request sent. Waiting for server response...");
-            // No waiting here, response handled by listener
-        } else {
-            log.error("Failed to send login request for user: {}", chatId);
-            System.out.println("Error sending login request.");
-            System.out.print("> "); // Prompt user again if send failed
-        }
+        // Use sendClientRequestWithAck to handle the C->S handshake for login
+        sendClientRequestWithAck(request, Constants.ACTION_LOGIN, Constants.FIXED_LOGIN_KEY_STRING);
     }
 
     private void createRoom(String[] participants) {

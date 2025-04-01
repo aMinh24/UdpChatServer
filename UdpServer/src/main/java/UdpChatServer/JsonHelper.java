@@ -73,7 +73,7 @@ public final class JsonHelper {
         try {
             // Assume the entire data payload is the encrypted string
             String encryptedString = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
-            // log.trace("Received raw encrypted string: {}", encryptedString); // Can be noisy
+            log.info("Received raw encrypted string: {}", encryptedString); // Can be noisy
 
             // Decrypt using Caesar cipher
             String decryptedJsonString = CaesarCipher.decrypt(encryptedString, keyString);
@@ -172,7 +172,7 @@ public final class JsonHelper {
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, address, port);
             socket.send(sendPacket);
             // log.trace("Sent encrypted UDP packet (key length {}) to {}:{}: {}", keyString.length(), address.getHostAddress(), port, encryptedString); // Can be noisy
-            log.debug("Sent encrypted packet (action: {}) with key length {} to {}:{}",
+            log.info("Sent encrypted packet (action: {}) with key length {} to {}:{}",
                       json.has(Constants.KEY_ACTION) ? json.get(Constants.KEY_ACTION).getAsString() : "unknown",
                       keyString.length(), address.getHostAddress(), port);
             return true;

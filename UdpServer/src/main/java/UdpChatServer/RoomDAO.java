@@ -30,7 +30,7 @@ public class RoomDAO {
         }
         // Check if room exists first (optional, INSERT IGNORE can handle it too)
         // if (roomExists(roomId)) {
-        //     log.debug("Room '{}' already exists in DB.", roomId);
+        //     log.info("Room '{}' already exists in DB.", roomId);
         //     return true;
         // }
 
@@ -46,7 +46,7 @@ public class RoomDAO {
                 log.info("Room '{}' created successfully in DB.", roomId);
             } else {
                 // This means the room likely already existed due to INSERT IGNORE
-                log.debug("Room '{}' already exists or insert was ignored.", roomId);
+                log.info("Room '{}' already exists or insert was ignored.", roomId);
             }
             return true; // Return true if created or already exists
 
@@ -85,7 +85,7 @@ public class RoomDAO {
              if (affectedRows > 0) {
                 log.info("Participant '{}' added to room '{}' in DB.", chatid, roomId);
             } else {
-                log.debug("Participant '{}' already in room '{}' or insert was ignored.", chatid, roomId);
+                log.info("Participant '{}' already in room '{}' or insert was ignored.", chatid, roomId);
             }
             return true; // Return true if added or already exists
 

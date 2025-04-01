@@ -1,8 +1,6 @@
 package UdpChatServer;
 
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,8 +22,6 @@ public class CreateRoomHandler {
     private final RoomManager roomManager;
     private final RoomDAO roomDAO;
     private final UserDAO userDAO;
-    private final DatagramSocket socket; // Keep for sending direct errors if needed before flow starts
-    private final UdpRequestHandler requestHandler; // To potentially initiate S2C flows if needed (e.g., notify participants - though not currently implemented)
 
     public CreateRoomHandler(ClientSessionManager sessionManager, RoomManager roomManager,
                            RoomDAO roomDAO, UserDAO userDAO, DatagramSocket socket, UdpRequestHandler requestHandler) {
@@ -33,8 +29,6 @@ public class CreateRoomHandler {
         this.roomManager = roomManager;
         this.roomDAO = roomDAO;
         this.userDAO = userDAO;
-        this.socket = socket;
-        this.requestHandler = requestHandler;
     }
 
     /**
@@ -128,32 +122,4 @@ public class CreateRoomHandler {
         }
     }
 
-    /**
-     * Sends an error reply directly (only used for errors *before* C2S flow starts).
-     * Encrypted with the provided session key.
-     */
-    private void sendErrorReply(InetAddress clientAddress, int clientPort, String action, String errorMessage, String sessionKey) {
-         if (sessionKey == null || sessionKey.isEmpty()) {
-            log.error("Cannot send error reply for create_room, session key is missing!");
-            return;
-        }
-        JsonObject errorReply = JsonHelper.createErrorReply(action, errorMessage);
-        JsonHelper.sendPacket(socket, clientAddress, clientPort, errorReply, sessionKey, log);
-    }
-
-    // --- Deprecated handleCreateRoom ---
-    /**
-     * @deprecated The initial handling is now done by UdpRequestHandler.initiateClientToServerFlow.
-     *             This method might be removed or kept for reference.
-     */
-    @Deprecated
-    public void handleCreateRoom(DatagramPacket requestPacket, JsonObject requestJson, InetAddress clientAddress, int clientPort, String sessionKey) {
-       log.warn("Deprecated handleCreateRoom called directly. Initial handling should be via UdpRequestHandler.");
-       // This method should no longer be called directly by UdpRequestHandler's main packet processing loop.
-       // The logic is now split:
-       // 1. UdpRequestHandler receives packet, validates session, calls initiateClientToServerFlow.
-       // 2. initiateClientToServerFlow sends CHARACTER_COUNT.
-       // 3. UdpRequestHandler receives CONFIRM_COUNT.
-       // 4. If confirmed, UdpRequestHandler calls processConfirmedCreateRoom (the method above).
-    }
 }

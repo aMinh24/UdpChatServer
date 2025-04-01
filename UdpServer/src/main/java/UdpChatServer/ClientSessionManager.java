@@ -54,7 +54,7 @@ public class ClientSessionManager {
         SessionInfo oldSession = sessionsByChatId.get(chatid);
         if (oldSession != null) {
             sessionsByAddress.remove(getAddressKey(oldSession.getIpAddress(), oldSession.getPort()));
-            log.debug("Removed old address mapping for updated session: {}", chatid);
+            log.info("Removed old address mapping for updated session: {}", chatid);
         }
 
         // Add new mappings
@@ -135,7 +135,7 @@ public class ClientSessionManager {
                 boolean related = (info.getDirection() == PendingMessageInfo.Direction.CLIENT_TO_SERVER && info.getOriginalMessageJson().get(Constants.KEY_CHAT_ID).getAsString().equals(chatid)) ||
                                   (info.getDirection() == PendingMessageInfo.Direction.SERVER_TO_CLIENT && info.getPartnerAddress().equals(removedSession.getIpAddress()) && info.getPartnerPort() == removedSession.getPort());
                 if (related) {
-                    log.debug("Removing pending transaction {} due to session removal for {}", entry.getKey(), chatid);
+                    log.info("Removing pending transaction {} due to session removal for {}", entry.getKey(), chatid);
                 }
                 return related;
             });
@@ -151,7 +151,7 @@ public class ClientSessionManager {
         if (chatid != null) {
             removeSession(chatid); // Call the main removal logic
         } else {
-             log.debug("Attempted to remove session by address {}:{}, but no mapping found.", ipAddress.getHostAddress(), port);
+             log.info("Attempted to remove session by address {}:{}, but no mapping found.", ipAddress.getHostAddress(), port);
         }
     }
 
@@ -174,7 +174,7 @@ public class ClientSessionManager {
             return;
         }
         pendingTransactions.put(pendingInfo.getTransactionId(), pendingInfo);
-        log.debug("Pending transaction stored: {}", pendingInfo);
+        log.info("Pending transaction stored: {}", pendingInfo);
     }
 
     /**
@@ -184,7 +184,7 @@ public class ClientSessionManager {
         if (transactionId == null) return null;
         PendingMessageInfo info = pendingTransactions.remove(transactionId);
         if (info != null) {
-            log.debug("Retrieved and removed pending transaction: {}", transactionId);
+            log.info("Retrieved and removed pending transaction: {}", transactionId);
         } else {
              log.warn("Attempted to retrieve non-existent pending transaction: {}", transactionId);
         }
