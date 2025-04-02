@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.model;
 
 public final class Constants {
 
@@ -24,6 +24,7 @@ public final class Constants {
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_DATA = "data";
     public static final String KEY_CHAT_ID = "chatid";
+    public static final String KEY_TRANSACTION_ID = "transaction_id";
 
     // Login Action
     public static final String KEY_PASSWORD = "password";
@@ -86,6 +87,12 @@ public final class Constants {
     public static final String ERROR_MSG_DECRYPTION_FAILED = "Failed to decrypt message with provided session key."; // Added message
     public static final String ERROR_MSG_PENDING_ACTION_NOT_FOUND = "No pending action found for this confirmation/ack.";
     public static final String ERROR_MSG_INVALID_STATE = "Invalid state for current action.";
+
+    public static final String MSG_ACTION_SUCCESS = "Action processed successfully.";
+    public static final String MSG_ACTION_FAILED = "Action failed to process.";
+    public static final String MSG_ACTION_CANCELLED = "Action cancelled by the user.";
+    public static final String MSG_ACTION_PENDING = "Action is pending confirmation.";
+
 
 
     // --- Other ---

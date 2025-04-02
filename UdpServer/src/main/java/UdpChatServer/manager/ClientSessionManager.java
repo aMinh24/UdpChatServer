@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.manager;
 
 import java.net.InetAddress;
 import java.util.Map;
@@ -7,6 +7,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import UdpChatServer.model.Constants;
+import UdpChatServer.model.PendingMessageInfo;
+import UdpChatServer.model.SessionInfo;
 
 /**
  * Manages active client sessions and pending multi-step message transactions in a thread-safe manner.

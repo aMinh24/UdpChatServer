@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

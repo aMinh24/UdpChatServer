@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.handler;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -7,6 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonObject;
+
+import UdpChatServer.model.*;
+import UdpChatServer.model.SessionInfo;
+import UdpChatServer.db.MessageDAO;
+import UdpChatServer.db.RoomDAO;
+import UdpChatServer.manager.ClientSessionManager;
+import UdpChatServer.manager.RoomManager;
+import UdpChatServer.net.UdpSender;
+import UdpChatServer.util.JsonHelper;
 
 /**
  * Handles the logic for processing confirmed "send_message" actions.
@@ -19,13 +28,13 @@ public class SendMessageHandler {
     private final ClientSessionManager sessionManager;
     private final MessageDAO messageDAO; // Needed to save the message
     private final RoomDAO roomDAO;       // Needed to check participation
-    private final UdpRequestHandler requestHandler; // To initiate S2C flow for forwarding
+    private final UdpSender udpSender;   // Changed from requestHandler
 
-    public SendMessageHandler(ClientSessionManager sessionManager, RoomManager roomManager, MessageDAO messageDAO, RoomDAO roomDAO, UdpRequestHandler requestHandler) {
+    public SendMessageHandler(ClientSessionManager sessionManager, RoomManager roomManager, MessageDAO messageDAO, RoomDAO roomDAO, UdpSender udpSender) { // Changed parameter
         this.sessionManager = sessionManager;
         this.messageDAO = messageDAO;
         this.roomDAO = roomDAO;
-        this.requestHandler = requestHandler;
+        this.udpSender = udpSender; // Changed from requestHandler
     }
 
     /**
@@ -125,7 +134,7 @@ public class SendMessageHandler {
                 if (recipientSession != null && recipientSession.getKey() != null) {
                     // Initiate S2C flow for this recipient
                     log.debug("Initiating S2C flow to forward message from {} to {} in room {}", senderChatId, recipientChatId, roomId);
-                    requestHandler.initiateServerToClientFlow(
+                    udpSender.initiateServerToClientFlow( // Changed from requestHandler
                         Constants.ACTION_RECEIVE_MESSAGE,
                         messageJson,
                         recipientSession.getIpAddress(),
