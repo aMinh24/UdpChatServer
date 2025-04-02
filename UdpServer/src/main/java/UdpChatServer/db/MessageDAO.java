@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +11,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import UdpChatServer.model.Message;
+
 
 /**
  * Data Access Object for Message related operations.

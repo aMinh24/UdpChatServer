@@ -1,7 +1,6 @@
-package UdpChatServer;
+package UdpChatServer.handler;
 
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -10,6 +9,16 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import UdpChatServer.db.MessageDAO;
+import UdpChatServer.db.RoomDAO;
+import UdpChatServer.manager.ClientSessionManager;
+import UdpChatServer.manager.RoomManager;
+import UdpChatServer.model.Constants;
+import UdpChatServer.model.Message;
+import UdpChatServer.model.PendingMessageInfo;
+import UdpChatServer.net.UdpSender;
+import UdpChatServer.util.JsonHelper;
 
 /**
  * Handles requests related to room information (listing rooms, getting messages),
@@ -28,15 +37,15 @@ public class RoomMessageHandler {
     private final RoomDAO roomDAO;
     private final MessageDAO messageDAO;
     private final DatagramSocket socket; // Keep for potential direct error replies
-    private final UdpRequestHandler requestHandler; // To initiate S2C flow
+    private final UdpSender udpSender; // Changed from requestHandler
 
     public RoomMessageHandler(ClientSessionManager sessionManager, RoomManager roomManager,
-                            RoomDAO roomDAO, MessageDAO messageDAO, DatagramSocket socket, UdpRequestHandler requestHandler) {
+                            RoomDAO roomDAO, MessageDAO messageDAO, DatagramSocket socket, UdpSender udpSender) { // Changed parameter
         this.roomManager = roomManager;
         this.roomDAO = roomDAO;
         this.messageDAO = messageDAO;
         this.socket = socket;
-        this.requestHandler = requestHandler;
+        this.udpSender = udpSender; // Changed from requestHandler
     }
 
     /**
@@ -118,12 +127,12 @@ public class RoomMessageHandler {
             // Gửi response qua S2C flow
             log.info("Lấy được {} tin nhắn cho user '{}' trong room '{}'. Bắt đầu luồng S2C.", 
                     messages.size(), chatid, roomId);
-            requestHandler.initiateServerToClientFlow(
+            udpSender.initiateServerToClientFlow( // Changed from requestHandler
                 Constants.ACTION_MESSAGES_LIST,
                 response,
                 pendingInfo.getPartnerAddress(),
                 pendingInfo.getPartnerPort(),
-                pendingInfo.getTransactionKey() // Use getTransactionKey instead of getSessionKey
+                pendingInfo.getTransactionKey()
             );
 
             return true;
@@ -177,12 +186,12 @@ public class RoomMessageHandler {
 
             // Gửi response qua S2C flow
             log.info("Lấy được {} phòng chat cho user '{}'. Bắt đầu luồng S2C.", rooms.size(), chatid);
-            requestHandler.initiateServerToClientFlow(
+            udpSender.initiateServerToClientFlow( // Changed from requestHandler
                 Constants.ACTION_ROOMS_LIST,
                 response,
                 pendingInfo.getPartnerAddress(),
                 pendingInfo.getPartnerPort(),
-                pendingInfo.getTransactionKey() // Use getTransactionKey instead of getSessionKey
+                pendingInfo.getTransactionKey()
             );
 
             return true;
@@ -192,18 +201,5 @@ public class RoomMessageHandler {
                       chatid, transactionId, e.getMessage(), e);
             return false;
         }
-    }
-
-    /**
-     * Sends an error reply directly (only used for errors *before* S2C flow starts).
-     * Encrypted with the provided session key.
-     */
-    private void sendErrorReply(InetAddress clientAddress, int clientPort, String action, String errorMessage, String sessionKey) {
-         if (sessionKey == null || sessionKey.isEmpty()) {
-            log.error("Cannot send error reply for action '{}' to {}:{}, session key is missing!", action, clientAddress.getHostAddress(), clientPort);
-            return;
-        }
-        JsonObject errorReply = JsonHelper.createErrorReply(action, errorMessage);
-        JsonHelper.sendPacket(socket, clientAddress, clientPort, errorReply, sessionKey, log);
     }
 }

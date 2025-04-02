@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.crypto;
 
 import java.security.SecureRandom;
 

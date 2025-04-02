@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.model;
 
 import java.sql.Timestamp;
 

@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.manager;
 
 import java.util.Collections;
 import java.util.HashSet;

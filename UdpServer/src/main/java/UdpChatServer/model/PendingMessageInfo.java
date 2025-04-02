@@ -1,5 +1,4 @@
-package UdpChatServer;
-
+package UdpChatServer.model;
 import java.net.InetAddress;
 import java.util.Map;
 

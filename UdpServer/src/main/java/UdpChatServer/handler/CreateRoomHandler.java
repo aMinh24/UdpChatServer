@@ -1,4 +1,4 @@
-package UdpChatServer;
+package UdpChatServer.handler;
 
 import java.net.DatagramSocket;
 import java.util.HashSet;
@@ -11,6 +11,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import UdpChatServer.db.RoomDAO;
+import UdpChatServer.db.UserDAO;
+import UdpChatServer.manager.ClientSessionManager;
+import UdpChatServer.manager.RoomManager;
+import UdpChatServer.model.Constants;
+import UdpChatServer.model.PendingMessageInfo;
 /**
  * Handles the logic for processing confirmed "create_room" actions.
  * The initial request is handled by UdpRequestHandler, which initiates the C2S flow.
@@ -24,7 +30,7 @@ public class CreateRoomHandler {
     private final UserDAO userDAO;
 
     public CreateRoomHandler(ClientSessionManager sessionManager, RoomManager roomManager,
-                           RoomDAO roomDAO, UserDAO userDAO, DatagramSocket socket, UdpRequestHandler requestHandler) {
+                           RoomDAO roomDAO, UserDAO userDAO, DatagramSocket socket) {
         this.sessionManager = sessionManager;
         this.roomManager = roomManager;
         this.roomDAO = roomDAO;

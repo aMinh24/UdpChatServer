@@ -8,6 +8,15 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import UdpChatServer.db.DatabaseConnectionManager;
+import UdpChatServer.db.MessageDAO;
+import UdpChatServer.db.RoomDAO;
+import UdpChatServer.db.UserDAO;
+import UdpChatServer.manager.ClientSessionManager;
+import UdpChatServer.manager.RoomManager;
+import UdpChatServer.model.Constants;
+import UdpChatServer.net.UdpRequestHandler;
+
 /**
  * Main entry point for the UDP Chat Server application.
  * Initializes all components and starts the request handler.
