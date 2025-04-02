@@ -88,6 +88,25 @@ public final class Constants {
     public static final String ERROR_MSG_PENDING_ACTION_NOT_FOUND = "No pending action found for this confirmation/ack.";
     public static final String ERROR_MSG_INVALID_STATE = "Invalid state for current action.";
 
+    // --- Client Command Definitions ---
+    public static final String CMD_LOGIN = "/login";
+    public static final String CMD_CREATE_ROOM = "/create";
+    public static final String CMD_SEND = "/send";
+    public static final String CMD_HELP = "/help";
+    public static final String CMD_EXIT = "/exit";
+    public static final String CMD_LIST_ROOMS = "/rooms";
+    public static final String CMD_LIST_MESSAGES = "/messages";
+    public static final String CMD_LOGIN_DESC = "/login <chatid> <password> - Đăng nhập vào hệ thống";
+    public static final String CMD_CREATE_ROOM_DESC = "/create <user2> [user3 ...] - Tạo phòng chat với các người dùng được chỉ định";
+    public static final String CMD_SEND_DESC = "/send <room_id> <message> - Gửi tin nhắn đến phòng chat";
+    public static final String CMD_HELP_DESC = "/help - Hiển thị hướng dẫn này";
+    public static final String CMD_EXIT_DESC = "/exit - Thoát chương trình";
+    public static final String CMD_LIST_ROOMS_DESC = "/rooms - Hiển thị danh sách phòng chat của bạn";
+    public static final String CMD_LIST_MESSAGES_DESC = "/messages <room_id> [time_option] - Hiển thị tin nhắn trong phòng chat";
+    public static final String TIME_OPTION_HOURS = "hours";
+    public static final String TIME_OPTION_DAYS = "days";
+    public static final String TIME_OPTION_WEEKS = "weeks";
+    public static final String TIME_OPTION_ALL = "all";
 
     // --- Other ---
     public static final long SESSION_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
