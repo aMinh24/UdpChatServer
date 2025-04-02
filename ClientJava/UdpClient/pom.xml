@@ -31,10 +31,9 @@
 
         <!-- Basic Logging Implementation (for console output) -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.7</version> <!-- Use the same version as server -->
-            <scope>runtime</scope>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.11</version>
         </dependency>
     </dependencies>
 
@@ -45,6 +44,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
+                    <encoding>UTF-8</encoding>
                     <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
@@ -53,10 +53,17 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
                     <mainClass>${exec.mainClass}</mainClass>
+                    <systemProperties>
+                    <systemProperty>
+                        <key>file.encoding</key>
+                        <value>UTF-8</value>
+                    </systemProperty>
+                </systemProperties>
                 </configuration>
             </plugin>
-             <!-- Optional: Plugin to package dependencies into a single JAR -->
+            <!-- Optional: Plugin to package dependencies into a single JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -78,6 +85,7 @@
                 </executions>
             </plugin>
         </plugins>
+        
     </build>
 
 </project>
