@@ -11,6 +11,8 @@ import UdpChatClient.command.ListMessagesHandler;
 import UdpChatClient.command.ListRoomsHandler;
 import UdpChatClient.command.LoginHandler;
 import UdpChatClient.command.SendHandler;
+import UdpChatClient.command.RegisterHandler;
+import UdpChatClient.command.GetUsersHandler;
 
 public class CommandProcessor {
 
@@ -23,6 +25,8 @@ public class CommandProcessor {
         this.handshakeManager = handshakeManager;
         
         // Register all command handlers
+        registerCommandHandler(Constants.CMD_REGISTER, new RegisterHandler()); // Thêm RegisterHandler
+        registerCommandHandler(Constants.CMD_GET_USERS, new GetUsersHandler());
         registerCommandHandler(Constants.CMD_LOGIN, new LoginHandler());
         registerCommandHandler(Constants.CMD_CREATE_ROOM, new CreateRoomHandler());
         registerCommandHandler(Constants.CMD_SEND, new SendHandler());

@@ -182,7 +182,7 @@ public class UdpRequestHandler implements Runnable {
             // --- Handle Initial Client Requests ---
             // These actions start the Client -> Server flow
             // Special case: Login uses fixed key initially and starts C2S flow
-            if (Constants.ACTION_LOGIN.equals(action)) {
+            if (Constants.ACTION_LOGIN.equals(action) || Constants.ACTION_REGISTER.equals(action)) {
                 // transactionKey should be FIXED_LOGIN_KEY_STRING if decryption succeeded with it
                 if (!transactionKey.equals(Constants.FIXED_LOGIN_KEY_STRING)) {
                     log.warn("Login attempt from {}:{} was not decrypted with the fixed key. Denying.", clientAddress.getHostAddress(), clientPort);

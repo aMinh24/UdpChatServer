@@ -46,6 +46,10 @@ public final class Constants {
 
     // --- Action Values ---
     public static final String ACTION_LOGIN = "login";
+    public static final String ACTION_REGISTER = "register"; // Hành động đăng ký
+    public static final String ACTION_REGISTER_SUCCESS = "register_success"; // Phản hồi đăng ký thành công
+    public static final String ACTION_GET_USERS = "get_users"; // Hành động lấy danh sách người dùng
+    public static final String ACTION_USERS_LIST = "users_list"; // Phản hồi danh sách người dùng
     public static final String ACTION_CREATE_ROOM = "create_room";
     public static final String ACTION_GET_ROOMS = "get_rooms"; // Thêm action xem danh sách room
     public static final String ACTION_GET_MESSAGES = "get_messages"; // Thêm action xem tin nhắn

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +18,11 @@ public class UserDAO {
     private static final Logger log = LoggerFactory.getLogger(UserDAO.class);
 
     /**
-     * Authenticates a user based on chatid and password.
-     * IMPORTANT: In a real application, passwords should be hashed and salted.
-     * This implementation uses plain text comparison for simplicity based on the initial setup.
+     * Authenticates a user based on chatid and password. IMPORTANT: In a real
+     * application, passwords should be hashed and salted. This implementation
+     * uses plain text comparison for simplicity based on the initial setup.
      *
-     * @param chatid   The user's chat ID.
+     * @param chatid The user's chat ID.
      * @param password The user's plain text password.
      * @return true if authentication is successful, false otherwise.
      */
@@ -35,8 +37,7 @@ public class UserDAO {
         boolean authenticated = false;
 
         // Use try-with-resources for automatic resource management
-        try (Connection conn = DatabaseConnectionManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, chatid);
 
@@ -78,8 +79,7 @@ public class UserDAO {
             return false;
         }
         String sql = "SELECT 1 FROM users WHERE chatid = ? LIMIT 1";
-        try (Connection conn = DatabaseConnectionManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, chatid);
             try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next(); // True if a row is found
@@ -94,37 +94,36 @@ public class UserDAO {
     }
 
     /**
-     * Adds a new user to the database.
-     * IMPORTANT: Ensure the password is properly hashed before calling this method in a real app.
+     * Adds a new user to the database. IMPORTANT: Ensure the password is
+     * properly hashed before calling this method in a real app.
      *
      * @param chatid The user's chat ID.
      * @param hashedPassword The hashed password.
      * @return true if the user was added successfully, false otherwise.
      */
     public boolean addUser(String chatid, String hashedPassword) {
-         if (chatid == null || chatid.trim().isEmpty() || hashedPassword == null || hashedPassword.isEmpty()) {
+        if (chatid == null || chatid.trim().isEmpty() || hashedPassword == null || hashedPassword.isEmpty()) {
             log.warn("Attempted to add user with invalid input (chatid: {})", chatid);
             return false;
         }
         String sql = "INSERT INTO users (chatid, password) VALUES (?, ?)";
-        try (Connection conn = DatabaseConnectionManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, chatid);
             pstmt.setString(2, hashedPassword); // Store the hashed password
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                 log.info("User '{}' added successfully.", chatid);
-                 return true;
+                log.info("User '{}' added successfully.", chatid);
+                return true;
             } else {
-                 log.warn("Failed to add user '{}'. No rows affected.", chatid);
-                 return false;
+                log.warn("Failed to add user '{}'. No rows affected.", chatid);
+                return false;
             }
         } catch (SQLException e) {
             // Handle potential duplicate entry errors (e.g., SQLState "23000")
             if ("23000".equals(e.getSQLState())) {
-                 log.warn("Failed to add user '{}': User already exists.", chatid);
+                log.warn("Failed to add user '{}': User already exists.", chatid);
             } else {
                 log.error("SQL error while adding user '{}': {}", chatid, e.getMessage(), e);
             }
@@ -133,5 +132,26 @@ public class UserDAO {
             log.error("Unexpected error while adding user '{}': {}", chatid, e.getMessage(), e);
             return false;
         }
+    }
+
+    // Lấy danh sách tất cả chatid
+    public List<String> getAllChatIds() {
+    String sql = "SELECT chatid FROM users"; // Thay query bằng sql cho đồng bộ với code hiện tại
+    List<String> chatIds = new ArrayList<>();
+    try (Connection conn = DatabaseConnectionManager.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql);
+         ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+            chatIds.add(rs.getString("chatid"));
+        }
+        log.info("Retrieved {} chat IDs from database.", chatIds.size());
+        return chatIds;
+    } catch (SQLException e) {
+        log.error("SQL error retrieving chatids: {}", e.getMessage(), e);
+        throw new RuntimeException("Error retrieving chatids: " + e.getMessage(), e);
+    } catch (Exception e) {
+        log.error("Unexpected error retrieving chatids: {}", e.getMessage(), e);
+        throw new RuntimeException("Error retrieving chatids: " + e.getMessage(), e);
+    }
     }
 }

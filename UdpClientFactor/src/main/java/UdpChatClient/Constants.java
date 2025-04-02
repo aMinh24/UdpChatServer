@@ -8,6 +8,7 @@ public final class Constants {
     // --- Network ---
     public static final int DEFAULT_SERVER_PORT = 9876;
     public static final int MAX_UDP_PACKET_SIZE = 65507;
+    
 
     // --- Security ---
     /**
@@ -45,6 +46,10 @@ public final class Constants {
     // Note: KEY_CONFIRMATION is removed as the new flow uses KEY_CONFIRM within CONFIRM_COUNT action
 
     // --- Action Values ---
+    public static final String ACTION_REGISTER = "register"; // Dăng ký
+    public static final String ACTION_REGISTER_SUCCESS = "register_success"; // Phản hồi đăng ký thành công
+    public static final String ACTION_GET_USERS = "get_users"; // Lấy danh sách người dùng
+    public static final String ACTION_USERS_LIST = "users_list";
     public static final String ACTION_LOGIN = "login";
     public static final String ACTION_CREATE_ROOM = "create_room";
     public static final String ACTION_GET_ROOMS = "get_rooms"; // Thêm action xem danh sách room
@@ -89,6 +94,10 @@ public final class Constants {
     public static final String ERROR_MSG_INVALID_STATE = "Invalid state for current action.";
 
     // --- Client Command Definitions ---
+    public static final String CMD_REGISTER = "/register";
+    public static final String CMD_GET_USERS = "/users";
+    public static final String CMD_REGISTER_DESC = "/register <chatid> <password> - Register for new account";
+    public static final String CMD_GET_USERS_DESC = "/users - Show all users";
     public static final String CMD_LOGIN = "/login";
     public static final String CMD_CREATE_ROOM = "/create";
     public static final String CMD_SEND = "/send";

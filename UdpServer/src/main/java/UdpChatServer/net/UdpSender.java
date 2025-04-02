@@ -25,6 +25,8 @@ import UdpChatServer.handler.SendMessageHandler;
 import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.manager.RoomManager;
 import UdpChatServer.util.JsonHelper;
+import UdpChatServer.handler.GetUsersHandler;
+import UdpChatServer.handler.RegisterHandler;
 
 public class UdpSender {
 
@@ -36,6 +38,8 @@ public class UdpSender {
     private final SendMessageHandler sendMessageHandler;
     private final CreateRoomHandler createRoomHandler;
     private final RoomMessageHandler roomMessageHandler;
+    private final GetUsersHandler getUsersHandler;
+    private final RegisterHandler registerHandler;
 
     // Managers and DAOs
     private final ClientSessionManager sessionManager;
@@ -59,6 +63,8 @@ public class UdpSender {
          this.sendMessageHandler = new SendMessageHandler(sessionManager, roomManager, messageDAO, roomDAO, this); // Pass 'this', socket removed
          this.createRoomHandler = new CreateRoomHandler(sessionManager, roomManager, roomDAO, userDAO, this.socket); // Pass 'this' and socket
          this.roomMessageHandler = new RoomMessageHandler(sessionManager, roomManager, roomDAO, messageDAO, this.socket, this); // Pass 'this' and socket
+         this.getUsersHandler = new GetUsersHandler(sessionManager, userDAO, this);
+        this.registerHandler = new RegisterHandler(userDAO, this);
     }
 
     /**
@@ -183,6 +189,10 @@ public class UdpSender {
                         roomMessageHandler.processConfirmedGetRooms(pendingInfo);
                     case Constants.ACTION_GET_MESSAGES ->
                         roomMessageHandler.processConfirmedGetMessages(pendingInfo);
+                    case Constants.ACTION_REGISTER -> 
+                        registerHandler.processConfirmedRegister(pendingInfo);
+                    case Constants.ACTION_GET_USERS -> 
+                        getUsersHandler.processConfirmedGetUsers(pendingInfo);
                     default -> {
                         log.error("No handler defined for confirmed action '{}' in transaction '{}'", originalAction, transactionId);
                         // Send ACK with failure status using the correct key
