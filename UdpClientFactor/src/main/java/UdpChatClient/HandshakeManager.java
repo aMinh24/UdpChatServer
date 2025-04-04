@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class HandshakeManager {
     private static final Logger log = LoggerFactory.getLogger(HandshakeManager.class);
@@ -142,6 +143,41 @@ public class HandshakeManager {
                 // Delegate processing to MessageProcessor
                 messageProcessor.processServerAction(pendingJson);
                 ackStatus = Constants.STATUS_SUCCESS;
+                
+                JsonObject pendingJsonObj = JsonParser.parseString(pendingJson).getAsJsonObject();
+                String action = pendingJsonObj.has(Constants.KEY_ACTION) ? pendingJsonObj.get(Constants.KEY_ACTION).getAsString() : null;
+                JsonObject actionData = pendingJsonObj.has(Constants.KEY_DATA) ? pendingJsonObj.getAsJsonObject(Constants.KEY_DATA) : null;
+                
+                if (action == null) {
+                    log.error("Pending JSON for transaction {} missing 'action' field.", transactionId);
+                    ackStatus = Constants.STATUS_FAILURE;
+                    ackMessage = "Invalid server action format.";
+                } else {
+                    // Handle specific actions by calling MessageProcessor methods directly
+                    switch (action) {
+                        case Constants.ACTION_ADD_USER_SUCCESS:
+                            messageProcessor.handleAddUserSuccess(actionData);
+                            ackStatus = Constants.STATUS_SUCCESS;
+                            break;
+                        case Constants.ACTION_KICK_USER_SUCCESS:
+                            messageProcessor.handleKickUserSuccess(actionData);
+                            ackStatus = Constants.STATUS_SUCCESS;
+                            break;
+                        case Constants.ACTION_DELETE_ROOM_SUCCESS:
+                            messageProcessor.handleDeleteRoomSuccess(actionData);
+                            ackStatus = Constants.STATUS_SUCCESS;
+                            break;
+                        case Constants.ACTION_RENAME_ROOM_SUCCESS:
+                            messageProcessor.handleRenameRoomSuccess(actionData);
+                            ackStatus = Constants.STATUS_SUCCESS;
+                            break;
+                        default:
+                            // Delegate other actions to processServerAction
+                            messageProcessor.processServerAction(pendingJson);
+                            ackStatus = Constants.STATUS_SUCCESS;
+                            break;
+                    }
+                }
             } else {
                 ackMessage = "Client lost original action state.";
                 log.warn("Cannot process action for transaction {} because pending JSON was lost.", transactionId);

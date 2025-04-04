@@ -126,6 +126,65 @@ public class MessageProcessor {
             System.out.print("> ");
         }
     }
+    
+protected void handleAddUserSuccess(JsonObject data) {
+        if (!data.has(Constants.KEY_ROOM_ID) || !data.has(Constants.KEY_TARGET_CHATID)) {
+            log.error("ADD_USER_SUCCESS missing required fields in data: {}", data);
+            System.out.println("\nUser added, but server response was incomplete.");
+            System.out.print("> ");
+            return;
+        }
+
+        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+        String targetChatId = data.get(Constants.KEY_TARGET_CHATID).getAsString();
+        log.info("User {} added to room {} successfully.", targetChatId, roomId);
+        System.out.println("\nUser " + targetChatId + " added to room " + roomId + " successfully.");
+        System.out.print("> ");
+    }
+
+    protected void handleKickUserSuccess(JsonObject data) {
+        if (!data.has(Constants.KEY_ROOM_ID) || !data.has(Constants.KEY_TARGET_CHATID)) {
+            log.error("KICK_USER_SUCCESS missing required fields in data: {}", data);
+            System.out.println("\nUser kicked, but server response was incomplete.");
+            System.out.print("> ");
+            return;
+        }
+
+        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+        String targetChatId = data.get(Constants.KEY_TARGET_CHATID).getAsString();
+        log.info("User {} kicked from room {} successfully.", targetChatId, roomId);
+        System.out.println("\nUser " + targetChatId + " kicked from room " + roomId + " successfully.");
+        System.out.print("> ");
+    }
+    
+    protected void handleDeleteRoomSuccess(JsonObject data) {
+        if (!data.has(Constants.KEY_ROOM_ID)) {
+            log.error("DELETE_ROOM_SUCCESS missing required field in data: {}", data);
+            System.out.println("\nRoom deleted, but server response was incomplete.");
+            System.out.print("> ");
+            return;
+        }
+
+        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+        log.info("Room {} deleted successfully.", roomId);
+        System.out.println("\nRoom " + roomId + " deleted successfully.");
+        System.out.print("> ");
+    }
+    
+    protected void handleRenameRoomSuccess(JsonObject data) {
+        if (!data.has(Constants.KEY_ROOM_ID) || !data.has(Constants.KEY_NEW_NAME)) {
+            log.error("RENAME_ROOM_SUCCESS missing required fields in data: {}", data);
+            System.out.println("\nRoom renamed, but server response was incomplete.");
+            System.out.print("> ");
+            return;
+        }
+
+        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+        String newName = data.get(Constants.KEY_NEW_NAME).getAsString();
+        log.info("Room {} renamed to {} successfully.", roomId, newName);
+        System.out.println("\nRoom " + roomId + " renamed to " + newName + " successfully.");
+        System.out.print("> ");
+    }
 
     private String formatTimestamp(String isoTimestamp, String pattern) {
         try {

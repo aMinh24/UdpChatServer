@@ -25,6 +25,7 @@ public final class Constants {
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_DATA = "data";
     public static final String KEY_CHAT_ID = "chatid";
+    public static final String KEY_TARGET_CHATID = "target_chatid";
 
     // Login Action
     public static final String KEY_PASSWORD = "password";
@@ -33,6 +34,7 @@ public final class Constants {
     // Room Creation
     public static final String KEY_PARTICIPANTS = "participants"; // List of chatids to add to room
     public static final String KEY_ROOM_ID = "room_id";
+    public static final String KEY_NEW_NAME = "new_name";
 
     // Send Message Action
     public static final String KEY_CONTENT = "content";
@@ -52,6 +54,14 @@ public final class Constants {
     public static final String ACTION_USERS_LIST = "users_list";
     public static final String ACTION_LOGIN = "login";
     public static final String ACTION_CREATE_ROOM = "create_room";
+    public static final String ACTION_KICK_USER = "kick_user";
+    public static final String ACTION_ADD_USER = "add_user";
+    public static final String ACTION_DELETE_ROOM = "delete_room";
+    public static final String ACTION_RENAME_ROOM = "rename_room";
+    public static final String ACTION_KICK_USER_SUCCESS = "kick_user_success";
+    public static final String ACTION_ADD_USER_SUCCESS = "add_user_success";
+    public static final String ACTION_DELETE_ROOM_SUCCESS = "delete_room_success";
+    public static final String ACTION_RENAME_ROOM_SUCCESS = "rename_room_success";
     public static final String ACTION_GET_ROOMS = "get_rooms"; // Thêm action xem danh sách room
     public static final String ACTION_GET_MESSAGES = "get_messages"; // Thêm action xem tin nhắn
     public static final String ACTION_SEND_MESSAGE = "send_message"; // Initial request from client
@@ -100,6 +110,10 @@ public final class Constants {
     public static final String CMD_GET_USERS_DESC = "/users - Show all users";
     public static final String CMD_LOGIN = "/login";
     public static final String CMD_CREATE_ROOM = "/create";
+    public static final String CMD_KICK = "/kick";
+    public static final String CMD_ADD = "/add";
+    public static final String CMD_DELETE = "/delete";
+    public static final String CMD_RENAME = "/rename";
     public static final String CMD_SEND = "/send";
     public static final String CMD_HELP = "/help";
     public static final String CMD_EXIT = "/exit";

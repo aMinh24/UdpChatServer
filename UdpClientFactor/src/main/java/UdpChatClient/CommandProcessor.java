@@ -13,6 +13,10 @@ import UdpChatClient.command.LoginHandler;
 import UdpChatClient.command.SendHandler;
 import UdpChatClient.command.RegisterHandler;
 import UdpChatClient.command.GetUsersHandler;
+import UdpChatClient.command.RenameRoomHandler;
+import UdpChatClient.command.AddUserHandler;
+import UdpChatClient.command.KickUserHandler;
+import UdpChatClient.command.DeleteRoomHandler;
 
 public class CommandProcessor {
 
@@ -29,6 +33,10 @@ public class CommandProcessor {
         registerCommandHandler(Constants.CMD_GET_USERS, new GetUsersHandler());
         registerCommandHandler(Constants.CMD_LOGIN, new LoginHandler());
         registerCommandHandler(Constants.CMD_CREATE_ROOM, new CreateRoomHandler());
+        registerCommandHandler(Constants.CMD_ADD, new AddUserHandler()); // Thêm handler cho /add
+        registerCommandHandler(Constants.CMD_KICK, new KickUserHandler()); // Thêm handler cho /kick
+        registerCommandHandler(Constants.CMD_RENAME, new RenameRoomHandler()); // Thêm handler cho /rename
+        registerCommandHandler(Constants.CMD_DELETE, new DeleteRoomHandler());
         registerCommandHandler(Constants.CMD_SEND, new SendHandler());
         registerCommandHandler(Constants.CMD_LIST_ROOMS, new ListRoomsHandler());
         registerCommandHandler(Constants.CMD_LIST_MESSAGES, new ListMessagesHandler());

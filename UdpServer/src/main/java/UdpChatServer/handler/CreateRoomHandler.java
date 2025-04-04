@@ -2,6 +2,8 @@ package UdpChatServer.handler;
 
 import java.net.DatagramSocket;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -89,9 +91,12 @@ public class CreateRoomHandler {
             String roomId = RoomManager.generateRoomId(participants);
 
             // 4. Create room in database
-            if (!roomDAO.createRoomIfNotExists(roomId)) {
-                 log.error("Failed to create room '{}' in DB for transaction {}", roomId, transactionId);
-                 // UdpRequestHandler will send ACK(failure)
+            List<String> participantsList = new ArrayList<>(participants);
+
+            // 5. Create room in database
+            if (!roomDAO.createRoomIfNotExists(roomId, creatorChatId, participantsList)) {
+                log.error("Failed to create room '{}' in DB for transaction {}", roomId, transactionId);
+                // UdpRequestHandler will send ACK(failure)
                 return false;
             }
 

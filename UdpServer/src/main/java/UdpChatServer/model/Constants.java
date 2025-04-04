@@ -25,6 +25,7 @@ public final class Constants {
     public static final String KEY_DATA = "data";
     public static final String KEY_CHAT_ID = "chatid";
     public static final String KEY_TRANSACTION_ID = "transaction_id";
+    public static final String KEY_TARGET_CHATID = "target_chatid";
 
     // Login Action
     public static final String KEY_PASSWORD = "password";
@@ -33,6 +34,7 @@ public final class Constants {
     // Room Creation
     public static final String KEY_PARTICIPANTS = "participants"; // List of chatids to add to room
     public static final String KEY_ROOM_ID = "room_id";
+    public static final String KEY_NEW_NAME = "new_name";
 
     // Send Message Action
     public static final String KEY_CONTENT = "content";
@@ -52,6 +54,14 @@ public final class Constants {
     public static final String ACTION_USERS_LIST = "users_list"; // Phản hồi danh sách người dùng
     public static final String ACTION_CREATE_ROOM = "create_room";
     public static final String ACTION_GET_ROOMS = "get_rooms"; // Thêm action xem danh sách room
+    public static final String ACTION_KICK_USER = "kick_user";
+    public static final String ACTION_ADD_USER = "add_user";
+    public static final String ACTION_DELETE_ROOM = "delete_room";
+    public static final String ACTION_RENAME_ROOM = "rename_room";
+    public static final String ACTION_KICK_USER_SUCCESS = "kick_user_success";
+    public static final String ACTION_ADD_USER_SUCCESS = "add_user_success";
+    public static final String ACTION_DELETE_ROOM_SUCCESS = "delete_room_success";
+    public static final String ACTION_RENAME_ROOM_SUCCESS = "rename_room_success";
     public static final String ACTION_GET_MESSAGES = "get_messages"; // Thêm action xem tin nhắn
     public static final String ACTION_SEND_MESSAGE = "send_message"; // Initial request from client
     public static final String ACTION_RECEIVE_MESSAGE = "receive_message"; // Server forwarding message to other clients
@@ -74,6 +84,10 @@ public final class Constants {
     public static final String STATUS_FAILURE = "failure";
     public static final String STATUS_ERROR = "error";
     public static final String STATUS_CANCELLED = "cancelled"; // Added status for ACK when confirm is false
+    
+    // Thêm các hằng số boolean
+    public static final boolean STATUS_SUCCESS_BOOL = true;
+    public static final boolean STATUS_FAILURE_BOOL = false;
 
     // --- Error Messages ---
     public static final String ERROR_MSG_INVALID_JSON = "Invalid JSON format or decryption failed."; // Updated message
