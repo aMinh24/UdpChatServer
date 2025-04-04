@@ -3,6 +3,7 @@ package UdpChatServer.handler;
 import java.net.DatagramSocket;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,14 +168,21 @@ public class RoomMessageHandler {
 
         try {
             // Lấy danh sách room từ database 
-            List<String> rooms = roomDAO.getRoomsByUser(chatid);
+            List<String> roomIds = roomDAO.getRoomsByUser(chatid);
             
             // Tạo response JSON
             JsonObject data = new JsonObject();
             JsonArray roomsArray = new JsonArray();
-            for (String roomId : rooms) {
-                roomsArray.add(roomId); 
+            
+            // Create detailed room info objects with both id and name
+            for (String roomId : roomIds) {
+                JsonObject roomInfo = new JsonObject();
+                roomInfo.addProperty("id", roomId);
+                roomInfo.addProperty("name", roomDAO.getRoomName(roomId));
+                roomsArray.add(roomInfo);
+                log.debug("Added room to response: id={}, name={}", roomId, roomDAO.getRoomName(roomId));
             }
+            
             data.add("rooms", roomsArray);
 
             JsonObject response = JsonHelper.createReply(
@@ -185,8 +193,8 @@ public class RoomMessageHandler {
             );
 
             // Gửi response qua S2C flow
-            log.info("Lấy được {} phòng chat cho user '{}'. Bắt đầu luồng S2C.", rooms.size(), chatid);
-            udpSender.initiateServerToClientFlow( // Changed from requestHandler
+            log.info("Lấy được {} phòng chat cho user '{}'. Bắt đầu luồng S2C.", roomIds.size(), chatid);
+            udpSender.initiateServerToClientFlow(
                 Constants.ACTION_ROOMS_LIST,
                 response,
                 pendingInfo.getPartnerAddress(),
@@ -198,6 +206,92 @@ public class RoomMessageHandler {
 
         } catch (Exception e) {
             log.error("Lỗi khi xử lý get_rooms từ user '{}' (Transaction ID: {}): {}", 
+                      chatid, transactionId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Processes the confirmed get_room_users request.
+     * Called by UdpRequestHandler.handleConfirmCount when client confirms character count.
+     * 
+     * @param pendingInfo Information about the confirmed get_room_users transaction
+     * @return true if room users were retrieved successfully, false otherwise
+     */
+    public boolean processConfirmedGetRoomUsers(PendingMessageInfo pendingInfo) {
+        if (pendingInfo == null || pendingInfo.getDirection() != PendingMessageInfo.Direction.CLIENT_TO_SERVER ||
+            !Constants.ACTION_GET_ROOM_USERS.equals(pendingInfo.getOriginalAction())) {
+            log.error("Invalid pending info passed to processConfirmedGetRoomUsers: {}", pendingInfo);
+            return false;
+        }
+
+        JsonObject originalRequest = pendingInfo.getOriginalMessageJson();
+        JsonObject requestData = originalRequest.getAsJsonObject(Constants.KEY_DATA);
+        String chatid = requestData.get(Constants.KEY_CHAT_ID).getAsString();
+        String roomId = requestData.get(Constants.KEY_ROOM_ID).getAsString();
+        String transactionId = pendingInfo.getTransactionId();
+
+        log.info("Processing confirmed get_room_users from '{}' for room '{}' (Transaction ID: {})", 
+                chatid, roomId, transactionId);
+
+        try {
+            // Check if the user is part of the room
+            if (!roomDAO.isUserInRoom(roomId, chatid)) {
+                log.warn("User '{}' tried to get users for room '{}' but is not a participant", chatid, roomId);
+                
+                JsonObject errorResponse = JsonHelper.createErrorReply(
+                    Constants.ACTION_GET_ROOM_USERS,
+                    "You are not a participant of this room."
+                );
+                
+                udpSender.sendAck(
+                    pendingInfo.getPartnerAddress(),
+                    pendingInfo.getPartnerPort(),
+                    transactionId,
+                    false,
+                    errorResponse.toString(),
+                    pendingInfo.getTransactionKey()
+                );
+                
+                return false;
+            }
+
+            // Get users from database
+            Set<String> users = roomDAO.getParticipantsInRoom(roomId);
+            
+            // Create response JSON
+            JsonObject data = new JsonObject();
+            JsonArray usersArray = new JsonArray();
+            
+            for (String userId : users) {
+                usersArray.add(userId);
+                log.debug("Added user to response: {}", userId);
+            }
+            
+            data.add("users", usersArray);
+            data.addProperty(Constants.KEY_ROOM_ID, roomId);
+            data.addProperty("room_name", roomDAO.getRoomName(roomId));
+
+            JsonObject response = JsonHelper.createReply(
+                Constants.ACTION_ROOM_USERS_LIST,
+                Constants.STATUS_SUCCESS, 
+                "Room users list retrieved successfully.",
+                data
+            );
+
+            // Send response through S2C flow
+            udpSender.sendAck(
+                pendingInfo.getPartnerAddress(),
+                pendingInfo.getPartnerPort(),
+                transactionId,
+                true,
+                response.toString(),
+                pendingInfo.getTransactionKey()
+            );
+            
+            return true;
+        } catch (Exception e) {
+            log.error("Error while processing get_room_users from user '{}' (Transaction ID: {}): {}", 
                       chatid, transactionId, e.getMessage(), e);
             return false;
         }

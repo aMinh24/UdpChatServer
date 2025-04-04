@@ -14,7 +14,10 @@ CREATE TABLE IF NOT EXISTS users (
 -- Create the rooms table
 CREATE TABLE IF NOT EXISTS rooms (
     room_id VARCHAR(100) PRIMARY KEY,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    name VARCHAR(255) NOT NULL,  -- Add a name field for the room
+    owner VARCHAR(50) NOT NULL,  -- Add owner field to track room creator
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner) REFERENCES users(chatid) ON DELETE CASCADE
 );
 
 -- Create the room_participants table
@@ -38,5 +41,5 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 -- Optional: Add some initial data for testing (example)
--- INSERT INTO users (chatid, password) VALUES ('user1', 'hashed_password1');
--- INSERT INTO users (chatid, password) VALUES ('user2', 'hashed_password2');
+INSERT INTO users (chatid, password) VALUES ('user1', 'pass1');
+INSERT INTO users (chatid, password) VALUES ('user2', 'pass2');

@@ -1,0 +1,311 @@
+2025-04-02 15:25:50 [main] INFO  UdpChatClient.UdpChatClient - UDP Chat Client initialized. Server: localhost:9876
+2025-04-02 15:25:50 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener started.
+2025-04-02 15:26:09 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 15:26:09 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login","data":{"chatid":"user1","password":"hashed_password1"}}
+2025-04-02 15:26:09 [main] INFO  UdpChatClient.UdpChatClient - Sent action: login (TempID: a267c115-3a76-4702-be6c-0f65ca331533) - waiting for server CHARACTER_COUNT...
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_1","original_action":"login","letter_frequencies":{"a":7,"\"":14,"c":2,"d":5,"e":2,"g":1,"h":3,"i":3,"l":1,",":2,"n":2,"o":4,"p":2,"1":2,"r":3,"s":6,"t":3,"u":1,"w":2,":":4,"{":2,"}":2,"_":1}}}
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_1","original_action":"login","letter_frequencies":{"a":7,"\"":14,"c":2,"d":5,"e":2,"g":1,"h":3,"i":3,"l":1,",":2,"n":2,"o":4,"p":2,"1":2,"r":3,"s":6,"t":3,"u":1,"w":2,":":4,"{":2,"}":2,"_":1}}}
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'login', server tx ID: C2S_login_1
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: a267c115-3a76-4702-be6c-0f65ca331533) for original action login
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_login_1 with pending action login (TempID: a267c115-3a76-4702-be6c-0f65ca331533)
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login","data":{"chatid":"user1","password":"hashed_password1"}}
+
+
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_login_1
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_login_1","confirm":true}}
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_login_1
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"uIGYq4UurlRYwX0H","transaction_id":"S2C_login_success_2"}}
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"uIGYq4UurlRYwX0H","transaction_id":"S2C_login_success_2"}}
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received initial action 'login_success' from server, starting S->C flow
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"uIGYq4UurlRYwX0H","transaction_id":"S2C_login_success_2"}}
+
+
+2025-04-02 15:26:10 [ClientListener] ERROR UdpChatClient.UdpChatClient - Attempted encryption with null or empty key for packet to 127.0.0.1:9876
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CHARACTER_COUNT for transaction: S2C_login_success_2
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_login_1","original_action":"login","chatid":"user1","session_key":"uIGYq4UurlRYwX0H"}}
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_login_1","original_action":"login","chatid":"user1","session_key":"uIGYq4UurlRYwX0H"}}
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_login_1 (Original Action: login) with status: success
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Login successful via ACK! Updated sessionKey for user 'user1'. Session: uIGYq4UurlRYwX0H
+2025-04-02 15:26:10 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending login request associated with transaction C2S_login_1
+2025-04-02 15:26:10 [main] INFO  UdpChatClient.UdpChatClient - Action login (TempID: a267c115-3a76-4702-be6c-0f65ca331533) acknowledged successfully by server.
+2025-04-02 15:29:47 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:29:47 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"get_rooms","data":{"chatid":"user1"}}
+2025-04-02 15:29:47 [main] INFO  UdpChatClient.UdpChatClient - Sent action: get_rooms (TempID: 55dadaa4-8f23-4472-9f3e-4f1c6d7f0596) - waiting for server CHARACTER_COUNT...
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_get_rooms_3","original_action":"get_rooms","letter_frequencies":{"a":4,"\"":10,"c":2,"d":2,"e":2,"g":1,"h":1,"i":2,",":1,"m":1,"n":1,"o":3,"1":1,"r":2,"s":2,"t":4,"u":1,":":3,"{":2,"}":2,"_":1}}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_get_rooms_3","original_action":"get_rooms","letter_frequencies":{"a":4,"\"":10,"c":2,"d":2,"e":2,"g":1,"h":1,"i":2,",":1,"m":1,"n":1,"o":3,"1":1,"r":2,"s":2,"t":4,"u":1,":":3,"{":2,"}":2,"_":1}}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'get_rooms', server tx ID: C2S_get_rooms_3
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: 55dadaa4-8f23-4472-9f3e-4f1c6d7f0596) for original action get_rooms
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_get_rooms_3 with pending action get_rooms (TempID: 55dadaa4-8f23-4472-9f3e-4f1c6d7f0596)
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"get_rooms","data":{"chatid":"user1"}}
+
+
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_get_rooms_3
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_get_rooms_3","confirm":true}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_get_rooms_3
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"rooms_list","status":"success","message":"Danh sách phòng chat được lấy thành công.","data":{"rooms":[],"transaction_id":"S2C_rooms_list_4"}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"rooms_list","status":"success","message":"Danh sách phòng chat được lấy thành công.","data":{"rooms":[],"transaction_id":"S2C_rooms_list_4"}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received initial action 'rooms_list' from server, starting S->C flow
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"rooms_list","status":"success","message":"Danh sách phòng chat được lấy thành công.","data":{"rooms":[],"transaction_id":"S2C_rooms_list_4"}}
+
+
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","data":{"transaction_id":"S2C_rooms_list_4","letter_frequencies":{"C":1,"D":1,"đ":1,"S":1,"[":1,"]":1,"_":5," ":7,"à":1,"a":9,"á":1,"\"":20,"c":8,"ợ":1,"d":2,"e":3,"ấ":1,"g":3,"h":6,"i":5,"l":3,",":4,"m":4,"n":7,".":1,"o":8,"p":1,"ư":1,"r":4,"ò":1,"2":1,"s":14,"t":10,"ô":1,"4":1,"u":2,"y":1,":":6,"{":2,"}":2}}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CHARACTER_COUNT for transaction: S2C_rooms_list_4
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_get_rooms_3","original_action":"get_rooms"}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_get_rooms_3","original_action":"get_rooms"}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_get_rooms_3 (Original Action: get_rooms) with status: success
+2025-04-02 15:29:47 [main] INFO  UdpChatClient.UdpChatClient - Action get_rooms (TempID: 55dadaa4-8f23-4472-9f3e-4f1c6d7f0596) acknowledged successfully by server.
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending request (Action: get_rooms) associated with transaction C2S_get_rooms_3
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","status":"success","message":"Frequencies match. Proceeding.","data":{"transaction_id":"S2C_rooms_list_4","confirm":true}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"confirm_count","status":"success","message":"Frequencies match. Proceeding.","data":{"transaction_id":"S2C_rooms_list_4","confirm":true}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CONFIRM_COUNT for transaction: S2C_rooms_list_4 (confirmed: true)
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Processing confirmed server action: rooms_list
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","data":{"transaction_id":"S2C_rooms_list_4"}}
+2025-04-02 15:29:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent ACK for transaction: S2C_rooms_list_4 with status: success
+2025-04-02 15:30:11 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:11 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"create_room","data":{"chatid":"user1","participants":["user2"]}}
+2025-04-02 15:30:11 [main] INFO  UdpChatClient.UdpChatClient - Sent action: create_room (TempID: b9c1176e-2836-4ff0-942d-e5267533e447) - waiting for server CHARACTER_COUNT...
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_create_room_5","original_action":"create_room","letter_frequencies":{"a":7,"\"":14,"c":4,"d":2,"e":4,"h":1,"i":4,",":2,"m":1,"n":2,"o":3,"p":2,"1":1,"r":5,"2":1,"s":3,"t":6,"u":2,":":4,"{":2,"[":1,"]":1,"}":2,"_":1}}}
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_create_room_5","original_action":"create_room","letter_frequencies":{"a":7,"\"":14,"c":4,"d":2,"e":4,"h":1,"i":4,",":2,"m":1,"n":2,"o":3,"p":2,"1":1,"r":5,"2":1,"s":3,"t":6,"u":2,":":4,"{":2,"[":1,"]":1,"}":2,"_":1}}}
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'create_room', server tx ID: C2S_create_room_5
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: b9c1176e-2836-4ff0-942d-e5267533e447) for original action create_room
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_create_room_5 with pending action create_room (TempID: b9c1176e-2836-4ff0-942d-e5267533e447)
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"create_room","data":{"chatid":"user1","participants":["user2"]}}
+
+
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_create_room_5
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_create_room_5","confirm":true}}
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_create_room_5
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_create_room_5","original_action":"create_room"}}
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_create_room_5","original_action":"create_room"}}
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_create_room_5 (Original Action: create_room) with status: success
+2025-04-02 15:30:11 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending request (Action: create_room) associated with transaction C2S_create_room_5
+2025-04-02 15:30:11 [main] INFO  UdpChatClient.UdpChatClient - Action create_room (TempID: b9c1176e-2836-4ff0-942d-e5267533e447) acknowledged successfully by server.
+2025-04-02 15:30:26 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:26 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"get_rooms","data":{"chatid":"user1"}}
+2025-04-02 15:30:26 [main] INFO  UdpChatClient.UdpChatClient - Sent action: get_rooms (TempID: d4121228-0ad7-4bc7-8e94-c4669cdf89ad) - waiting for server CHARACTER_COUNT...
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_get_rooms_6","original_action":"get_rooms","letter_frequencies":{"a":4,"\"":10,"c":2,"d":2,"e":2,"g":1,"h":1,"i":2,",":1,"m":1,"n":1,"o":3,"1":1,"r":2,"s":2,"t":4,"u":1,":":3,"{":2,"}":2,"_":1}}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_get_rooms_6","original_action":"get_rooms","letter_frequencies":{"a":4,"\"":10,"c":2,"d":2,"e":2,"g":1,"h":1,"i":2,",":1,"m":1,"n":1,"o":3,"1":1,"r":2,"s":2,"t":4,"u":1,":":3,"{":2,"}":2,"_":1}}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'get_rooms', server tx ID: C2S_get_rooms_6
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: d4121228-0ad7-4bc7-8e94-c4669cdf89ad) for original action get_rooms
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_get_rooms_6 with pending action get_rooms (TempID: d4121228-0ad7-4bc7-8e94-c4669cdf89ad)
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"get_rooms","data":{"chatid":"user1"}}
+
+
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_get_rooms_6
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_get_rooms_6","confirm":true}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_get_rooms_6
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"rooms_list","status":"success","message":"Danh sách phòng chat được lấy thành công.","data":{"rooms":["user1_user2"],"transaction_id":"S2C_rooms_list_7"}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"rooms_list","status":"success","message":"Danh sách phòng chat được lấy thành công.","data":{"rooms":["user1_user2"],"transaction_id":"S2C_rooms_list_7"}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received initial action 'rooms_list' from server, starting S->C flow
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"rooms_list","status":"success","message":"Danh sách phòng chat được lấy thành công.","data":{"rooms":["user1_user2"],"transaction_id":"S2C_rooms_list_7"}}
+
+
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","data":{"transaction_id":"S2C_rooms_list_7","letter_frequencies":{"C":1,"D":1,"đ":1,"S":1,"[":1,"]":1,"_":6," ":7,"à":1,"a":9,"á":1,"\"":22,"c":8,"ợ":1,"d":2,"e":5,"ấ":1,"g":3,"h":6,"i":5,"l":3,",":4,"m":4,"n":7,".":1,"o":8,"p":1,"ư":1,"1":1,"r":6,"ò":1,"2":2,"s":16,"t":10,"ô":1,"u":4,"7":1,"y":1,":":6,"{":2,"}":2}}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CHARACTER_COUNT for transaction: S2C_rooms_list_7
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_get_rooms_6","original_action":"get_rooms"}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_get_rooms_6","original_action":"get_rooms"}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_get_rooms_6 (Original Action: get_rooms) with status: success
+2025-04-02 15:30:26 [main] INFO  UdpChatClient.UdpChatClient - Action get_rooms (TempID: d4121228-0ad7-4bc7-8e94-c4669cdf89ad) acknowledged successfully by server.
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending request (Action: get_rooms) associated with transaction C2S_get_rooms_6
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","status":"success","message":"Frequencies match. Proceeding.","data":{"transaction_id":"S2C_rooms_list_7","confirm":true}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"confirm_count","status":"success","message":"Frequencies match. Proceeding.","data":{"transaction_id":"S2C_rooms_list_7","confirm":true}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CONFIRM_COUNT for transaction: S2C_rooms_list_7 (confirmed: true)
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Processing confirmed server action: rooms_list
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","data":{"transaction_id":"S2C_rooms_list_7"}}
+2025-04-02 15:30:26 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent ACK for transaction: S2C_rooms_list_7 with status: success
+2025-04-02 15:30:52 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:52 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"send_message","data":{"chatid":"user1","room_id":"user1_user2","content":"hello"}}
+2025-04-02 15:30:52 [main] INFO  UdpChatClient.UdpChatClient - Sent action: send_message (TempID: f3656400-f01a-4710-99cd-b8f3d6b47575) - waiting for server CHARACTER_COUNT...
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_send_message_8","original_action":"send_message","letter_frequencies":{"a":5,"\"":18,"c":3,"d":4,"e":8,"g":1,"h":2,"i":3,",":3,"l":2,"m":2,"n":4,"o":5,"1":2,"r":4,"2":1,"s":6,"t":5,"u":3,":":5,"{":2,"}":2,"_":3}}}
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_send_message_8","original_action":"send_message","letter_frequencies":{"a":5,"\"":18,"c":3,"d":4,"e":8,"g":1,"h":2,"i":3,",":3,"l":2,"m":2,"n":4,"o":5,"1":2,"r":4,"2":1,"s":6,"t":5,"u":3,":":5,"{":2,"}":2,"_":3}}}
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'send_message', server tx ID: C2S_send_message_8
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: f3656400-f01a-4710-99cd-b8f3d6b47575) for original action send_message
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_send_message_8 with pending action send_message (TempID: f3656400-f01a-4710-99cd-b8f3d6b47575)
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"send_message","data":{"chatid":"user1","room_id":"user1_user2","content":"hello"}}
+
+
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_send_message_8
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 16
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_send_message_8","confirm":true}}
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_send_message_8
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 16
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_send_message_8","original_action":"send_message"}}
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_send_message_8","original_action":"send_message"}}
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_send_message_8 (Original Action: send_message) with status: success
+2025-04-02 15:30:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending request (Action: send_message) associated with transaction C2S_send_message_8
+2025-04-02 15:30:52 [main] INFO  UdpChatClient.UdpChatClient - Action send_message (TempID: f3656400-f01a-4710-99cd-b8f3d6b47575) acknowledged successfully by server.
+2025-04-02 15:45:52 [main] INFO  UdpChatClient.UdpChatClient - UDP Chat Client initialized. Server: localhost:9876
+2025-04-02 15:45:52 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener started.
+2025-04-02 15:46:12 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 15:46:12 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login","data":{"chatid":"user1","password":"hashed_password1"}}
+2025-04-02 15:46:12 [main] INFO  UdpChatClient.UdpChatClient - Sent action: login (TempID: 6aa6e330-a160-403f-a939-d764918c0d7c) - waiting for server CHARACTER_COUNT...
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_1","original_action":"login","letter_frequencies":{"a":7,"\"":14,"c":2,"d":5,"e":2,"g":1,"h":3,"i":3,"l":1,",":2,"n":2,"o":4,"p":2,"1":2,"r":3,"s":6,"t":3,"u":1,"w":2,":":4,"{":2,"}":2,"_":1}}}
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_1","original_action":"login","letter_frequencies":{"a":7,"\"":14,"c":2,"d":5,"e":2,"g":1,"h":3,"i":3,"l":1,",":2,"n":2,"o":4,"p":2,"1":2,"r":3,"s":6,"t":3,"u":1,"w":2,":":4,"{":2,"}":2,"_":1}}}
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'login', server tx ID: C2S_login_1
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: 6aa6e330-a160-403f-a939-d764918c0d7c) for original action login
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_login_1 with pending action login (TempID: 6aa6e330-a160-403f-a939-d764918c0d7c)
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login","data":{"chatid":"user1","password":"hashed_password1"}}
+
+
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_login_1
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_login_1","confirm":true}}
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_login_1
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"bK4MMvGQW8N4QDwD","transaction_id":"S2C_login_success_2"}}
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"bK4MMvGQW8N4QDwD","transaction_id":"S2C_login_success_2"}}
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received initial action 'login_success' from server, starting S->C flow
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"bK4MMvGQW8N4QDwD","transaction_id":"S2C_login_success_2"}}
+
+
+2025-04-02 15:46:12 [ClientListener] ERROR UdpChatClient.UdpChatClient - Attempted encryption with null or empty key for packet to 127.0.0.1:9876
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CHARACTER_COUNT for transaction: S2C_login_success_2
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_login_1","original_action":"login","chatid":"user1","session_key":"bK4MMvGQW8N4QDwD"}}
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_login_1","original_action":"login","chatid":"user1","session_key":"bK4MMvGQW8N4QDwD"}}
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_login_1 (Original Action: login) with status: success
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Login successful via ACK! Updated sessionKey for user 'user1'. Session: bK4MMvGQW8N4QDwD
+2025-04-02 15:46:12 [main] INFO  UdpChatClient.UdpChatClient - Action login (TempID: 6aa6e330-a160-403f-a939-d764918c0d7c) acknowledged successfully by server.
+2025-04-02 15:46:12 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending login request associated with transaction C2S_login_1
+2025-04-02 15:49:37 [ClientListener] INFO  UdpChatClient.UdpChatClient - Socket closed.
+2025-04-02 15:49:37 [main] INFO  UdpChatClient.UdpChatClient - Client closed.
+2025-04-02 15:49:37 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener thread stopped.
+2025-04-02 15:49:41 [main] INFO  UdpChatClient.UdpChatClient - UDP Chat Client initialized. Server: localhost:9876
+2025-04-02 15:49:41 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener started.
+2025-04-02 15:49:46 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 15:49:46 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login","data":{"chatid":"usser2","password":"kdjfsd"}}
+2025-04-02 15:49:46 [main] INFO  UdpChatClient.UdpChatClient - Sent action: login (TempID: 8f94106a-f56a-42d7-b24a-850de6c3a774) - waiting for server CHARACTER_COUNT...
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_3","original_action":"login","letter_frequencies":{"a":5,"\"":14,"c":2,"d":5,"e":1,"f":1,"g":1,"h":1,"i":3,"j":1,"k":1,"l":1,",":2,"n":2,"o":3,"p":1,"r":2,"2":1,"s":5,"t":3,"u":1,"w":1,":":4,"{":2,"}":2}}}
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_3","original_action":"login","letter_frequencies":{"a":5,"\"":14,"c":2,"d":5,"e":1,"f":1,"g":1,"h":1,"i":3,"j":1,"k":1,"l":1,",":2,"n":2,"o":3,"p":1,"r":2,"2":1,"s":5,"t":3,"u":1,"w":1,":":4,"{":2,"}":2}}}
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'login', server tx ID: C2S_login_3
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: 8f94106a-f56a-42d7-b24a-850de6c3a774) for original action login
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_login_3 with pending action login (TempID: 8f94106a-f56a-42d7-b24a-850de6c3a774)
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login","data":{"chatid":"usser2","password":"kdjfsd"}}
+
+
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_login_3
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_login_3","confirm":true}}
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_login_3
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_3","original_action":"login"}}
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_3","original_action":"login"}}
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_login_3 (Original Action: login) with status: failure
+2025-04-02 15:49:46 [ClientListener] WARN  UdpChatClient.UdpChatClient - Login failed via ACK. Status: failure, Message: Action processing failed.
+2025-04-02 15:49:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending login request associated with transaction C2S_login_3
+2025-04-02 15:49:46 [main] WARN  UdpChatClient.UdpChatClient - Action login (TempID: 8f94106a-f56a-42d7-b24a-850de6c3a774) failed on server. Status: failure, Message: Action processing failed.
+2025-04-02 19:44:35 [main] INFO  UdpChatClient.UdpChatClient - UDP Chat Client initialized. Server: localhost:9876
+2025-04-02 19:44:35 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener started.
+2025-04-02 19:44:46 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 19:44:46 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login","data":{"chatid":"user1","password":"hashed_password1"}}
+2025-04-02 19:44:46 [main] INFO  UdpChatClient.UdpChatClient - Sent action: login (TempID: d96c6d1c-0c90-4d13-b53b-dd1d7299d109) - waiting for server CHARACTER_COUNT...
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_1","original_action":"login","letter_frequencies":{"a":7,"\"":14,"c":2,"d":5,"e":2,"g":1,"h":3,"i":3,"l":1,",":2,"n":2,"o":4,"p":2,"1":2,"r":3,"s":6,"t":3,"u":1,"w":2,":":4,"{":2,"}":2,"_":1}}}
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_1","original_action":"login","letter_frequencies":{"a":7,"\"":14,"c":2,"d":5,"e":2,"g":1,"h":3,"i":3,"l":1,",":2,"n":2,"o":4,"p":2,"1":2,"r":3,"s":6,"t":3,"u":1,"w":2,":":4,"{":2,"}":2,"_":1}}}
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'login', server tx ID: C2S_login_1
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: d96c6d1c-0c90-4d13-b53b-dd1d7299d109) for original action login
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_login_1 with pending action login (TempID: d96c6d1c-0c90-4d13-b53b-dd1d7299d109)
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login","data":{"chatid":"user1","password":"hashed_password1"}}
+
+
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_login_1
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_login_1","confirm":true}}
+2025-04-02 19:44:46 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_login_1
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"kbqElJ9lw4EY7Ve6","transaction_id":"S2C_login_success_2"}}
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"kbqElJ9lw4EY7Ve6","transaction_id":"S2C_login_success_2"}}
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received initial action 'login_success' from server, starting S->C flow
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login_success","status":"success","message":"Login successful. Confirm receipt.","data":{"chatid":"user1","session_key":"kbqElJ9lw4EY7Ve6","transaction_id":"S2C_login_success_2"}}
+
+
+2025-04-02 19:44:47 [ClientListener] ERROR UdpChatClient.UdpChatClient - Attempted encryption with null or empty key for packet to 127.0.0.1:9876
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CHARACTER_COUNT for transaction: S2C_login_success_2
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_login_1","original_action":"login","chatid":"user1","session_key":"kbqElJ9lw4EY7Ve6"}}
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_login_1","original_action":"login","chatid":"user1","session_key":"kbqElJ9lw4EY7Ve6"}}
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_login_1 (Original Action: login) with status: success
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Login successful via ACK! Updated sessionKey for user 'user1'. Session: kbqElJ9lw4EY7Ve6
+2025-04-02 19:44:47 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending login request associated with transaction C2S_login_1
+2025-04-02 19:44:47 [main] INFO  UdpChatClient.UdpChatClient - Action login (TempID: d96c6d1c-0c90-4d13-b53b-dd1d7299d109) acknowledged successfully by server.
+2025-04-03 12:16:20 [main] INFO  UdpChatClient.UdpChatClient - UDP Chat Client initialized. Server: localhost:9876
+2025-04-03 12:16:20 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener started.
+2025-04-03 12:16:24 [main] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-03 12:16:24 [main] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"login","data":{"chatid":"34","password":"df"}}
+2025-04-03 12:16:24 [main] INFO  UdpChatClient.UdpChatClient - Sent action: login (TempID: 047b4e6c-0881-4371-be4b-76d793b4b804) - waiting for server CHARACTER_COUNT...
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_6","original_action":"login","letter_frequencies":{"a":5,"\"":14,"c":2,"d":4,"f":1,"g":1,"h":1,"i":3,"l":1,",":2,"n":2,"o":3,"p":1,"r":1,"3":1,"s":2,"t":3,"4":1,"w":1,":":4,"{":2,"}":2}}}
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_6","original_action":"login","letter_frequencies":{"a":5,"\"":14,"c":2,"d":4,"f":1,"g":1,"h":1,"i":3,"l":1,",":2,"n":2,"o":3,"p":1,"r":1,"3":1,"s":2,"t":3,"4":1,"w":1,":":4,"{":2,"}":2}}}
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received CHARACTER_COUNT for original action 'login', server tx ID: C2S_login_6
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Found matching pending request (TempID: 047b4e6c-0881-4371-be4b-76d793b4b804) for original action login
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Associated server tx ID C2S_login_6 with pending action login (TempID: 047b4e6c-0881-4371-be4b-76d793b4b804)
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.CaesarCipher - 
+
+count letter: {"action":"login","data":{"chatid":"34","password":"df"}}
+
+
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Frequency check successful for transaction: C2S_login_6
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.CaesarCipher - Encrypting with shift: 9
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"confirm_count","data":{"transaction_id":"C2S_login_6","confirm":true}}
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Sent CONFIRM_COUNT (confirmed: true) for transaction: C2S_login_6
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.CaesarCipher - Decrypting with shift: 9
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.CaesarCipher - Processing text: {"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_6","original_action":"login"}}
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received decrypted JSON: {"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_6","original_action":"login"}}
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Received Server ACK for transaction: C2S_login_6 (Original Action: login) with status: failure
+2025-04-03 12:16:24 [ClientListener] WARN  UdpChatClient.UdpChatClient - Login failed via ACK. Status: failure, Message: Action processing failed.
+2025-04-03 12:16:24 [ClientListener] INFO  UdpChatClient.UdpChatClient - Signaled completion for pending login request associated with transaction C2S_login_6
+2025-04-03 12:16:24 [main] WARN  UdpChatClient.UdpChatClient - Action login (TempID: 047b4e6c-0881-4371-be4b-76d793b4b804) failed on server. Status: failure, Message: Action processing failed.
+2025-04-03 12:24:20 [main] INFO  UdpChatClient.UdpChatClient - UDP Chat Client initialized. Server: localhost:9876
+2025-04-03 12:24:20 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener started.
+2025-04-03 12:25:06 [main] INFO  UdpChatClient.UdpChatClient - UDP Chat Client initialized. Server: localhost:9876
+2025-04-03 12:25:06 [ClientListener] INFO  UdpChatClient.UdpChatClient - Message listener started.

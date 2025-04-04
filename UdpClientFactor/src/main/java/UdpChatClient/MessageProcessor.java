@@ -77,7 +77,17 @@ public class MessageProcessor {
                             System.out.println("  (No rooms found)");
                         } else {
                             for (int i = 0; i < roomsArray.size(); i++) {
-                                System.out.println("  " + (i + 1) + ". " + roomsArray.get(i).getAsString());
+                                JsonElement roomElement = roomsArray.get(i);
+                                if (roomElement.isJsonObject()) {
+                                    JsonObject roomObject = roomElement.getAsJsonObject();
+                                    // Fix: Use property names that match the server: "id" and "name"
+                                    String roomId = roomObject.has("id") ? roomObject.get("id").getAsString() : "Unknown ID";
+                                    String roomName = roomObject.has("name") ? roomObject.get("name").getAsString() : "Unnamed";
+                                    System.out.println("  " + (i + 1) + ". " + roomName + " (ID: " + roomId + ")");
+                                } else {
+                                    // Fallback for older server implementation that might just send room IDs
+                                    System.out.println("  " + (i + 1) + ". " + roomElement.getAsString());
+                                }
                             }
                         }
                     } else {
@@ -107,6 +117,93 @@ public class MessageProcessor {
                     } else {
                         log.error("Received invalid MESSAGES_LIST data: {}", jsonString);
                         System.out.println("\nFailed to retrieve messages from server.");
+                    }
+                    break;
+
+                case Constants.ACTION_USERS_LIST:
+                    // Handle users list response
+                    if (data != null && data.has("users")) {
+                        JsonArray usersArray = data.getAsJsonArray("users");
+                        System.out.println("\nUsers in the system:");
+                        if (usersArray.size() == 0) {
+                            System.out.println("  (No users found)");
+                        } else {
+                            for (int i = 0; i < usersArray.size(); i++) {
+                                String username = usersArray.get(i).getAsString();
+                                System.out.println("  " + (i + 1) + ". " + username);
+                            }
+                        }
+                    } else {
+                        log.error("Received invalid USERS_LIST data: {}", jsonString);
+                        System.out.println("\nFailed to retrieve users list from server.");
+                    }
+                    break;
+
+                case Constants.ACTION_USER_ADDED:
+                    if (Constants.STATUS_SUCCESS.equals(status) && data != null && 
+                        data.has(Constants.KEY_ROOM_ID) && data.has("user_added")) {
+                        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+                        String userAdded = data.get("user_added").getAsString();
+                        System.out.println("\nUser '" + userAdded + "' successfully added to room: " + roomId);
+                    } else {
+                        System.out.println("\nFailed to add user to room: " + 
+                            (message != null ? message : "Unknown reason"));
+                    }
+                    break;
+
+                case Constants.ACTION_USER_REMOVED:
+                    if (Constants.STATUS_SUCCESS.equals(status) && data != null &&
+                            data.has(Constants.KEY_ROOM_ID) && data.has("user_removed")) {
+                        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+                        String userRemoved = data.get("user_removed").getAsString();
+                        System.out.println("\nUser '" + userRemoved + "' successfully removed from room: " + roomId);
+                    } else {
+                        System.out.println("\nFailed to remove user from room: " +
+                                (message != null ? message : "Unknown reason"));
+                    }
+                    break;
+
+                case Constants.ACTION_ROOM_DELETED:
+                    if (Constants.STATUS_SUCCESS.equals(status) && data != null &&
+                            data.has(Constants.KEY_ROOM_ID)) {
+                        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+                        System.out.println("\nRoom '" + roomId + "' successfully deleted.");
+                    } else {
+                        System.out.println("\nFailed to delete room: " +
+                                (message != null ? message : "Unknown reason"));
+                    }
+                    break;
+
+                case Constants.ACTION_ROOM_RENAMED:
+                    if (Constants.STATUS_SUCCESS.equals(status) && data != null &&
+                            data.has(Constants.KEY_ROOM_ID) && data.has("new_room_name")) {
+                        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+                        String newRoomName = data.get("new_room_name").getAsString();
+                        System.out.println("\nRoom '" + roomId + "' successfully renamed to '" + newRoomName + "'.");
+                    } else {
+                        System.out.println("\nFailed to rename room: " +
+                                (message != null ? message : "Unknown reason"));
+                    }
+                    break;
+
+                case Constants.ACTION_ROOM_USERS_LIST:
+                    if (Constants.STATUS_SUCCESS.equals(status) && data != null &&
+                            data.has(Constants.KEY_ROOM_ID) && data.has("users")) {
+                        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+                        JsonArray usersArray = data.getAsJsonArray("users");
+
+                        System.out.println("\nUsers in room '" + roomId + "':");
+                        if (usersArray.size() == 0) {
+                            System.out.println("  (No users found in this room)");
+                        } else {
+                            for (int i = 0; i < usersArray.size(); i++) {
+                                String username = usersArray.get(i).getAsString();
+                                System.out.println("  " + (i + 1) + ". " + username);
+                            }
+                        }
+                    } else {
+                        System.out.println("\nFailed to get room users: " +
+                                (message != null ? message : "Unknown reason"));
                     }
                     break;
 

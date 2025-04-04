@@ -3,13 +3,20 @@ package UdpChatClient;
 import java.util.HashMap;
 import java.util.Map;
 
+import UdpChatClient.command.AddUserHandler;
 import UdpChatClient.command.CommandHandler;
 import UdpChatClient.command.CreateRoomHandler;
+import UdpChatClient.command.DeleteRoomHandler;
 import UdpChatClient.command.ExitHandler;
+import UdpChatClient.command.GetRoomUsersHandler;
+import UdpChatClient.command.GetUsersHandler;
 import UdpChatClient.command.HelpHandler;
 import UdpChatClient.command.ListMessagesHandler;
 import UdpChatClient.command.ListRoomsHandler;
 import UdpChatClient.command.LoginHandler;
+import UdpChatClient.command.RegisterHandler;
+import UdpChatClient.command.RemoveUserHandler;
+import UdpChatClient.command.RenameRoomHandler;
 import UdpChatClient.command.SendHandler;
 
 public class CommandProcessor {
@@ -23,11 +30,18 @@ public class CommandProcessor {
         this.handshakeManager = handshakeManager;
         
         // Register all command handlers
+        registerCommandHandler(Constants.CMD_REGISTER, new RegisterHandler());
+        registerCommandHandler(Constants.CMD_GET_USERS, new GetUsersHandler());
         registerCommandHandler(Constants.CMD_LOGIN, new LoginHandler());
         registerCommandHandler(Constants.CMD_CREATE_ROOM, new CreateRoomHandler());
         registerCommandHandler(Constants.CMD_SEND, new SendHandler());
         registerCommandHandler(Constants.CMD_LIST_ROOMS, new ListRoomsHandler());
         registerCommandHandler(Constants.CMD_LIST_MESSAGES, new ListMessagesHandler());
+        registerCommandHandler(Constants.CMD_ADD_USER, new AddUserHandler());
+        registerCommandHandler(Constants.CMD_REMOVE_USER, new RemoveUserHandler());
+        registerCommandHandler(Constants.CMD_DELETE_ROOM, new DeleteRoomHandler());
+        registerCommandHandler(Constants.CMD_RENAME_ROOM, new RenameRoomHandler());
+        registerCommandHandler(Constants.CMD_GET_ROOM_USERS, new GetRoomUsersHandler());
         registerCommandHandler(Constants.CMD_HELP, new HelpHandler(this));
         registerCommandHandler(Constants.CMD_EXIT, new ExitHandler());
     }

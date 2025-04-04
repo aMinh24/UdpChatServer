@@ -3,6 +3,7 @@ package UdpChatServer.handler;
 import java.net.DatagramSocket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.manager.RoomManager;
 import UdpChatServer.model.Constants;
 import UdpChatServer.model.PendingMessageInfo;
+
 /**
  * Handles the logic for processing confirmed "create_room" actions.
  * The initial request is handled by UdpRequestHandler, which initiates the C2S flow.
@@ -52,9 +54,9 @@ public class CreateRoomHandler {
             return false;
         }
 
-        JsonObject originalRequest = pendingInfo.getOriginalMessageJson(); // This is the outer JSON {action: ..., data: {...}}
-        JsonObject requestData = originalRequest.getAsJsonObject(Constants.KEY_DATA); // Get the inner 'data' object
-        String creatorChatId = requestData.get(Constants.KEY_CHAT_ID).getAsString(); // Read from 'data'
+        JsonObject originalRequest = pendingInfo.getOriginalMessageJson();
+        JsonObject requestData = originalRequest.getAsJsonObject(Constants.KEY_DATA);
+        String creatorChatId = requestData.get(Constants.KEY_CHAT_ID).getAsString();
         String transactionId = pendingInfo.getTransactionId();
 
         log.info("Processing confirmed create_room request from '{}' (Transaction ID: {})", creatorChatId, transactionId);
@@ -62,7 +64,7 @@ public class CreateRoomHandler {
         try {
             // 1. Extract and validate participants list (again, for safety) from 'data'
             Set<String> participants = new HashSet<>();
-            JsonArray participantsArray = requestData.getAsJsonArray(Constants.KEY_PARTICIPANTS); // Read from 'data'
+            JsonArray participantsArray = requestData.getAsJsonArray(Constants.KEY_PARTICIPANTS);
 
             participants.add(creatorChatId); // Always include the creator
             for (JsonElement element : participantsArray) {
@@ -71,16 +73,13 @@ public class CreateRoomHandler {
 
             if (participants.size() < 2) {
                 log.warn("Invalid participants count ({}) during confirmed create_room for transaction {}", participants.size(), transactionId);
-                // UdpRequestHandler will send ACK(failure)
                 return false;
             }
 
             // 2. Verify all participants exist (using UserDAO)
             for (String chatId : participants) {
-                // Optimization: Check sessionManager first if user might be online
                 if (!sessionManager.isOnline(chatId) && !userDAO.userExists(chatId)) {
                      log.warn("Participant '{}' not found during confirmed create_room for transaction {}", chatId, transactionId);
-                     // UdpRequestHandler will send ACK(failure) with a generic error
                      return false;
                 }
             }
@@ -88,44 +87,55 @@ public class CreateRoomHandler {
             // 3. Generate room ID based on participants
             String roomId = RoomManager.generateRoomId(participants);
 
-            // 4. Create room in database
-            if (!roomDAO.createRoomIfNotExists(roomId)) {
-                 log.error("Failed to create room '{}' in DB for transaction {}", roomId, transactionId);
-                 // UdpRequestHandler will send ACK(failure)
+            // 4. Get room name from request, or use a default if not provided
+            String roomName;
+            if (requestData.has(Constants.KEY_ROOM_NAME) && !requestData.get(Constants.KEY_ROOM_NAME).getAsString().trim().isEmpty()) {
+                roomName = requestData.get(Constants.KEY_ROOM_NAME).getAsString().trim();
+            } else {
+                // Create a default name from participant IDs (limited to first 3)
+                roomName = participants.stream().limit(3).collect(Collectors.joining(", "));
+                if (participants.size() > 3) {
+                    roomName += " + " + (participants.size() - 3) + " more";
+                }
+            }
+
+            // 5. Create room in database with name and set the creator as owner
+            // *** MODIFIED LINE: Pass creatorChatId as the third argument ***
+            if (!roomDAO.createRoomIfNotExists(roomId, roomName, creatorChatId)) {
+                log.error("Failed to create room '{}' with name '{}' and owner '{}' in DB for transaction {}",
+                          roomId, roomName, creatorChatId, transactionId); // Added owner to log message
                 return false;
             }
 
-            // 5. Add all participants to room in DB
+            // 6. Add all participants to room in DB
             boolean allAdded = true;
             for (String chatId : participants) {
                 if (!roomDAO.addParticipantToRoom(roomId, chatId)) {
                     allAdded = false;
-                    log.error("Failed to add participant {} to room {} in DB for transaction {}", chatId, roomId, transactionId);
-                    // Consider how to handle partial failure - for now, fail the whole operation
+                    log.error("Failed to add participant {} to room {} in DB for transaction {}",
+                              chatId, roomId, transactionId);
                 }
             }
 
             if (!allAdded) {
-                 log.error("Failed to add all participants to room '{}' in DB for transaction {}", roomId, transactionId);
-                 // UdpRequestHandler will send ACK(failure)
+                log.error("Failed to add all participants to room '{}' in DB for transaction {}", roomId, transactionId);
+                // Consider rolling back room creation or participant additions if critical
                 return false;
             }
 
-            // 6. Update in-memory room manager
+            // 7. Update in-memory room manager
             roomManager.createOrJoinRoom(roomId, participants);
 
-            // 7. Success! UdpRequestHandler will send ACK(success)
-            log.info("Room {} created successfully by {} for transaction {}", roomId, creatorChatId, transactionId);
-            // Optionally: Initiate S2C flow to notify other participants?
-            // notifyParticipantsRoomCreated(roomId, participants, creatorChatId);
+            // 8. Success! UdpRequestHandler will send ACK(success)
+            log.info("Room {} with name '{}' created successfully by {} for transaction {}",
+                     roomId, roomName, creatorChatId, transactionId);
             return true;
 
         } catch (Exception e) {
             log.error("Error processing confirmed create_room from {} (Transaction ID: {}): {}",
                      creatorChatId, transactionId, e.getMessage(), e);
-            // UdpRequestHandler will send ACK(failure)
+            // Consider more specific error handling or rollback
             return false;
         }
     }
-
 }

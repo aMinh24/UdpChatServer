@@ -1,0 +1,267 @@
+// Request: Login
+{
+  "action": "login",
+  "data": {
+    "chatid": "user123",
+    "password": "password123"
+  }
+}
+
+// Response: Login Success
+{
+  "action": "login_success",
+  "status": "success",
+  "message": "Login successful",
+  "data": {
+    "chatid": "user123",
+    "session_key": "unique_session_key"
+  }
+}
+
+// Request: Create Room
+{
+  "action": "create_room",
+  "data": {
+    "chatid": "user123",
+    "participants": ["user456", "user789"],
+    "room_name": "My Room"
+  }
+}
+
+// Response: Room Created
+{
+  "action": "room_created",
+  "status": "success",
+  "message": "Room created successfully",
+  "data": {
+    "room_id": "unique_room_id"
+  }
+}
+
+// Request: Send Message
+{
+  "action": "send_message",
+  "data": {
+    "chatid": "user123",
+    "room_id": "unique_room_id",
+    "content": "Hello everyone!"
+  }
+}
+
+// Response: Receive Message (forwarded to other clients)
+{
+  "action": "receive_message",
+  "status": "success",
+  "message": "New message received.",
+  "data": {
+    "room_id": "unique_room_id",
+    "sender_chatid": "user123",
+    "content": "Hello everyone!",
+    "timestamp": "2024-01-01T12:00:00Z"
+  }
+}
+
+// Request: Get Rooms
+{
+  "action": "get_rooms",
+  "data": {
+    "chatid": "user123"
+  }
+}
+
+// Response: Get Rooms
+{
+  "action": "rooms_list",
+  "status": "success",
+  "message": "Room list retrieved successfully.",
+  "data": {
+    "rooms": [
+      {
+        "id": "unique_room_id_1",
+        "name": "Room One"
+      },
+      {
+        "id": "unique_room_id_2",
+        "name": "Room Two"
+      }
+    ]
+  }
+}
+
+// Request: Get Messages
+{
+  "action": "get_messages",
+  "data": {
+    "chatid": "user123",
+    "room_id": "unique_room_id",
+    "from_time": "2024-01-01T00:00:00Z"
+  }
+}
+
+// Response: Get Messages
+{
+  "action": "messages_list",
+  "status": "success",
+  "message": "Messages retrieved successfully.",
+  "data": {
+    "room_id": "unique_room_id",
+    "messages": [
+      {
+        "message_id": 1,
+        "sender_chatid": "user123",
+        "content": "Hi!",
+        "timestamp": "2024-01-01T12:00:00Z"
+      },
+      {
+        "message_id": 2,
+        "sender_chatid": "user456",
+        "content": "Hello!",
+        "timestamp": "2024-01-01T12:01:00Z"
+      }
+    ]
+  }
+}
+
+// Response: Error
+{
+  "action": "error",
+  "original_action": "login",
+  "status": "error",
+  "message": "Invalid credentials"
+}
+
+// Request: Add User to Room (Owner only)
+{
+  "action": "add_user_to_room",
+  "data": {
+    "chatid": "owner123",
+    "room_id": "unique_room_id",
+    "user_to_add": "user456"
+  }
+}
+
+// Response: User Added
+{
+  "action": "user_added",
+  "status": "success",
+  "message": "User added to room successfully",
+  "data": {
+    "room_id": "unique_room_id",
+    "user_added": "user456"
+  }
+}
+
+// Request: Remove User from Room (Owner only)
+{
+  "action": "remove_user_from_room",
+  "data": {
+    "chatid": "owner123",
+    "room_id": "unique_room_id",
+    "user_to_remove": "user456"
+  }
+}
+
+// Response: User Removed
+{
+  "action": "user_removed",
+  "status": "success",
+  "message": "User removed from room successfully",
+  "data": {
+    "room_id": "unique_room_id",
+    "user_removed": "user456"
+  }
+}
+
+// Request: Delete Room (Owner only)
+{
+  "action": "delete_room",
+  "data": {
+    "chatid": "owner123",
+    "room_id": "unique_room_id"
+  }
+}
+
+// Response: Room Deleted
+{
+  "action": "room_deleted",
+  "status": "success",
+  "message": "Room deleted successfully",
+  "data": {
+    "room_id": "unique_room_id"
+  }
+}
+
+// Request: Rename Room (Owner only)
+{
+  "action": "rename_room",
+  "data": {
+    "chatid": "owner123",
+    "room_id": "unique_room_id",
+    "new_room_name": "New Room Name"
+  }
+}
+
+// Response: Room Renamed
+{
+  "action": "room_renamed",
+  "status": "success",
+  "message": "Room renamed successfully",
+  "data": {
+    "room_id": "unique_room_id",
+    "new_room_name": "New Room Name"
+  }
+}
+
+// Request: Character Count (C->S or S->C)
+{
+  "action": "character_count",
+  "data": {
+    "transaction_id": "unique_transaction_id",
+    "letter_frequencies": {
+      "a": 10,
+      "b": 5,
+      "c": 3
+    },
+    "original_action": "send_message" // Include original action
+  }
+}
+
+// Response: Confirm Count (C->S or S->C)
+{
+  "action": "confirm_count",
+  "data": {
+    "transaction_id": "unique_transaction_id",
+    "confirm": true
+  }
+}
+
+// Response: Ack (C->S or S->C)
+{
+  "action": "ack",
+  "status": "success",
+  "message": "Action processed successfully.",
+  "data": {
+    "transaction_id": "unique_transaction_id"
+  }
+}
+
+// Request: Get Room Users
+{
+  "action": "get_room_users",
+  "data": {
+    "chatid": "user123",
+    "room_id": "unique_room_id"
+  }
+}
+
+// Response: Room Users List
+{
+  "action": "room_users_list",
+  "status": "success",
+  "message": "Room users list retrieved successfully.",
+  "data": {
+    "room_id": "unique_room_id",
+    "room_name": "Room Name",
+    "users": ["user123", "user456", "user789"]
+  }
+}

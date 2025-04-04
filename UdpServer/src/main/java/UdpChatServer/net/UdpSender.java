@@ -11,55 +11,39 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-
-import UdpChatServer.model.PendingMessageInfo.*;
-import UdpChatServer.model.*;
 import UdpChatServer.crypto.CaesarCipher;
 import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
-import UdpChatServer.handler.CreateRoomHandler;
-import UdpChatServer.handler.LoginHandler;
-import UdpChatServer.handler.RoomMessageHandler;
-import UdpChatServer.handler.SendMessageHandler;
+// Removed handler imports - UdpSender doesn't need them directly
 import UdpChatServer.manager.ClientSessionManager;
-import UdpChatServer.manager.RoomManager;
+import UdpChatServer.manager.RoomManager; // Keep RoomManager if needed for context in sending? Unlikely.
+import UdpChatServer.model.Constants;
+import UdpChatServer.model.PendingMessageInfo;
+import UdpChatServer.model.PendingMessageInfo.Direction;
+import UdpChatServer.model.PendingMessageInfo.State;
 import UdpChatServer.util.JsonHelper;
 
 public class UdpSender {
 
-    private static final Logger log = LoggerFactory.getLogger(UdpRequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(UdpSender.class); // Corrected logger class
     private final DatagramSocket socket;
 
-    // Handlers for specific initial actions
-    private final LoginHandler loginHandler;
-    private final SendMessageHandler sendMessageHandler;
-    private final CreateRoomHandler createRoomHandler;
-    private final RoomMessageHandler roomMessageHandler;
+    // Removed internal handler instances
 
-    // Managers and DAOs
-    private final ClientSessionManager sessionManager;
-    @SuppressWarnings("unused") private final RoomManager roomManager; // Keep if needed later
-    @SuppressWarnings("unused") private final MessageDAO messageDAO; // Keep if needed later
-    @SuppressWarnings("unused") private final UserDAO userDAO; // Keep if needed later
-    @SuppressWarnings("unused") private final RoomDAO roomDAO; // Keep if needed later
+    // Managers and DAOs (Keep only if directly needed by UdpSender's own logic)
+    private final ClientSessionManager sessionManager; // Needed for transaction management
+    // Removed unused DAOs and RoomManager from UdpSender fields
 
-    public UdpSender(DatagramSocket socket, ClientSessionManager sessionManager, RoomManager roomManager,
-    UserDAO userDAO, RoomDAO roomDAO, MessageDAO messageDAO) {
+    // Simplified constructor - only takes dependencies needed by UdpSender itself
+    public UdpSender(DatagramSocket socket, ClientSessionManager sessionManager) {
         this.socket = socket;
-        this.sessionManager = sessionManager;
+        this.sessionManager = sessionManager; // Needed for transaction management
 
-        this.roomManager = roomManager;
-        this.userDAO = userDAO;
-        this.roomDAO = roomDAO;
-        this.messageDAO = messageDAO;
-
-         // Initialize action handlers
-         this.loginHandler = new LoginHandler(userDAO, sessionManager, this); // Pass 'this', socket removed as LoginHandler won't send directly
-         this.sendMessageHandler = new SendMessageHandler(sessionManager, roomManager, messageDAO, roomDAO, this); // Pass 'this', socket removed
-         this.createRoomHandler = new CreateRoomHandler(sessionManager, roomManager, roomDAO, userDAO, this.socket); // Pass 'this' and socket
-         this.roomMessageHandler = new RoomMessageHandler(sessionManager, roomManager, roomDAO, messageDAO, this.socket, this); // Pass 'this' and socket
+         // Removed internal handler initializations
     }
+
+    // Removed Getters for handlers
 
     /**
      * Initiates the Client -> Server flow upon receiving an initial request
@@ -106,22 +90,23 @@ public class UdpSender {
      * Server flow). Expects transaction_id and confirm within the 'data'
      * object.
      *
-     * @param transactionKey The key used to decrypt this CONFIRM_COUNT message
-     * (should match the original transaction key).
+     * @param transactionKey The key used to decrypt this CONFIRM_COUNT message (should match the original transaction key).
+     * @return The validated PendingMessageInfo if confirmation is valid and positive, null otherwise.
+     *         The caller (UdpRequestHandler) is responsible for executing the action and sending the ACK.
      */
-    public void handleConfirmCount(JsonObject requestJson, InetAddress clientAddress, int clientPort, String transactionKey) {
+    public PendingMessageInfo handleConfirmCount(JsonObject requestJson, InetAddress clientAddress, int clientPort, String transactionKey) {
         // CONFIRM_COUNT data comes from the client, expected within 'data' object
         if (!requestJson.has(Constants.KEY_DATA)) {
             log.warn("Received CONFIRM_COUNT from {}:{} missing 'data' object.", clientAddress.getHostAddress(), clientPort);
             sendErrorReply(clientAddress, clientPort, Constants.ACTION_CONFIRM_COUNT, Constants.ERROR_MSG_MISSING_FIELD + "'data'", transactionKey);
-            return;
+            return null; // Indicate failure
         }
         JsonObject data = requestJson.getAsJsonObject(Constants.KEY_DATA);
 
         if (!data.has("transaction_id") || !data.has(Constants.KEY_CONFIRM)) {
             log.warn("Received CONFIRM_COUNT from {}:{} missing 'transaction_id' or 'confirm' field within 'data'.", clientAddress.getHostAddress(), clientPort);
             sendErrorReply(clientAddress, clientPort, Constants.ACTION_CONFIRM_COUNT, Constants.ERROR_MSG_MISSING_FIELD + "'data.transaction_id' or 'data.confirm'", transactionKey);
-            return;
+            return null; // Indicate failure
         }
 
         String transactionId = data.get("transaction_id").getAsString();
@@ -135,7 +120,7 @@ public class UdpSender {
         if (pendingInfo == null) {
             log.warn("No pending transaction found for CONFIRM_COUNT with id '{}' from {}:{}", transactionId, clientAddress.getHostAddress(), clientPort);
             sendErrorReply(clientAddress, clientPort, Constants.ACTION_CONFIRM_COUNT, Constants.ERROR_MSG_PENDING_ACTION_NOT_FOUND, transactionKey);
-            return;
+            return null; // Indicate failure
         }
 
         // Validate the key used for this message matches the stored transaction key
@@ -144,7 +129,7 @@ public class UdpSender {
                     transactionId, pendingInfo.getTransactionKey().equals(Constants.FIXED_LOGIN_KEY_STRING), transactionKey.equals(Constants.FIXED_LOGIN_KEY_STRING));
             sendErrorReply(clientAddress, clientPort, Constants.ACTION_CONFIRM_COUNT, "Key mismatch for transaction.", transactionKey);
             // Do not remove pending info, might be a spoof attempt or delayed packet with old key
-            return;
+            return null; // Indicate failure
         }
 
         // Validate state and direction
@@ -153,7 +138,7 @@ public class UdpSender {
             sendErrorReply(clientAddress, clientPort, Constants.ACTION_CONFIRM_COUNT, Constants.ERROR_MSG_INVALID_STATE, transactionKey);
             // Optionally remove the invalid state transaction
             sessionManager.retrieveAndRemovePendingTransaction(transactionId);
-            return;
+            return null; // Indicate failure
         }
 
         // Validate sender matches original transaction partner
@@ -161,55 +146,25 @@ public class UdpSender {
             log.warn("CONFIRM_COUNT sender {}:{} does not match pending transaction partner {}:{} for id '{}'",
                     clientAddress.getHostAddress(), clientPort, pendingInfo.getPartnerAddress().getHostAddress(), pendingInfo.getPartnerPort(), transactionId);
             sendErrorReply(clientAddress, clientPort, Constants.ACTION_CONFIRM_COUNT, "Sender mismatch for transaction.", transactionKey);
-            return;
+            return null; // Indicate failure
         }
 
         // Process based on confirmation
         if (confirmed) {
-            // --- Execute the original action ---
-            String originalAction = pendingInfo.getOriginalAction();
-            log.info("Processing confirmed action '{}' for transaction '{}'", originalAction, transactionId);
-            boolean actionSuccess = false;
-            try {
-                actionSuccess = switch (originalAction) {
-                    case Constants.ACTION_LOGIN ->
-                        // Note: processConfirmedLogin initiates its own S2C flow for login_success on success
-                        loginHandler.processConfirmedLogin(pendingInfo);
-                    case Constants.ACTION_SEND_MESSAGE ->
-                        sendMessageHandler.processConfirmedSendMessage(pendingInfo);
-                    case Constants.ACTION_CREATE_ROOM ->
-                        createRoomHandler.processConfirmedCreateRoom(pendingInfo);
-                    case Constants.ACTION_GET_ROOMS ->
-                        roomMessageHandler.processConfirmedGetRooms(pendingInfo);
-                    case Constants.ACTION_GET_MESSAGES ->
-                        roomMessageHandler.processConfirmedGetMessages(pendingInfo);
-                    default -> {
-                        log.error("No handler defined for confirmed action '{}' in transaction '{}'", originalAction, transactionId);
-                        // Send ACK with failure status using the correct key
-                        sendAck(clientAddress, clientPort, transactionId, false, "Unhandled confirmed action", pendingInfo.getTransactionKey());
-                        sessionManager.retrieveAndRemovePendingTransaction(transactionId); // Clean up
-                        // Return false from the switch expression block
-                        yield false; // Indicate failure for the default case
-                    }
-                };
-            } catch (Exception e) {
-                log.error("Error executing confirmed action '{}' for transaction '{}': {}", originalAction, transactionId, e.getMessage(), e);
-                actionSuccess = false; // Ensure actionSuccess is false on exception
-            }
-
-            // Send ACK based on action execution result using the correct key
-            sendAck(clientAddress, clientPort, transactionId, actionSuccess,
-                    actionSuccess ? "Action processed successfully." : "Action processing failed.", pendingInfo.getTransactionKey());
-
+            // Confirmation is valid and positive. Return the pendingInfo for the caller to process.
+            log.info("CONFIRM_COUNT successful for transaction '{}'. Delegating action execution.", transactionId);
+            // DO NOT remove the transaction here. The caller (UdpRequestHandler) will remove it after processing.
+            return pendingInfo;
         } else {
             // Client cancelled
             log.info("Client cancelled action '{}' for transaction '{}'", pendingInfo.getOriginalAction(), transactionId);
+            // Send ACK indicating cancellation
             sendAck(clientAddress, clientPort, transactionId, false, "Action cancelled by client.", pendingInfo.getTransactionKey());
+            // Remove the cancelled transaction
+            sessionManager.retrieveAndRemovePendingTransaction(transactionId);
+            return null; // Indicate cancellation/failure
         }
-
-        // Remove the completed or cancelled transaction
-        sessionManager.retrieveAndRemovePendingTransaction(transactionId);
-    }
+    } // End of handleConfirmCount
 
     /**
      * Initiates the Server -> Client flow. Called by handlers like
