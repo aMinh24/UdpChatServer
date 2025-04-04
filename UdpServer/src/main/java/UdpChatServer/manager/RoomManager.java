@@ -25,10 +25,7 @@ public class RoomManager {
 
     /**
      * Generates a deterministic room ID based on a set of participant chat IDs.
-     * Sorts the chat IDs to ensure the order doesn't affect the result.
-     * Example: Users "alice", "bob" -> room ID "alice_bob"
-     * Example: Users "bob", "alice" -> room ID "alice_bob"
-     * For group chats with many users, a hash might be more suitable.
+     * Uses a hashing approach to create shorter IDs while maintaining uniqueness.
      *
      * @param chatids The set of participant chat IDs.
      * @return A unique, deterministic room ID string.
@@ -37,13 +34,27 @@ public class RoomManager {
         if (chatids == null || chatids.isEmpty()) {
             throw new IllegalArgumentException("Chat IDs cannot be null or empty to generate a room ID.");
         }
+        
         // Use TreeSet to ensure sorted order for deterministic ID generation
         Set<String> sortedChatIds = new TreeSet<>(chatids);
-        return sortedChatIds.stream().collect(Collectors.joining("_")); // Simple concatenation with '_'
-        // Alternative: Hashing for potentially shorter/more uniform IDs
-        // return HashingFunction.hash(sortedChatIds.stream().collect(Collectors.joining(",")));
+        
+        // Create a combined string and generate a hash
+        String combined = sortedChatIds.stream().collect(Collectors.joining(","));
+        
+        // Generate a simple hash code and convert to a positive hex string
+        int hash = combined.hashCode();
+        String shortId = Integer.toHexString(Math.abs(hash));
+        
+        // Append first letter of each user ID (up to 3) for readability
+        StringBuilder prefix = new StringBuilder();
+        sortedChatIds.stream().limit(3).forEach(id -> {
+            if (!id.isEmpty()) {
+                prefix.append(id.charAt(0));
+            }
+        });
+        
+        return prefix.toString() + "_" + shortId;
     }
-
 
     /**
      * Creates a new room in memory with the given participants.

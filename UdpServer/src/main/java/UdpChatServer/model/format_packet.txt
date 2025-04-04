@@ -244,3 +244,24 @@
     "transaction_id": "unique_transaction_id"
   }
 }
+
+// Request: Get Room Users
+{
+  "action": "get_room_users",
+  "data": {
+    "chatid": "user123",
+    "room_id": "unique_room_id"
+  }
+}
+
+// Response: Room Users List
+{
+  "action": "room_users_list",
+  "status": "success",
+  "message": "Room users list retrieved successfully.",
+  "data": {
+    "room_id": "unique_room_id",
+    "room_name": "Room Name",
+    "users": ["user123", "user456", "user789"]
+  }
+}

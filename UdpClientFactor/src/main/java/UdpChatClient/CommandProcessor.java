@@ -8,6 +8,7 @@ import UdpChatClient.command.CommandHandler;
 import UdpChatClient.command.CreateRoomHandler;
 import UdpChatClient.command.DeleteRoomHandler;
 import UdpChatClient.command.ExitHandler;
+import UdpChatClient.command.GetRoomUsersHandler;
 import UdpChatClient.command.GetUsersHandler;
 import UdpChatClient.command.HelpHandler;
 import UdpChatClient.command.ListMessagesHandler;
@@ -40,6 +41,7 @@ public class CommandProcessor {
         registerCommandHandler(Constants.CMD_REMOVE_USER, new RemoveUserHandler());
         registerCommandHandler(Constants.CMD_DELETE_ROOM, new DeleteRoomHandler());
         registerCommandHandler(Constants.CMD_RENAME_ROOM, new RenameRoomHandler());
+        registerCommandHandler(Constants.CMD_GET_ROOM_USERS, new GetRoomUsersHandler());
         registerCommandHandler(Constants.CMD_HELP, new HelpHandler(this));
         registerCommandHandler(Constants.CMD_EXIT, new ExitHandler());
     }

@@ -75,6 +75,10 @@ public final class Constants {
     public static final String ACTION_REMOVE_USER_FROM_ROOM = "remove_user_from_room";
     public static final String ACTION_DELETE_ROOM = "delete_room";
     public static final String ACTION_RENAME_ROOM = "rename_room";
+    
+    // Room user list action
+    public static final String ACTION_GET_ROOM_USERS = "get_room_users";
+    public static final String ACTION_ROOM_USERS_LIST = "room_users_list";
 
     // Room management replies
     public static final String ACTION_USER_ADDED = "user_added";

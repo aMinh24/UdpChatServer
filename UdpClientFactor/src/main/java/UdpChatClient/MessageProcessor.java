@@ -186,6 +186,27 @@ public class MessageProcessor {
                     }
                     break;
 
+                case Constants.ACTION_ROOM_USERS_LIST:
+                    if (Constants.STATUS_SUCCESS.equals(status) && data != null &&
+                            data.has(Constants.KEY_ROOM_ID) && data.has("users")) {
+                        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+                        JsonArray usersArray = data.getAsJsonArray("users");
+
+                        System.out.println("\nUsers in room '" + roomId + "':");
+                        if (usersArray.size() == 0) {
+                            System.out.println("  (No users found in this room)");
+                        } else {
+                            for (int i = 0; i < usersArray.size(); i++) {
+                                String username = usersArray.get(i).getAsString();
+                                System.out.println("  " + (i + 1) + ". " + username);
+                            }
+                        }
+                    } else {
+                        System.out.println("\nFailed to get room users: " +
+                                (message != null ? message : "Unknown reason"));
+                    }
+                    break;
+
                 default:
                     log.warn("Unhandled confirmed server action: {}", action);
                     if (message != null) {

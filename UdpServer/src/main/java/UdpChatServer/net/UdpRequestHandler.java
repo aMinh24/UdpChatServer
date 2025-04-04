@@ -207,6 +207,10 @@ public class UdpRequestHandler implements Runnable {
                     udpSender.initiateClientToServerFlow(action, requestJson, decryptedJsonString, clientAddress, clientPort, Constants.FIXED_LOGIN_KEY_STRING);
                     break;
 
+                case Constants.ACTION_GET_ROOM_USERS:
+                    handleGetRoomUsers(requestJson, clientAddress, clientPort, transactionKey);
+                    break;
+
                 default: // All other initial actions require a valid session
                     if (sessionKey == null) {
                         log.warn("Received action '{}' from {}:{} without a valid session key. Denying.", action, clientAddress.getHostAddress(), clientPort);
@@ -273,6 +277,7 @@ public class UdpRequestHandler implements Runnable {
                 case Constants.ACTION_GET_ROOMS -> roomMessageHandler.processConfirmedGetRooms(pendingInfo);
                 case Constants.ACTION_GET_MESSAGES -> roomMessageHandler.processConfirmedGetMessages(pendingInfo);
                 case Constants.ACTION_GET_USERS -> getUsersHandler.processConfirmedGetUsers(pendingInfo);
+                case Constants.ACTION_GET_ROOM_USERS -> roomMessageHandler.processConfirmedGetRoomUsers(pendingInfo);
                 // Room Management Actions
                 case Constants.ACTION_ADD_USER_TO_ROOM -> roomManagementHandler.processConfirmedAddUserToRoom(pendingInfo);
                 case Constants.ACTION_REMOVE_USER_FROM_ROOM -> roomManagementHandler.processConfirmedRemoveUserFromRoom(pendingInfo);
@@ -297,6 +302,31 @@ public class UdpRequestHandler implements Runnable {
         log.info("Completed processing and removed transaction '{}'", transactionId);
     }
 
+    /**
+     * Handles a request to get the list of users in a room.
+     */
+    private void handleGetRoomUsers(JsonObject jsonObject, InetAddress clientAddress, int clientPort, String sessionKey) {
+        log.info("Processing get_room_users request from {}:{}", clientAddress.getHostAddress(), clientPort);
+
+        // Extract the data object
+        JsonObject data = jsonObject.getAsJsonObject(Constants.KEY_DATA);
+        if (data == null || !data.has(Constants.KEY_CHAT_ID) || !data.has(Constants.KEY_ROOM_ID)) {
+            udpSender.sendErrorReply(clientAddress, clientPort, Constants.ACTION_GET_ROOM_USERS, "get_room_users request missing required fields", sessionKey);
+            return;
+        }
+
+        String chatid = data.get(Constants.KEY_CHAT_ID).getAsString();
+        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
+
+        // Validate the session
+        if (!sessionManager.validateSession(chatid, clientAddress, clientPort)) {
+            udpSender.sendErrorReply(clientAddress, clientPort, Constants.ACTION_GET_ROOM_USERS, "Invalid session for get_room_users", sessionKey);
+            return;
+        }
+
+        // Start C2S character count flow
+        udpSender.initiateClientToServerFlow(Constants.ACTION_GET_ROOM_USERS, jsonObject, jsonObject.toString(), clientAddress, clientPort, sessionKey);
+    }
 
     // --- Lifecycle Methods ---
     private void startCleanupTasks() {

@@ -79,6 +79,8 @@ public final class Constants {
     public static final String ACTION_ROOM_DELETED = "room_deleted";
     public static final String ACTION_RENAME_ROOM = "rename_room";
     public static final String ACTION_ROOM_RENAMED = "room_renamed";
+    public static final String ACTION_GET_ROOM_USERS = "get_room_users";
+    public static final String ACTION_ROOM_USERS_LIST = "room_users_list";
 
     // --- Status Values ---
     public static final String STATUS_SUCCESS = "success";
@@ -130,6 +132,8 @@ public final class Constants {
     public static final String CMD_DELETE_ROOM_DESC = "/deleteroom <room_id> - Delete an existing room";
     public static final String CMD_RENAME_ROOM = "/renameroom";
     public static final String CMD_RENAME_ROOM_DESC = "/renameroom <room_id> <new_room_name> - Rename an existing room";
+    public static final String CMD_GET_ROOM_USERS = "/roomusers";
+    public static final String CMD_GET_ROOM_USERS_DESC = "/roomusers <room_id> - Get the list of users in a room";
     public static final String TIME_OPTION_HOURS = "hours";
     public static final String TIME_OPTION_DAYS = "days";
     public static final String TIME_OPTION_WEEKS = "weeks";
