@@ -1,6 +1,5 @@
 package UdpChatClient;
 
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.UUID;
@@ -204,13 +203,15 @@ public class HandshakeManager {
             else if (Constants.ACTION_REGISTER.equals(originalAction)) {
                 if (Constants.STATUS_SUCCESS.equals(status)) {
                     String message = data.has(Constants.KEY_MESSAGE) ? data.get(Constants.KEY_MESSAGE).getAsString() : "Registration successful.";
-                    log.info("Registration successful for '{}'", data.get(Constants.KEY_CHAT_ID).getAsString());
+                    log.info("Registration successful ");
                     System.out.println("\n" + message);
                 } else {
                     String message = responseJson.has(Constants.KEY_MESSAGE) ? responseJson.get(Constants.KEY_MESSAGE).getAsString() : "Unknown reason";
                     log.warn("Registration failed via ACK. Status: {}, Message: {}", status, message);
                     System.out.println("\nRegistration failed: " + message + " (Status: " + status + ")");
                 }
+                pendingReq.latch.countDown(); // Add this line to signal completion for registration
+                log.info("Signaled completion for pending registration request associated with transaction {}", transactionId);
             }
             else {
                 // Handle ACK for other actions

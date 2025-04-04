@@ -33,6 +33,7 @@ public final class Constants {
     // Room Creation
     public static final String KEY_PARTICIPANTS = "participants"; // List of chatids to add to room
     public static final String KEY_ROOM_ID = "room_id";
+    public static final String KEY_ROOM_NAME = "room_name"; 
 
     // Send Message Action
     public static final String KEY_CONTENT = "content";
@@ -70,6 +71,15 @@ public final class Constants {
     // Note: ACTION_CONFIRM_MESSAGE is removed as the new flow uses ACTION_CONFIRM_COUNT
     // Note: ACTION_MESSAGE_CONFIRMED_BY_SERVER is removed/replaced by the new flow steps
 
+    public static final String ACTION_ADD_USER_TO_ROOM = "add_user_to_room"; // Add user to a room
+    public static final String ACTION_USER_ADDED = "user_added"; // Server response for add_user_to_room
+    public static final String ACTION_REMOVE_USER_FROM_ROOM = "remove_user_from_room";
+    public static final String ACTION_USER_REMOVED = "user_removed";
+    public static final String ACTION_DELETE_ROOM = "delete_room";
+    public static final String ACTION_ROOM_DELETED = "room_deleted";
+    public static final String ACTION_RENAME_ROOM = "rename_room";
+    public static final String ACTION_ROOM_RENAMED = "room_renamed";
+
     // --- Status Values ---
     public static final String STATUS_SUCCESS = "success";
     public static final String STATUS_FAILURE = "failure";
@@ -106,12 +116,20 @@ public final class Constants {
     public static final String CMD_LIST_ROOMS = "/rooms";
     public static final String CMD_LIST_MESSAGES = "/messages";
     public static final String CMD_LOGIN_DESC = "/login <chatid> <password> - Đăng nhập vào hệ thống";
-    public static final String CMD_CREATE_ROOM_DESC = "/create <user2> [user3 ...] - Tạo phòng chat với các người dùng được chỉ định";
+    public static final String CMD_CREATE_ROOM_DESC = "/create <room_name> <user2> [user3 ...] - Tạo phòng chat với các người dùng được chỉ định";
     public static final String CMD_SEND_DESC = "/send <room_id> <message> - Gửi tin nhắn đến phòng chat";
     public static final String CMD_HELP_DESC = "/help - Hiển thị hướng dẫn này";
     public static final String CMD_EXIT_DESC = "/exit - Thoát chương trình";
     public static final String CMD_LIST_ROOMS_DESC = "/rooms - Hiển thị danh sách phòng chat của bạn";
     public static final String CMD_LIST_MESSAGES_DESC = "/messages <room_id> [time_option] - Hiển thị tin nhắn trong phòng chat";
+    public static final String CMD_ADD_USER = "/adduser";
+    public static final String CMD_ADD_USER_DESC = "/adduser <room_id> <username> - Add a user to an existing room";
+    public static final String CMD_REMOVE_USER = "/removeuser";
+    public static final String CMD_REMOVE_USER_DESC = "/removeuser <room_id> <username> - Remove a user from an existing room";
+    public static final String CMD_DELETE_ROOM = "/deleteroom";
+    public static final String CMD_DELETE_ROOM_DESC = "/deleteroom <room_id> - Delete an existing room";
+    public static final String CMD_RENAME_ROOM = "/renameroom";
+    public static final String CMD_RENAME_ROOM_DESC = "/renameroom <room_id> <new_room_name> - Rename an existing room";
     public static final String TIME_OPTION_HOURS = "hours";
     public static final String TIME_OPTION_DAYS = "days";
     public static final String TIME_OPTION_WEEKS = "weeks";

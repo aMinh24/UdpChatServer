@@ -61,8 +61,11 @@ public class GetUsersHandler {
 
             JsonObject responseData = new JsonObject();
             JsonArray usersArray = new JsonArray();
-            for (String user : users) {
-                usersArray.add(user);
+            // Add null check before iterating
+            if (users != null) {
+                for (String user : users) {
+                    usersArray.add(user);
+                }
             }
             responseData.add("users", usersArray);
 

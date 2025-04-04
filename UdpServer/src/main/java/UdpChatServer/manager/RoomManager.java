@@ -139,4 +139,20 @@ public class RoomManager {
     public Set<String> getAllRoomIds() {
         return Collections.unmodifiableSet(new HashSet<>(rooms.keySet()));
     }
+
+    /**
+     * Removes a room from memory completely.
+     *
+     * @param roomId The ID of the room to remove.
+     * @return true if the room existed and was removed, false otherwise.
+     */
+    public boolean removeRoom(String roomId) {
+        Set<String> removed = rooms.remove(roomId);
+        if (removed != null) {
+            System.out.println("Room '" + roomId + "' completely removed from memory.");
+            return true;
+        }
+        System.err.println("Attempted to remove non-existent room '" + roomId + "' from memory.");
+        return false;
+    }
 }

@@ -8,14 +8,17 @@ package UdpChatServer.handler;
  *
  * @author nguye
  */
+import java.net.InetAddress;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonObject;
+
 import UdpChatServer.db.UserDAO;
 import UdpChatServer.model.Constants;
 import UdpChatServer.model.PendingMessageInfo;
 import UdpChatServer.net.UdpSender;
-import com.google.gson.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.net.InetAddress;
 
 public class RegisterHandler {
     private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
@@ -56,7 +59,7 @@ public class RegisterHandler {
 
             JsonObject responseData = new JsonObject();
             responseData.addProperty(Constants.KEY_CHAT_ID, chatid);
-            responseData.addProperty(Constants.KEY_MESSAGE, "Registration successful. Please login with /login <chatid> <password>");
+            responseData.addProperty(Constants.KEY_MESSAGE, "Registration successful. Please login with /login chatid password");
 
             JsonObject responseJson = new JsonObject();
             responseJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_REGISTER_SUCCESS); // Dùng hằng số

@@ -167,14 +167,21 @@ public class RoomMessageHandler {
 
         try {
             // Lấy danh sách room từ database 
-            List<String> rooms = roomDAO.getRoomsByUser(chatid);
+            List<String> roomIds = roomDAO.getRoomsByUser(chatid);
             
             // Tạo response JSON
             JsonObject data = new JsonObject();
             JsonArray roomsArray = new JsonArray();
-            for (String roomId : rooms) {
-                roomsArray.add(roomId); 
+            
+            // Create detailed room info objects with both id and name
+            for (String roomId : roomIds) {
+                JsonObject roomInfo = new JsonObject();
+                roomInfo.addProperty("id", roomId);
+                roomInfo.addProperty("name", roomDAO.getRoomName(roomId));
+                roomsArray.add(roomInfo);
+                log.debug("Added room to response: id={}, name={}", roomId, roomDAO.getRoomName(roomId));
             }
+            
             data.add("rooms", roomsArray);
 
             JsonObject response = JsonHelper.createReply(
@@ -185,8 +192,8 @@ public class RoomMessageHandler {
             );
 
             // Gửi response qua S2C flow
-            log.info("Lấy được {} phòng chat cho user '{}'. Bắt đầu luồng S2C.", rooms.size(), chatid);
-            udpSender.initiateServerToClientFlow( // Changed from requestHandler
+            log.info("Lấy được {} phòng chat cho user '{}'. Bắt đầu luồng S2C.", roomIds.size(), chatid);
+            udpSender.initiateServerToClientFlow(
                 Constants.ACTION_ROOMS_LIST,
                 response,
                 pendingInfo.getPartnerAddress(),

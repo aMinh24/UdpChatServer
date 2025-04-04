@@ -33,7 +33,8 @@ public final class Constants {
     // Room Creation
     public static final String KEY_PARTICIPANTS = "participants"; // List of chatids to add to room
     public static final String KEY_ROOM_ID = "room_id";
-
+    public static final String KEY_ROOM_NAME = "room_name"; // Add room name key
+    
     // Send Message Action
     public static final String KEY_CONTENT = "content";
     public static final String KEY_SENDER_CHAT_ID = "sender_chatid";
@@ -68,6 +69,18 @@ public final class Constants {
     public static final String ACTION_ACK = "ack";                         // Server -> Client (final step for Client->Server flow) OR Client -> Server (final step for Server->Client flow)
     // Note: ACTION_CONFIRM_MESSAGE is removed as the new flow uses ACTION_CONFIRM_COUNT
     // Note: ACTION_MESSAGE_CONFIRMED_BY_SERVER is removed/replaced by the new flow steps
+
+    // Room management actions
+    public static final String ACTION_ADD_USER_TO_ROOM = "add_user_to_room";
+    public static final String ACTION_REMOVE_USER_FROM_ROOM = "remove_user_from_room";
+    public static final String ACTION_DELETE_ROOM = "delete_room";
+    public static final String ACTION_RENAME_ROOM = "rename_room";
+
+    // Room management replies
+    public static final String ACTION_USER_ADDED = "user_added";
+    public static final String ACTION_USER_REMOVED = "user_removed";
+    public static final String ACTION_ROOM_DELETED = "room_deleted";
+    public static final String ACTION_ROOM_RENAMED = "room_renamed";
 
     // --- Status Values ---
     public static final String STATUS_SUCCESS = "success";
