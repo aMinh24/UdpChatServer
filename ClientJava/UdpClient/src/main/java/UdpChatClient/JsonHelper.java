@@ -161,7 +161,7 @@ public final class JsonHelper {
             // Encrypt the JSON string
             String encryptedString = CaesarCipher.encrypt(jsonString, keyString);
             // log.trace("Encrypted JSON string to send: {}", encryptedString); // Can be noisy
-
+            System.out.print("-------------------Encrypted JSON string to send: " + encryptedString); // For debugging
             byte[] sendData = encryptedString.getBytes(StandardCharsets.UTF_8);
 
             if (sendData.length > Constants.MAX_UDP_PACKET_SIZE) {

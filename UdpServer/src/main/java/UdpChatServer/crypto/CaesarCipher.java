@@ -62,12 +62,13 @@ public class CaesarCipher {
      */
     private static String processText(String text, int shift) {
         log.info("Processing text: {}", text);
-        if(text != null) return text;
+        
         // Handle null input text gracefully
         if (text == null) {
             log.warn("processText called with null input.");
             return ""; // Return empty string for null input
         }
+        
         StringBuilder result = new StringBuilder();
         int len = ALPHABET.length();
 

@@ -30,7 +30,7 @@ public class CaesarCipher {
             return plainText; // Return original text if input is invalid
         }
         int shift = keyString.length(); // Use key length as shift value
-        log.info("Encrypting with shift: {}", shift);
+        log.info("---------------Encrypting with shift: {}", shift);
         return processText(plainText, shift);
     }
 
@@ -48,7 +48,7 @@ public class CaesarCipher {
             return cipherText; // Return original text if input is invalid
         }
         int shift = keyString.length(); // Use key length as shift value
-        log.info("Decrypting with shift: {}", shift);
+        log.info("---------------Decrypting with shift: {}", shift);
         // Decryption is encryption with the negative shift
         return processText(cipherText, -shift);
     }
