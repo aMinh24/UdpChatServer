@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import UdpChatServer.db.DatabaseConnectionManager;
+import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
@@ -25,6 +26,7 @@ public class ServerMain {
 
     private static final Logger log = LoggerFactory.getLogger(ServerMain.class);
     private static final String CONFIG_FILE = "config.properties";
+    private static FileTransferServer fileTransferServer; // Add this field
 
     public static void main(String[] args) {
         log.info("Starting UDP Chat Server...");
@@ -45,7 +47,14 @@ public class ServerMain {
             UserDAO userDAO = new UserDAO();
             RoomDAO roomDAO = new RoomDAO();
             MessageDAO messageDAO = new MessageDAO();
+            FileDAO fileDAO = new FileDAO(); // Add FileDAO
             log.info("Managers and DAOs initialized.");
+
+            // Initialize FileTransferServer
+            log.info("Initializing File Transfer Server...");
+            fileTransferServer = new FileTransferServer(configProps, userDAO, roomDAO, fileDAO);
+            Thread fileServerThread = new Thread(() -> fileTransferServer.listen(), "File-Transfer-Server-Thread");
+            fileServerThread.start();
 
             // Initialize Request Handler
             log.info("Initializing UDP Request Handler on port {}...", serverPort);
@@ -59,11 +68,11 @@ public class ServerMain {
             // Add Shutdown Hook for graceful termination
             UdpRequestHandler finalRequestHandler = requestHandler; // Need final variable for lambda
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                log.info("Shutdown hook triggered. Stopping server...");
-                // Removed null check as finalRequestHandler should not be null here if hook runs
+                log.info("Shutdown hook triggered. Stopping servers...");
                 finalRequestHandler.stop(); // Stop the handler loop and thread pool
+                fileTransferServer.stop();
                 DatabaseConnectionManager.closeDataSource(); // Close the database connection pool
-                log.info("Server shut down gracefully.");
+                log.info("Servers shut down gracefully.");
             }, "Server-Shutdown-Hook"));
 
             // Keep the main thread alive (optional, depends on deployment)
@@ -77,6 +86,9 @@ public class ServerMain {
              // Ensure resources are cleaned up if startup fails partially
             if (requestHandler != null) {
                 requestHandler.stop();
+            }
+            if (fileTransferServer != null) {
+                fileTransferServer.stop();
             }
             DatabaseConnectionManager.closeDataSource();
             System.exit(1);

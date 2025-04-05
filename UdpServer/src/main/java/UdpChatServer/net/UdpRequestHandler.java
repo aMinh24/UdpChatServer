@@ -16,15 +16,18 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-// Import DAOs and Managers
 import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.handler.CreateRoomHandler;
+import UdpChatServer.handler.GetUsersHandler;
+import UdpChatServer.handler.LoginHandler;
+import UdpChatServer.handler.RegisterHandler; // Import all handlers
+import UdpChatServer.handler.RoomManagementHandler;
+import UdpChatServer.handler.RoomMessageHandler;
+import UdpChatServer.handler.SendMessageHandler;
 import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.manager.RoomManager;
-// Import Handlers
-import UdpChatServer.handler.*; // Import all handlers
-// Import Models and Utils
 import UdpChatServer.model.Constants;
 import UdpChatServer.model.PendingMessageInfo;
 import UdpChatServer.util.JsonHelper;
@@ -56,7 +59,6 @@ public class UdpRequestHandler implements Runnable {
     private final GetUsersHandler getUsersHandler;
     private final RoomManagementHandler roomManagementHandler;
 
-
     public UdpRequestHandler(int port, ClientSessionManager sessionManager, RoomManager roomManager,
             UserDAO userDAO, RoomDAO roomDAO, MessageDAO messageDAO) throws SocketException {
         this.socket = new DatagramSocket(port);
@@ -77,7 +79,6 @@ public class UdpRequestHandler implements Runnable {
         this.roomMessageHandler = new RoomMessageHandler(this.sessionManager, this.roomManager, this.roomDAO, this.messageDAO, this.socket, this.udpSender); // Needs socket? Check handler impl. Assuming yes for now.
         this.getUsersHandler = new GetUsersHandler(this.sessionManager, this.userDAO, this.udpSender);
         this.roomManagementHandler = new RoomManagementHandler(this.sessionManager, this.roomManager, this.roomDAO, this.udpSender);
-
 
         // Initialize thread pools
         int poolSize = Runtime.getRuntime().availableProcessors();

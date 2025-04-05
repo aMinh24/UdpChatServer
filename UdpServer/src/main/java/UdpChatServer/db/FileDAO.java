@@ -39,7 +39,7 @@ public class FileDAO {
         try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, file.getRoomId());
-            pstmt.setString(2, file.getReceiverChatid());
+            pstmt.setString(2, file.getSenderChatid());
             pstmt.setString(3, file.getReceiverChatid());
             pstmt.setString(4, file.getFileName());
             pstmt.setTimestamp(5, file.getTimestamp() != null ? file.getTimestamp() : new Timestamp(System.currentTimeMillis()));

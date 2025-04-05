@@ -16,27 +16,48 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import UdpChatServer.handler.SendFileHandler;
+import com.google.gson.JsonObject;
+
+import UdpChatServer.db.FileDAO;
+import UdpChatServer.db.RoomDAO;
+import UdpChatServer.db.UserDAO;
+import UdpChatServer.handler.file.FileDataHandler;
+import UdpChatServer.handler.file.FileDownloadHandler;
+import UdpChatServer.handler.file.FileFinHandler;
+import UdpChatServer.handler.file.FileInitHandler;
+import UdpChatServer.handler.file.ListRequestHandler;
+import UdpChatServer.handler.file.SendFileHandler;
 import UdpChatServer.model.Constants;
 
 public class FileTransferServer {
+
     private static final Logger log = LoggerFactory.getLogger(FileTransferServer.class);
-    
+
     private final DatagramSocket socket;
-    private final SendFileHandler handler;
     private final ExecutorService executor;
     private volatile boolean running = true;
+    private final UserDAO userDAO;
+    private final RoomDAO roomDAO;
+    private final FileDAO fileDAO;
+    private FileDataHandler fileDataHandler;
+    private FileDownloadHandler fileDownloadHandler;
+    private FileFinHandler fileFinHandler;
+    private FileInitHandler fileInitHandler;
+    private ListRequestHandler listRequestHandler;
 
-    public FileTransferServer(Properties config) throws SocketException {
+    public FileTransferServer(Properties config, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO) throws SocketException {
         int port = Integer.parseInt(config.getProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT)));
         String storageDir = config.getProperty("file.storage.dir", "server_storage");
-        
+
+        this.userDAO = userDAO;
+        this.roomDAO = roomDAO;
+        this.fileDAO = fileDAO;
+
         socket = new DatagramSocket(port);
-        handler = new SendFileHandler(socket);
         executor = Executors.newCachedThreadPool();
-        
+
         log.info("UDP File Transfer Server started on port {}", port);
-        
+
         try {
             Files.createDirectories(Paths.get(storageDir));
             log.info("Server storage directory: {}", Paths.get(storageDir).toAbsolutePath());
@@ -66,7 +87,7 @@ public class FileTransferServer {
     public void stop() {
         running = false;
         log.info("Stopping File Transfer Server...");
-        
+
         if (executor != null) {
             executor.shutdown();
             try {
@@ -78,11 +99,11 @@ public class FileTransferServer {
                 Thread.currentThread().interrupt();
             }
         }
-        
+
         if (socket != null && !socket.isClosed()) {
             socket.close();
         }
-        
+
         log.info("File Transfer Server stopped.");
     }
 
@@ -90,10 +111,10 @@ public class FileTransferServer {
         try {
             String receivedData = new String(packet.getData(), 0, packet.getLength()).trim();
             String[] parts = receivedData.split(Pattern.quote(Constants.PACKET_DELIMITER), 2);
-            
+
             if (parts.length < 1) {
-                log.warn("Received invalid packet format from {}:{}", 
-                    packet.getAddress(), packet.getPort());
+                log.warn("Received invalid packet format from {}:{}",
+                        packet.getAddress(), packet.getPort());
                 return;
             }
 
@@ -103,28 +124,48 @@ public class FileTransferServer {
             int clientPort = packet.getPort();
 
             switch (command) {
+                case "TEST":
+                    JsonObject testJson = new JsonObject();
+                    testJson.addProperty("action", "test");
+                    testJson.addProperty("client_name", "clientName");
+
+                    // Tạo data object
+                    JsonObject data = new JsonObject();
+                    data.addProperty("message", "Hello from " + "clientName");
+                    testJson.add("data", data);
+
+                    // Convert to string và gửi
+                    String jsonString = testJson.toString();
+                    System.out.println(jsonString);
+                    SendFileHandler handler = new SendFileHandler(userDAO, roomDAO, fileDAO, socket);
+                    handler.test(clientAddress, clientPort);
+                    break;
                 case Constants.CMD_SEND_INIT:
-                    handler.handleSendInit(payload, clientAddress, clientPort);
+                    fileInitHandler = new FileInitHandler(userDAO, roomDAO, fileDAO, socket);
+                    fileInitHandler.handleSendInit(payload, clientAddress, clientPort);
                     break;
                 case Constants.CMD_SEND_DATA:
-                    handler.handleSendData(payload, packet.getData(), packet.getLength(), 
-                        clientAddress, clientPort);
+                    fileDataHandler = new FileDataHandler(userDAO, roomDAO, fileDAO, socket);
+                    fileDataHandler.handleSendData(payload, packet.getData(), packet.getLength(), clientAddress, clientPort);
                     break;
                 case Constants.CMD_SEND_FIN:
-                    handler.handleSendFin(payload, clientAddress, clientPort);
+                    fileFinHandler = new FileFinHandler(userDAO, roomDAO, fileDAO, socket);
+                    fileFinHandler.handleSendFin(payload, clientAddress, clientPort);
                     break;
                 case Constants.CMD_LIST_REQ:
-                    handler.handleListRequest(payload, clientAddress, clientPort);
+                    listRequestHandler = new ListRequestHandler(userDAO, roomDAO, fileDAO, socket);
+                    listRequestHandler.handleListRequest(payload, clientAddress, clientPort);
                     break;
                 case Constants.CMD_DOWNLOAD_REQ:
-                    handler.handleDownloadRequest(payload, clientAddress, clientPort);
+                    fileDownloadHandler = new FileDownloadHandler(userDAO, roomDAO, fileDAO, socket);
+                    fileDownloadHandler.handleDownloadRequest(payload, clientAddress, clientPort);
                     break;
                 default:
                     log.warn("Unknown command received: {}", command);
             }
         } catch (Exception e) {
-            log.error("Error handling packet from {}:{} - {}", 
-                packet.getAddress(), packet.getPort(), e.getMessage());
+            log.error("Error handling packet from {}:{} - {}",
+                    packet.getAddress(), packet.getPort(), e.getMessage());
         }
     }
 
@@ -133,20 +174,20 @@ public class FileTransferServer {
         // Add default config values
         config.setProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT));
         config.setProperty("file.storage.dir", "server_storage");
-        
+
         try {
-            FileTransferServer server = new FileTransferServer(config);
-            
+            FileTransferServer server = new FileTransferServer(config, new UserDAO(), new RoomDAO(), new FileDAO());
+
             // Add shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 log.info("Shutdown hook triggered for File Transfer Server...");
                 server.stop();
             }));
-            
+
             server.listen();
         } catch (SocketException e) {
-            log.error("Failed to start server: Could not bind to port {}", 
-                config.getProperty("file.server.port"));
+            log.error("Failed to start server: Could not bind to port {}",
+                    config.getProperty("file.server.port"));
             System.exit(1);
         }
     }

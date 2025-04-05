@@ -26,6 +26,18 @@
                 <exec.mainClass>UdpChatServer.FileTransferServer</exec.mainClass>
             </properties>
         </profile>
+        <profile>
+            <id>file-client</id>
+            <properties>
+                <exec.mainClass>UdpChatServer.UdpChatClient</exec.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>client</id>
+            <properties>
+                <exec.mainClass>UdpChatServer.Client</exec.mainClass>
+            </properties>
+        </profile>
     </profiles>
 
     <dependencies>

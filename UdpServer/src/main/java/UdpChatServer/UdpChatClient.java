@@ -34,6 +34,7 @@ import UdpChatServer.model.Constants;
 import UdpChatServer.util.JsonHelper;
 
 public class UdpChatClient {
+
     private static final Logger log = LoggerFactory.getLogger(UdpChatClient.class);
     private static final Gson gson = new Gson(); // For converting frequency map
 
@@ -77,6 +78,7 @@ public class UdpChatClient {
     private final ConcurrentHashMap<String, String> pendingServerActionsJson = new ConcurrentHashMap<>();
 
     private static class ClientPendingRequest {
+
         final String originalAction;
         final String originalSentJson;
         final CountDownLatch latch;
@@ -100,6 +102,7 @@ public class UdpChatClient {
     }
 
     private class MessageListener implements Runnable {
+
         @Override
         public void run() {
             byte[] receiveData = new byte[Constants.MAX_UDP_PACKET_SIZE];
@@ -173,14 +176,22 @@ public class UdpChatClient {
                     sendCharacterCount(decryptedJsonString, transactionId, receivePacket.getAddress(), receivePacket.getPort());
 
                 } catch (SocketException se) {
-                    if (running) log.error("Socket closed: {}", se.getMessage()); else log.info("Socket closed.");
+                    if (running) {
+                        log.error("Socket closed: {}", se.getMessage());
+                    } else {
+                        log.info("Socket closed.");
+                    }
                     running = false;
                 } catch (IOException e) { // Catch IOException specifically
-                    if (running) log.error("IOException receiving packet: {}", e.getMessage(), e);
+                    if (running) {
+                        log.error("IOException receiving packet: {}", e.getMessage(), e);
+                    }
                 } catch (JsonSyntaxException e) {
                     log.error("Failed to parse received JSON: {}", e.getMessage());
                 } catch (Exception e) { // Catch other potential runtime exceptions
-                    if (running) log.error("Unexpected error in listener loop: {}", e.getMessage(), e);
+                    if (running) {
+                        log.error("Unexpected error in listener loop: {}", e.getMessage(), e);
+                    }
                 }
             }
             log.info("Message listener thread stopped.");
@@ -193,7 +204,7 @@ public class UdpChatClient {
             return;
         }
         JsonObject data = response.getAsJsonObject(Constants.KEY_DATA);
-        
+
         if (!data.has("transaction_id") || !data.has(Constants.KEY_LETTER_FREQUENCIES) || !data.has(Constants.KEY_ORIGINAL_ACTION)) {
             log.error("Received CHARACTER_COUNT missing transaction_id, frequencies, or original_action within 'data'.");
             return;
@@ -229,11 +240,10 @@ public class UdpChatClient {
         if (tempIdToRemove != null) {
             pendingClientRequestsByTempId.remove(tempIdToRemove); // Remove from temp map
         } else {
-             log.warn("Could not find tempIdToRemove while processing CHARACTER_COUNT for tx {}", transactionId); // Should not happen if pendingReq was found
+            log.warn("Could not find tempIdToRemove while processing CHARACTER_COUNT for tx {}", transactionId); // Should not happen if pendingReq was found
         }
         pendingClientRequestsByServerId.put(transactionId, pendingReq); // Store by server ID
         log.info("Associated server tx ID {} with pending action {} (TempID: {})", transactionId, originalAction, tempIdToRemove);
-
 
         // Compare frequencies
         Map<Character, Integer> clientCalculatedFrequencies = CaesarCipher.countLetterFrequencies(pendingReq.originalSentJson);
@@ -242,9 +252,9 @@ public class UdpChatClient {
 
         if (!isValid) {
             log.warn("Frequency check failed for transaction: {}. Client: {}, Server: {}",
-                     transactionId, clientCalculatedFrequencies, serverFrequencies);
+                    transactionId, clientCalculatedFrequencies, serverFrequencies);
         } else {
-             log.info("Frequency check successful for transaction: {}", transactionId);
+            log.info("Frequency check successful for transaction: {}", transactionId);
         }
 
         // Send CONFIRM_COUNT back
@@ -264,7 +274,7 @@ public class UdpChatClient {
             return;
         }
         JsonObject data = response.getAsJsonObject(Constants.KEY_DATA);
-        
+
         if (!data.has("transaction_id") || !data.has(Constants.KEY_CONFIRM)) {
             log.error("Received CONFIRM_COUNT missing 'transaction_id' or 'confirm' field within 'data'.");
             return;
@@ -304,13 +314,13 @@ public class UdpChatClient {
             return;
         }
         String status = responseJson.get(Constants.KEY_STATUS).getAsString();
-        
+
         if (!responseJson.has(Constants.KEY_DATA)) {
             log.error("Received ACK missing 'data' object.");
             return;
         }
         JsonObject data = responseJson.getAsJsonObject(Constants.KEY_DATA);
-        
+
         if (!data.has("transaction_id")) {
             log.error("Received ACK missing 'transaction_id' field within 'data'.");
             return;
@@ -384,26 +394,30 @@ public class UdpChatClient {
         // If not found by server ID, try finding by original action in the temp map
         if (pendingReqToFail == null) {
             for (Map.Entry<String, ClientPendingRequest> entry : pendingClientRequestsByTempId.entrySet()) {
-                 if (entry.getValue().originalAction.equals(originalAction)) {
-                     pendingReqToFail = entry.getValue();
-                     tempIdToFail = entry.getKey();
-                     // If found here, it might already have a server ID associated
-                     serverIdToFail = pendingReqToFail.serverTransactionId;
-                     break;
-                 }
+                if (entry.getValue().originalAction.equals(originalAction)) {
+                    pendingReqToFail = entry.getValue();
+                    tempIdToFail = entry.getKey();
+                    // If found here, it might already have a server ID associated
+                    serverIdToFail = pendingReqToFail.serverTransactionId;
+                    break;
+                }
             }
         }
 
         if (pendingReqToFail != null) {
-             log.warn("Signaling failure for pending action {} due to server error.", originalAction);
-             pendingReqToFail.ackData = responseJson; // Store error info
-             pendingReqToFail.latch.countDown(); // Signal completion (as failure)
-             // Clean up from maps using the IDs we found
-             if (tempIdToFail != null) pendingClientRequestsByTempId.remove(tempIdToFail);
-             if (serverIdToFail != null) pendingClientRequestsByServerId.remove(serverIdToFail);
+            log.warn("Signaling failure for pending action {} due to server error.", originalAction);
+            pendingReqToFail.ackData = responseJson; // Store error info
+            pendingReqToFail.latch.countDown(); // Signal completion (as failure)
+            // Clean up from maps using the IDs we found
+            if (tempIdToFail != null) {
+                pendingClientRequestsByTempId.remove(tempIdToFail);
+            }
+            if (serverIdToFail != null) {
+                pendingClientRequestsByServerId.remove(serverIdToFail);
+            }
 
         } else {
-             log.warn("Could not find pending request for action '{}' to signal server error.", originalAction);
+            log.warn("Could not find pending request for action '{}' to signal server error.", originalAction);
         }
 
         System.out.print("> ");
@@ -418,15 +432,95 @@ public class UdpChatClient {
             String message = responseJson.has(Constants.KEY_MESSAGE) ? responseJson.get(Constants.KEY_MESSAGE).getAsString() : null;
             log.info("Processing confirmed server action: {}", action);
             switch (action) {
-                 case Constants.ACTION_LOGIN_SUCCESS: if (Constants.STATUS_SUCCESS.equals(status)) { JsonObject d=responseJson.getAsJsonObject(Constants.KEY_DATA); sessionKey=d.get(Constants.KEY_SESSION_KEY).getAsString(); currentChatId=d.get(Constants.KEY_CHAT_ID).getAsString(); System.out.println("\nLogin successful! (Session: "+sessionKey+")"); System.out.println("Type /help"); } else { System.out.println("\nLogin failed: "+message); } break;
-                 case Constants.ACTION_ROOM_CREATED: if (Constants.STATUS_SUCCESS.equals(status)) { JsonObject d=responseJson.getAsJsonObject(Constants.KEY_DATA); String r=d.get(Constants.KEY_ROOM_ID).getAsString(); System.out.println("\nRoom created! ID: "+r); System.out.println("Use: /send "+r+" <msg>"); } else { System.out.println("\nRoom creation failed: "+message); } break;
-                 case Constants.ACTION_RECEIVE_MESSAGE: if (Constants.STATUS_SUCCESS.equals(status)) { JsonObject d=responseJson.getAsJsonObject(Constants.KEY_DATA); String r=d.get(Constants.KEY_ROOM_ID).getAsString(); String s=d.get(Constants.KEY_SENDER_CHAT_ID).getAsString(); String c=d.get(Constants.KEY_CONTENT).getAsString(); String t=d.get(Constants.KEY_TIMESTAMP).getAsString(); String dt=t; try { dt=new SimpleDateFormat("HH:mm:ss").format(java.util.Date.from(Instant.parse(t))); } catch (Exception e){} System.out.printf("\n[%s] %s @ %s: %s\n",r,s,dt,c); } break;
-                 case Constants.ACTION_ROOMS_LIST: if (Constants.STATUS_SUCCESS.equals(status)) { JsonObject d=responseJson.getAsJsonObject(Constants.KEY_DATA); JsonArray r=d.getAsJsonArray("rooms"); System.out.println("\nYour rooms:"); if(r.size()==0)System.out.println("None."); else for(int i=0;i<r.size();i++)System.out.println((i+1)+". "+r.get(i).getAsString()); } else { System.out.println("\nFailed list rooms: "+message); } break;
-                 case Constants.ACTION_MESSAGES_LIST: if (Constants.STATUS_SUCCESS.equals(status)) { JsonObject d=responseJson.getAsJsonObject(Constants.KEY_DATA); String r=d.get("room_id").getAsString(); JsonArray m=d.getAsJsonArray("messages"); System.out.println("\nMsgs in "+r+":"); if(m.size()==0)System.out.println("None."); else for(JsonElement e:m){JsonObject o=e.getAsJsonObject(); String s=o.get("sender_chatid").getAsString(); String c=o.get("content").getAsString(); String t=o.get("timestamp").getAsString(); String dt=t; try { dt=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(java.util.Date.from(Instant.parse(t))); } catch (Exception ex){} System.out.printf("[%s] %s: %s\n",dt,s,c); } } else { System.out.println("\nFailed get msgs: "+message); } break;
-                 default: log.warn("Unhandled server action: {}", action); if (message!=null) System.out.println("\nServer msg: "+message); break;
+                case Constants.ACTION_LOGIN_SUCCESS:
+                    if (Constants.STATUS_SUCCESS.equals(status)) {
+                        JsonObject d = responseJson.getAsJsonObject(Constants.KEY_DATA);
+                        sessionKey = d.get(Constants.KEY_SESSION_KEY).getAsString();
+                        currentChatId = d.get(Constants.KEY_CHAT_ID).getAsString();
+                        System.out.println("\nLogin successful! (Session: " + sessionKey + ")");
+                        System.out.println("Type /help");
+                    } else {
+                        System.out.println("\nLogin failed: " + message);
+                    }
+                    break;
+                case Constants.ACTION_ROOM_CREATED:
+                    if (Constants.STATUS_SUCCESS.equals(status)) {
+                        JsonObject d = responseJson.getAsJsonObject(Constants.KEY_DATA);
+                        String r = d.get(Constants.KEY_ROOM_ID).getAsString();
+                        System.out.println("\nRoom created! ID: " + r);
+                        System.out.println("Use: /send " + r + " <msg>");
+                    } else {
+                        System.out.println("\nRoom creation failed: " + message);
+                    }
+                    break;
+                case Constants.ACTION_RECEIVE_MESSAGE:
+                    if (Constants.STATUS_SUCCESS.equals(status)) {
+                        JsonObject d = responseJson.getAsJsonObject(Constants.KEY_DATA);
+                        String r = d.get(Constants.KEY_ROOM_ID).getAsString();
+                        String s = d.get(Constants.KEY_SENDER_CHAT_ID).getAsString();
+                        String c = d.get(Constants.KEY_CONTENT).getAsString();
+                        String t = d.get(Constants.KEY_TIMESTAMP).getAsString();
+                        String dt = t;
+                        try {
+                            dt = new SimpleDateFormat("HH:mm:ss").format(java.util.Date.from(Instant.parse(t)));
+                        } catch (Exception e) {
+                        }
+                        System.out.printf("\n[%s] %s @ %s: %s\n", r, s, dt, c);
+                    }
+                    break;
+                case Constants.ACTION_ROOMS_LIST:
+                    if (Constants.STATUS_SUCCESS.equals(status)) {
+                        JsonObject d = responseJson.getAsJsonObject(Constants.KEY_DATA);
+                        JsonArray r = d.getAsJsonArray("rooms");
+                        System.out.println("\nYour rooms:");
+                        if (r.size() == 0) {
+                            System.out.println("None.");
+                        } else {
+                            for (int i = 0; i < r.size(); i++) {
+                                System.out.println((i + 1) + ". " + r.get(i).getAsString());
+                    
+                            }
+                        }} else {
+                        System.out.println("\nFailed list rooms: " + message);
+                    }
+                    break;
+                case Constants.ACTION_MESSAGES_LIST:
+                    if (Constants.STATUS_SUCCESS.equals(status)) {
+                        JsonObject d = responseJson.getAsJsonObject(Constants.KEY_DATA);
+                        String r = d.get("room_id").getAsString();
+                        JsonArray m = d.getAsJsonArray("messages");
+                        System.out.println("\nMsgs in " + r + ":");
+                        if (m.size() == 0) {
+                            System.out.println("None.");
+                        } else {
+                            for (JsonElement e : m) {
+                                JsonObject o = e.getAsJsonObject();
+                                String s = o.get("sender_chatid").getAsString();
+                                String c = o.get("content").getAsString();
+                                String t = o.get("timestamp").getAsString();
+                                String dt = t;
+                                try {
+                                    dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(java.util.Date.from(Instant.parse(t)));
+                                } catch (Exception ex) {
+                                }
+                                System.out.printf("[%s] %s: %s\n", dt, s, c);
+                            }
+                    
+                        }} else {
+                        System.out.println("\nFailed get msgs: " + message);
+                    }
+                    break;
+                default:
+                    log.warn("Unhandled server action: {}", action);
+                    if (message != null) {
+                        System.out.println("\nServer msg: " + message);
+                    
+                    }break;
             }
             System.out.print("> ");
-        } catch (Exception e) { log.error("Error processing server JSON: {}", e.getMessage(), e); }
+        } catch (Exception e) {
+            log.error("Error processing server JSON: {}", e.getMessage(), e);
+        }
     }
 
     private void sendCharacterCount(String receivedJsonString, String transactionId, InetAddress serverAddress, int serverPort) {
@@ -455,12 +549,15 @@ public class UdpChatClient {
             JsonHelper.sendPacket(socket, serverAddress, serverPort, request, sessionKey, log); // Use sessionKey
             log.info("Sent ACK for transaction: {} with status: {}", transactionId, status);
         } catch (Exception e) {
-             log.error("Error sending ACK for transaction {}: {}", transactionId, e.getMessage(), e);
+            log.error("Error sending ACK for transaction {}: {}", transactionId, e.getMessage(), e);
         }
     }
 
     private void login(String chatId, String password) {
-        if (sessionKey != null) { System.out.println("Already logged in!"); return; }
+        if (sessionKey != null) {
+            System.out.println("Already logged in!");
+            return;
+        }
         JsonObject data = new JsonObject();
         data.addProperty(Constants.KEY_CHAT_ID, chatId);
         data.addProperty(Constants.KEY_PASSWORD, password);
@@ -470,18 +567,34 @@ public class UdpChatClient {
     }
 
     private void createRoom(String[] participants) {
-        if (sessionKey == null) { System.out.println("Login first!"); return; }
-        if (participants == null || participants.length == 0) { System.out.println("Usage: /create <p1> [p2...]"); return; }
+        if (sessionKey == null) {
+            System.out.println("Login first!");
+            return;
+        }
+        if (participants == null || participants.length == 0) {
+            System.out.println("Usage: /create <p1> [p2...]");
+            return;
+        }
         JsonObject data = new JsonObject();
         data.addProperty(Constants.KEY_CHAT_ID, currentChatId);
-        JsonArray pa = new JsonArray(); for (String p : participants) pa.add(p.trim()); data.add(Constants.KEY_PARTICIPANTS, pa);
+        JsonArray pa = new JsonArray();
+        for (String p : participants) {
+            pa.add(p.trim());
+        
+        }data.add(Constants.KEY_PARTICIPANTS, pa);
         JsonObject request = JsonHelper.createRequest(Constants.ACTION_CREATE_ROOM, data);
         sendClientRequestWithAck(request, Constants.ACTION_CREATE_ROOM, sessionKey);
     }
 
     private void sendMessage(String roomId, String content) {
-        if (sessionKey == null) { System.out.println("Login first!"); return; }
-        if (roomId == null || roomId.trim().isEmpty() || content == null || content.isEmpty()) { System.out.println("Usage: /send <room> <msg>"); return; }
+        if (sessionKey == null) {
+            System.out.println("Login first!");
+            return;
+        }
+        if (roomId == null || roomId.trim().isEmpty() || content == null || content.isEmpty()) {
+            System.out.println("Usage: /send <room> <msg>");
+            return;
+        }
         JsonObject data = new JsonObject();
         data.addProperty(Constants.KEY_CHAT_ID, currentChatId);
         data.addProperty(Constants.KEY_ROOM_ID, roomId.trim());
@@ -491,18 +604,35 @@ public class UdpChatClient {
     }
 
     private void getRooms() {
-        if (sessionKey == null) { System.out.println("Login first!"); return; }
-        JsonObject data = new JsonObject(); data.addProperty(Constants.KEY_CHAT_ID, currentChatId);
+        if (sessionKey == null) {
+            System.out.println("Login first!");
+            return;
+        }
+        JsonObject data = new JsonObject();
+        data.addProperty(Constants.KEY_CHAT_ID, currentChatId);
         JsonObject request = JsonHelper.createRequest(Constants.ACTION_GET_ROOMS, data);
         sendClientRequestWithAck(request, Constants.ACTION_GET_ROOMS, sessionKey);
     }
 
     private void getMessages(String roomId, String timeOption) {
-        if (sessionKey == null) { System.out.println("Login first!"); return; }
-        if (roomId == null || roomId.trim().isEmpty()) { System.out.println("Usage: /msg <room> [time]"); return; }
-        JsonObject data = new JsonObject(); data.addProperty(Constants.KEY_CHAT_ID, currentChatId); data.addProperty(Constants.KEY_ROOM_ID, roomId.trim());
+        if (sessionKey == null) {
+            System.out.println("Login first!");
+            return;
+        }
+        if (roomId == null || roomId.trim().isEmpty()) {
+            System.out.println("Usage: /msg <room> [time]");
+            return;
+        }
+        JsonObject data = new JsonObject();
+        data.addProperty(Constants.KEY_CHAT_ID, currentChatId);
+        data.addProperty(Constants.KEY_ROOM_ID, roomId.trim());
         if (timeOption != null && !timeOption.isEmpty() && !timeOption.equalsIgnoreCase(TIME_OPTION_ALL)) {
-            String ft = parseTimeOption(timeOption); if (ft != null) data.addProperty("from_time", ft); else return;
+            String ft = parseTimeOption(timeOption);
+            if (ft != null) {
+                data.addProperty("from_time", ft);
+            } else {
+                return;
+            }
         }
         JsonObject request = JsonHelper.createRequest(Constants.ACTION_GET_MESSAGES, data);
         sendClientRequestWithAck(request, Constants.ACTION_GET_MESSAGES, sessionKey);
@@ -524,9 +654,8 @@ public class UdpChatClient {
             // and removed from there by handleServerAck. If not completed, it might still be in temp map.
             pendingClientRequestsByTempId.remove(tempId); // Ensure cleanup from temp map if timeout/error occurred before CHARACTER_COUNT
             if (pendingReq.serverTransactionId != null) {
-                 pendingClientRequestsByServerId.remove(pendingReq.serverTransactionId); // Ensure cleanup from main map
+                pendingClientRequestsByServerId.remove(pendingReq.serverTransactionId); // Ensure cleanup from main map
             }
-
 
             if (!completed) {
                 log.warn("Timeout waiting for server ACK for action: {} (TempID: {})", action, tempId);
@@ -541,60 +670,187 @@ public class UdpChatClient {
                         System.out.println("\nServer couldn't process request: " + serverMessage + " (Status: " + status + ")");
                     } else {
                         log.info("Action {} (TempID: {}) acknowledged successfully by server.", action, tempId);
-                        if (action.equals(Constants.ACTION_SEND_MESSAGE)) System.out.println("\nMessage sent successfully!");
+                        if (action.equals(Constants.ACTION_SEND_MESSAGE)) {
+                            System.out.println("\nMessage sent successfully!");
+                        }
                     }
                 } else {
-                     log.error("ACK received for action {} (TempID: {}) but status missing/invalid.", action, tempId);
-                     System.out.println("\nReceived invalid ACK from server.");
+                    log.error("ACK received for action {} (TempID: {}) but status missing/invalid.", action, tempId);
+                    System.out.println("\nReceived invalid ACK from server.");
                 }
             }
-        // Removed unreachable IOException catch block, as sendPacket handles it internally.
+            // Removed unreachable IOException catch block, as sendPacket handles it internally.
         } catch (InterruptedException e) {
-             log.warn("Interrupted waiting for ACK for {} (TempID: {})", action, tempId);
-             System.out.println("\nRequest interrupted.");
-             pendingClientRequestsByTempId.remove(tempId); // Cleanup
-             Thread.currentThread().interrupt();
+            log.warn("Interrupted waiting for ACK for {} (TempID: {})", action, tempId);
+            System.out.println("\nRequest interrupted.");
+            pendingClientRequestsByTempId.remove(tempId); // Cleanup
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
-             log.error("Unexpected error sending {} (TempID: {}): {}", action, tempId, e.getMessage(), e);
-             System.out.println("Error: " + e.getMessage());
-             pendingClientRequestsByTempId.remove(tempId); // Cleanup
+            log.error("Unexpected error sending {} (TempID: {}): {}", action, tempId, e.getMessage(), e);
+            System.out.println("Error: " + e.getMessage());
+            pendingClientRequestsByTempId.remove(tempId); // Cleanup
         } finally {
-             System.out.print("> ");
+            System.out.print("> ");
         }
     }
 
     private String parseTimeOption(String timeOption) {
         // (Logic remains the same)
-        if (timeOption == null) return null; timeOption = timeOption.trim().toLowerCase(); if (timeOption.equals(TIME_OPTION_ALL)) return null;
-        Pattern p = Pattern.compile("^(\\d+)(hours?|days?|weeks?)$"); Matcher m = p.matcher(timeOption);
+        if (timeOption == null) {
+            return null;
+        
+        }timeOption = timeOption.trim().toLowerCase();
+        if (timeOption.equals(TIME_OPTION_ALL)) {
+            return null;
+        }
+        Pattern p = Pattern.compile("^(\\d+)(hours?|days?|weeks?)$");
+        Matcher m = p.matcher(timeOption);
         Instant now = Instant.now(), from = null;
-        if (m.matches()) { try { int a = Integer.parseInt(m.group(1)); String u = m.group(2); if (u.startsWith("h")) from=now.minus(a,ChronoUnit.HOURS); else if (u.startsWith("d")) from=now.minus(a,ChronoUnit.DAYS); else if (u.startsWith("w")) from=now.minus(a*7,ChronoUnit.DAYS); } catch (NumberFormatException e){System.out.println("Invalid #: "+timeOption); return null;} }
-        else { try { from = Instant.parse(timeOption); } catch (Exception e1) { try { from = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(timeOption).toInstant(); } catch (Exception e2) { System.out.println("Invalid time format."); return null; } } }
+        if (m.matches()) {
+            try {
+                int a = Integer.parseInt(m.group(1));
+                String u = m.group(2);
+                if (u.startsWith("h")) {
+                    from = now.minus(a, ChronoUnit.HOURS);
+                } else if (u.startsWith("d")) {
+                    from = now.minus(a, ChronoUnit.DAYS);
+                } else if (u.startsWith("w")) {
+                    from = now.minus(a * 7, ChronoUnit.DAYS);
+            
+                }} catch (NumberFormatException e) {
+                System.out.println("Invalid #: " + timeOption);
+                return null;
+            }
+        } else {
+            try {
+                from = Instant.parse(timeOption);
+            } catch (Exception e1) {
+                try {
+                    from = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(timeOption).toInstant();
+                } catch (Exception e2) {
+                    System.out.println("Invalid time format.");
+                    return null;
+                }
+            }
+        }
         return from != null ? from.toString() : null;
     }
 
     private void showHelp() {
         // (Logic remains the same)
-        System.out.println("\nAvailable commands:"); System.out.println(CMD_LOGIN_DESC); System.out.println(CMD_CREATE_ROOM_DESC); System.out.println(CMD_SEND_DESC); System.out.println(CMD_LIST_ROOMS_DESC); System.out.println(CMD_LIST_MESSAGES_DESC); System.out.println("  Time options: '12"+TIME_OPTION_HOURS+"', '7"+TIME_OPTION_DAYS+"', '3"+TIME_OPTION_WEEKS+"', '"+TIME_OPTION_ALL+"', or ISO/yyyy-MM-dd HH:mm:ss"); System.out.println(CMD_HELP_DESC); System.out.println(CMD_EXIT_DESC); System.out.print("> ");
+        System.out.println("\nAvailable commands:");
+        System.out.println(CMD_LOGIN_DESC);
+        System.out.println(CMD_CREATE_ROOM_DESC);
+        System.out.println(CMD_SEND_DESC);
+        System.out.println(CMD_LIST_ROOMS_DESC);
+        System.out.println(CMD_LIST_MESSAGES_DESC);
+        System.out.println("  Time options: '12" + TIME_OPTION_HOURS + "', '7" + TIME_OPTION_DAYS + "', '3" + TIME_OPTION_WEEKS + "', '" + TIME_OPTION_ALL + "', or ISO/yyyy-MM-dd HH:mm:ss");
+        System.out.println(CMD_HELP_DESC);
+        System.out.println(CMD_EXIT_DESC);
+        System.out.print("> ");
     }
 
     public void start() {
         // (Logic remains the same)
-        listenerThread = new Thread(new MessageListener(), "ClientListener"); listenerThread.setDaemon(true); listenerThread.start(); showHelp();
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(System.in))) { String l; while (running && (l=r.readLine())!=null) { String cl=l.trim(); if(cl.isEmpty()){System.out.print("> ");continue;} String[] p=cl.split("\\s+",2); String cmd=p[0].toLowerCase(); String args=p.length>1?p[1]:""; switch(cmd){ case CMD_LOGIN: String[] la=args.split("\\s+",2); if(la.length!=2)System.out.println("Usage: /login <id> <pw>"); else login(la[0],la[1]); break; case CMD_CREATE_ROOM: if(args.isEmpty())System.out.println("Usage: /create <p1> [p2...]"); else createRoom(args.split("\\s+")); break; case CMD_SEND: String[] sa=args.split("\\s+",2); if(sa.length!=2)System.out.println("Usage: /send <room> <msg>"); else sendMessage(sa[0],sa[1]); break; case CMD_LIST_ROOMS: getRooms(); break; case CMD_LIST_MESSAGES: String[] ma=args.split("\\s+",2); if(ma.length<1||ma[0].isEmpty())System.out.println("Usage: /msg <room> [time]"); else getMessages(ma[0],ma.length>1?ma[1]:TIME_OPTION_ALL); break; case CMD_HELP: showHelp(); break; case CMD_EXIT: System.out.println("Exiting..."); running=false; break; default: System.out.println("Invalid command. /help"); System.out.print("> "); break; } } }
-        catch (IOException e) { log.error("Input error: {}", e.getMessage()); } finally { cleanup(); }
+        listenerThread = new Thread(new MessageListener(), "ClientListener");
+        listenerThread.setDaemon(true);
+        listenerThread.start();
+        showHelp();
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(System.in))) {
+            String l;
+            while (running && (l = r.readLine()) != null) {
+                String cl = l.trim();
+                if (cl.isEmpty()) {
+                    System.out.print("> ");
+                    continue;
+                }
+                String[] p = cl.split("\\s+", 2);
+                String cmd = p[0].toLowerCase();
+                String args = p.length > 1 ? p[1] : "";
+                switch (cmd) {
+                    case CMD_LOGIN:
+                        String[] la = args.split("\\s+", 2);
+                        if (la.length != 2) {
+                            System.out.println("Usage: /login <id> <pw>");
+                        } else {
+                            login(la[0], la[1]);
+                        
+                        }break;
+                    case CMD_CREATE_ROOM:
+                        if (args.isEmpty()) {
+                            System.out.println("Usage: /create <p1> [p2...]");
+                        } else {
+                            createRoom(args.split("\\s+"));
+                        
+                        }break;
+                    case CMD_SEND:
+                        String[] sa = args.split("\\s+", 2);
+                        if (sa.length != 2) {
+                            System.out.println("Usage: /send <room> <msg>");
+                        } else {
+                            sendMessage(sa[0], sa[1]);
+                        
+                        }break;
+                    case CMD_LIST_ROOMS:
+                        getRooms();
+                        break;
+                    case CMD_LIST_MESSAGES:
+                        String[] ma = args.split("\\s+", 2);
+                        if (ma.length < 1 || ma[0].isEmpty()) {
+                            System.out.println("Usage: /msg <room> [time]");
+                        } else {
+                            getMessages(ma[0], ma.length > 1 ? ma[1] : TIME_OPTION_ALL);
+                        
+                        }break;
+                    case CMD_HELP:
+                        showHelp();
+                        break;
+                    case CMD_EXIT:
+                        System.out.println("Exiting...");
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("Invalid command. /help");
+                        System.out.print("> ");
+                        break;
+                }
+            }
+        } catch (IOException e) {
+            log.error("Input error: {}", e.getMessage());
+        } finally {
+            cleanup();
+        }
     }
 
     private void cleanup() {
         // (Logic remains the same)
-        running = false; if (socket != null && !socket.isClosed()) socket.close(); log.info("Client closed."); System.out.println("\nClient connection closed.");
+        running = false;
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
+        
+        }log.info("Client closed.");
+        System.out.println("\nClient connection closed.");
     }
 
     private Map<Character, Integer> parseFrequencyJson(JsonObject freqJson) {
-        Map<Character, Integer> map = new ConcurrentHashMap<>(); if (freqJson != null) { for (Map.Entry<String, JsonElement> entry : freqJson.entrySet()) { if (entry.getKey().length() == 1) { try { map.put(entry.getKey().charAt(0), entry.getValue().getAsInt()); } catch (Exception e) { log.warn("Invalid freq value {}: {}", entry.getKey(), entry.getValue()); } } } } return map;
+        Map<Character, Integer> map = new ConcurrentHashMap<>();
+        if (freqJson != null) {
+            for (Map.Entry<String, JsonElement> entry : freqJson.entrySet()) {
+                if (entry.getKey().length() == 1) {
+                    try {
+                        map.put(entry.getKey().charAt(0), entry.getValue().getAsInt());
+                    } catch (Exception e) {
+                        log.warn("Invalid freq value {}: {}", entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+        return map;
     }
 
-    private boolean areFrequenciesEqual(Map<Character, Integer> map1, Map<Character, Integer> map2) { return map1 != null && map1.equals(map2); }
+    private boolean areFrequenciesEqual(Map<Character, Integer> map1, Map<Character, Integer> map2) {
+        return map1 != null && map1.equals(map2);
+    }
 
     // public static void main(String[] args) {
     //     // (Logic remains the same)
