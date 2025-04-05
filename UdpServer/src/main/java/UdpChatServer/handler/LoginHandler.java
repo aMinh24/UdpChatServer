@@ -74,7 +74,7 @@ public class LoginHandler {
                 JsonObject replyJson = JsonHelper.createReply(
                     Constants.ACTION_LOGIN_SUCCESS,
                     Constants.STATUS_SUCCESS,
-                    "Login successful. Confirm receipt.",
+                    "Login successful. Confirm receipt. gui tin nhan",
                     replyData
                 );
 
