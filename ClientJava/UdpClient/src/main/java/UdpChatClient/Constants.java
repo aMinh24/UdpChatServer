@@ -1,4 +1,4 @@
-package UdpChatServer.model;
+package UdpChatClient;
 
 public final class Constants {
 
@@ -24,7 +24,6 @@ public final class Constants {
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_DATA = "data";
     public static final String KEY_CHAT_ID = "chatid";
-    public static final String KEY_TRANSACTION_ID = "transaction_id";
 
     // Login Action
     public static final String KEY_PASSWORD = "password";
@@ -33,8 +32,7 @@ public final class Constants {
     // Room Creation
     public static final String KEY_PARTICIPANTS = "participants"; // List of chatids to add to room
     public static final String KEY_ROOM_ID = "room_id";
-    public static final String KEY_ROOM_NAME = "room_name"; // Add room name key
-    
+
     // Send Message Action
     public static final String KEY_CONTENT = "content";
     public static final String KEY_SENDER_CHAT_ID = "sender_chatid";
@@ -47,10 +45,6 @@ public final class Constants {
 
     // --- Action Values ---
     public static final String ACTION_LOGIN = "login";
-    public static final String ACTION_REGISTER = "register"; // Hành động đăng ký
-    public static final String ACTION_REGISTER_SUCCESS = "register_success"; // Phản hồi đăng ký thành công
-    public static final String ACTION_GET_USERS = "get_users"; // Hành động lấy danh sách người dùng
-    public static final String ACTION_USERS_LIST = "users_list"; // Phản hồi danh sách người dùng
     public static final String ACTION_CREATE_ROOM = "create_room";
     public static final String ACTION_GET_ROOMS = "get_rooms"; // Thêm action xem danh sách room
     public static final String ACTION_GET_MESSAGES = "get_messages"; // Thêm action xem tin nhắn
@@ -69,22 +63,6 @@ public final class Constants {
     public static final String ACTION_ACK = "ack";                         // Server -> Client (final step for Client->Server flow) OR Client -> Server (final step for Server->Client flow)
     // Note: ACTION_CONFIRM_MESSAGE is removed as the new flow uses ACTION_CONFIRM_COUNT
     // Note: ACTION_MESSAGE_CONFIRMED_BY_SERVER is removed/replaced by the new flow steps
-
-    // Room management actions
-    public static final String ACTION_ADD_USER_TO_ROOM = "add_user_to_room";
-    public static final String ACTION_REMOVE_USER_FROM_ROOM = "remove_user_from_room";
-    public static final String ACTION_DELETE_ROOM = "delete_room";
-    public static final String ACTION_RENAME_ROOM = "rename_room";
-    
-    // Room user list action
-    public static final String ACTION_GET_ROOM_USERS = "get_room_users";
-    public static final String ACTION_ROOM_USERS_LIST = "room_users_list";
-
-    // Room management replies
-    public static final String ACTION_USER_ADDED = "user_added";
-    public static final String ACTION_USER_REMOVED = "user_removed";
-    public static final String ACTION_ROOM_DELETED = "room_deleted";
-    public static final String ACTION_ROOM_RENAMED = "room_renamed";
 
     // --- Status Values ---
     public static final String STATUS_SUCCESS = "success";
@@ -109,19 +87,6 @@ public final class Constants {
     public static final String ERROR_MSG_PENDING_ACTION_NOT_FOUND = "No pending action found for this confirmation/ack.";
     public static final String ERROR_MSG_INVALID_STATE = "Invalid state for current action.";
 
-    public static final String MSG_ACTION_SUCCESS = "Action processed successfully.";
-    public static final String MSG_ACTION_FAILED = "Action failed to process.";
-    public static final String MSG_ACTION_CANCELLED = "Action cancelled by the user.";
-    public static final String MSG_ACTION_PENDING = "Action is pending confirmation.";
-
-    // --- File Transfer Constants ---
-    public static final int FILE_TRANSFER_SERVER_PORT = 9877; // Port for file transfer server
-    public static final String PACKET_DELIMITER = "|:|";
-    public static final String CMD_SEND_INIT = "SEND_INIT";
-    public static final String CMD_SEND_DATA = "SEND_DATA";
-    public static final String CMD_SEND_FIN = "SEND_FIN";
-    public static final String CMD_LIST_REQ = "LIST_REQ";
-    public static final String CMD_DOWNLOAD_REQ = "DOWNLOAD_REQ";
 
     // --- Other ---
     public static final long SESSION_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
