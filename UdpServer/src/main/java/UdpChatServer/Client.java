@@ -10,18 +10,29 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import UdpChatServer.model.Constants;
 
 public class Client {
+
+    private static final Logger log = LoggerFactory.getLogger(Client.class);
 
     private static final int SERVER_PORT = 9877; // File transfer server port
     private static final String SERVER_ADDRESS = "localhost"; // Change if server is on a different machine
@@ -59,7 +70,8 @@ public class Client {
             System.err.println("Error creating client storage directory: " + e.getMessage());
             // Decide if the client should exit or continue without guaranteed storage
         }
-        System.out.println("Client '" + clientName + "' started. Sending to Server at " + SERVER_ADDRESS + ":" + SERVER_PORT);
+        System.out.println(
+                "Client '" + clientName + "' started. Sending to Server at " + SERVER_ADDRESS + ":" + SERVER_PORT);
     }
 
     public void startConsole() {
@@ -88,9 +100,6 @@ public class Client {
 
             try {
                 switch (command) {
-                    case "test":
-                        sendPacket("TEST");
-                        break;
                     case "send":
                         if (parts.length == 3) {
                             String recipient = parts[1];
@@ -136,7 +145,6 @@ public class Client {
         }
     }
 
-    // Runs in a separate thread to listen for incoming packets from the server
     private void receivePackets() {
         byte[] receiveBuffer = new byte[BUFFER_SIZE];
         while (!socket.isClosed()) {
@@ -164,76 +172,67 @@ public class Client {
 
     private void handleReceivedPacket(DatagramPacket packet) {
         try {
-            String receivedData = new String(packet.getData(), 0, packet.getLength()).trim();
-            String[] parts = receivedData.split(Pattern.quote(PACKET_DELIMITER), 2);
-            if (parts.length < 1) {
-                return; // Ignore invalid packets
-            }
-            String command = parts[0];
-            String payload = (parts.length > 1) ? parts[1] : "";
+            byte[] receivedData = packet.getData();
+            int receivedLength = packet.getLength();
+            String jsonString = new String(receivedData, 0, receivedLength, StandardCharsets.UTF_8);
+            JsonObject responseJson = JsonParser.parseString(jsonString).getAsJsonObject();
+            String action = responseJson.get(Constants.KEY_ACTION).getAsString();
+            String status;
+            String message;
 
-            switch (command) {
-                case "SEND_FIN_RESP":
-                    String[] finParts = payload.split(Pattern.quote(PACKET_DELIMITER));
-                    System.out.println("\n" + finParts[1]);
-                    System.out.print("> ");
-                    break;
-                case "SEND_INIT_RESP":
-                    String[] respParts = payload.split(Pattern.quote(PACKET_DELIMITER));
-                    if (respParts.length >= 2) {
-                        serverAccepted = respParts[0].equals("OK");
-                        if (serverAccepted) {
-                            System.out.println("\nServer accepted file transfer: " + respParts[1]);
-                        } else {
-                            System.err.println("\nServer rejected file transfer: " + respParts[1]);
-                        }
-                        waitingForResponse = false;  // Signal that we got the response
+            log.info("Processing confirmed server action: {}", action);
+
+            switch (action) {
+                case Constants.ACTION_FILE_INIT:
+                    status = responseJson.get(Constants.KEY_STATUS).getAsString();
+                    if (status.equals(Constants.STATUS_SUCCESS)) {
+                        serverAccepted = true;
+                        System.out.println("Server accepted file transfer request.");
+                    } else {
+                        System.err.println("Server rejected file transfer request.");
                     }
+                    waitingForResponse = false;
                     System.out.print("> ");
                     break;
-                case "LIST_RESP":
+                case Constants.ACTION_FILE_FIN:
+                    message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
+                    System.out.println("\nReceived FIN from Server: " + message);
+                    break;
+                case Constants.ACTION_LIST_REQ:
+                    message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
                     System.out.println("\nFiles available for you on the server:");
-                    System.out.println("  " + payload);
-                    System.out.print("> "); // Prompt again
+                    System.out.println(" " + message);
+                    System.out.print("> ");
                     break;
-                case "DOWNLOAD_RESP_META":
-                    // Format: filename|:|filesize|:|totalpackets
-                    handleDownloadMeta(payload);
+                case Constants.ACTION_FILE_DOWN:
+                    handleDownloadMeta(responseJson);
                     break;
-                case "DOWNLOAD_RESP_DATA":
-                    // Format: filename|:|seqnum|:|DATA_BYTES
-                    handleDownloadData(payload, packet.getData(), packet.getLength());
-                    break;
-                case "DOWNLOAD_RESP_FIN":
-                    // Format: filename
-                    handleDownloadFin(payload);
-                    break;
-                case "DOWNLOAD_ERR":
-                    System.err.println("\nServer download error: " + payload);
-                    System.out.print("> "); // Prompt again
-                    // Clean up any partial download state if necessary
-                    String filenameWithError = extractFilenameFromErrorPayload(payload); // Need a helper
-                    if (filenameWithError != null) {
-                        incomingDownloads.remove(filenameWithError);
-                        downloadStates.remove(filenameWithError);
+                case Constants.ACTION_DOWN_REQ:
+                    status = responseJson.get(Constants.KEY_STATUS).getAsString();
+                    if (status.equals(Constants.STATUS_ERROR)) {
+                        message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
+                        System.out.println(message);
                     }
                     break;
-                // Handle other potential server responses if needed (e.g., ACKs)
+                case Constants.ACTION_FILE_DATA:
+                    handleDownloadData(responseJson);
+                    break;
+                case Constants.ACTION_DOWN_FIN:
+                    status = responseJson.get(Constants.KEY_STATUS).getAsString();
+                    if (status.equals(Constants.STATUS_ERROR)) {
+                        message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
+                        System.out.println(message);
+                    } else {
+                        handleDownloadFin(responseJson);
+                    }
+                    break;
                 default:
-                    System.out.println("\nReceived unknown response from server: " + command);
-                    System.out.print("> "); // Prompt again
+                    System.err.println("Received unknown response from server: " + jsonString);
+                    break;
             }
         } catch (Exception e) {
             System.err.println("Error handling received packet: " + e.getMessage());
         }
-    }
-
-    // Helper to attempt extracting filename if an error occurs mid-download
-    private String extractFilenameFromErrorPayload(String payload) {
-        // This is heuristic. Assumes filename might be mentioned.
-        // A better approach is if server includes filename in error messages.
-        // For now, just return null, requiring manual cleanup or timeout handling.
-        return null;
     }
 
     private void sendFile(String recipient, String filepath) throws IOException {
@@ -256,18 +255,22 @@ public class Client {
         if (fileSize == 0) {
             totalPackets = 0; // Handle empty file case
         }
-        System.out.println("Preparing to send file '" + file.getName() + "' (" + fileSize + " bytes) to " + recipient + " in " + totalPackets + " packets.");
+        System.out.println("Preparing to send file '" + file.getName() + "' (" + fileSize + " bytes) to " + recipient
+                + " in " + totalPackets + " packets.");
 
         // 1. Send INIT packet
         waitingForResponse = true;
         serverAccepted = false;
 
-        String initPayload = "SEND_INIT" + PACKET_DELIMITER
-                + clientName + PACKET_DELIMITER
-                + recipient + PACKET_DELIMITER
-                + file.getName() + PACKET_DELIMITER
-                + fileSize + PACKET_DELIMITER
-                + totalPackets;
+        JsonObject initJson = new JsonObject();
+        initJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_INIT);
+        JsonObject dataJson = new JsonObject();
+        dataJson.addProperty("client_name", clientName);
+        dataJson.addProperty("recipient", recipient);
+        dataJson.addProperty("file_name", file.getName());
+        dataJson.addProperty("file_size", fileSize);
+        dataJson.addProperty("total_packets", totalPackets);
+        initJson.add(Constants.KEY_DATA, dataJson);
 
         // Add retries for INIT
         int retries = 0;
@@ -275,7 +278,7 @@ public class Client {
             waitingForResponse = true;
             serverAccepted = false;
 
-            sendPacket(initPayload);
+            sendPacket(initJson);
             System.out.println("Sent INIT packet (attempt " + (retries + 1) + "/" + MAX_RETRIES + ")");
 
             // Wait for response
@@ -320,16 +323,21 @@ public class Client {
 
             while ((bytesRead = fis.read(dataBuffer)) != -1) {
                 sequenceNumber++;
-                String dataHeader = "SEND_DATA" + PACKET_DELIMITER
-                        + clientName + PACKET_DELIMITER
-                        + recipient + PACKET_DELIMITER
-                        + file.getName() + PACKET_DELIMITER
-                        + sequenceNumber + PACKET_DELIMITER;
 
-                byte[] headerBytes = dataHeader.getBytes();
-                byte[] packetBytes = new byte[headerBytes.length + bytesRead];
-                System.arraycopy(headerBytes, 0, packetBytes, 0, headerBytes.length);
-                System.arraycopy(dataBuffer, 0, packetBytes, headerBytes.length, bytesRead);
+                String base64Data = Base64.getEncoder().encodeToString(Arrays.copyOf(dataBuffer, bytesRead));
+                JsonObject dataPacketJson = new JsonObject();
+                dataPacketJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_DATA);
+                JsonObject dataDataJson = new JsonObject();
+                dataDataJson.addProperty("client_name", clientName);
+                dataDataJson.addProperty("recipient", recipient);
+                dataDataJson.addProperty("file_name", file.getName());
+                dataDataJson.addProperty("sequence_number", sequenceNumber);
+                dataDataJson.addProperty("chunk_size", bytesRead);
+                dataDataJson.addProperty("file_data", base64Data);
+                dataPacketJson.add(Constants.KEY_DATA, dataDataJson);
+
+                String jsonHeaderString = dataPacketJson.toString();
+                byte[] packetBytes = jsonHeaderString.getBytes(StandardCharsets.UTF_8);
 
                 // Add retry logic for each data packet
                 boolean packetSent = false;
@@ -337,7 +345,8 @@ public class Client {
 
                 while (!packetSent && retries < MAX_RETRIES) {
                     try {
-                        DatagramPacket dataPacket = new DatagramPacket(packetBytes, packetBytes.length, serverAddress, SERVER_PORT);
+                        DatagramPacket dataPacket = new DatagramPacket(packetBytes, packetBytes.length, serverAddress,
+                                SERVER_PORT);
                         socket.send(dataPacket);
                         packetSent = true;
                         totalBytesSent += bytesRead;
@@ -354,7 +363,8 @@ public class Client {
                             System.err.println("Error sending packet " + sequenceNumber + ", retrying...");
                             Thread.sleep(RETRY_DELAY_MS);
                         } else {
-                            throw new IOException("Failed to send packet " + sequenceNumber + " after " + MAX_RETRIES + " attempts");
+                            throw new IOException(
+                                    "Failed to send packet " + sequenceNumber + " after " + MAX_RETRIES + " attempts");
                         }
                     }
                 }
@@ -371,60 +381,61 @@ public class Client {
 
         } catch (Exception e) {
             System.err.println("Error during file transfer: " + e.getMessage());
-            // Send abort notification
-            String abortPayload = "SEND_ABORT" + PACKET_DELIMITER + clientName + PACKET_DELIMITER + file.getName();
-            sendPacket(abortPayload);
             return;
         }
 
         // 3. Send FIN with retry
+        JsonObject finJson = new JsonObject();
+        finJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_FIN);
+        JsonObject finDataJson = new JsonObject();
+        finDataJson.addProperty("client_name", clientName);
+        finDataJson.addProperty("recipient", recipient);
+        finDataJson.addProperty("file_name", file.getName());
+        finJson.add(Constants.KEY_DATA, finDataJson);
+
         retries = 0;
-        String finPayload = "SEND_FIN" + PACKET_DELIMITER + clientName + PACKET_DELIMITER + recipient + PACKET_DELIMITER + file.getName();
 
         while (retries < MAX_RETRIES) {
-            try {
-                sendPacket(finPayload);
-                System.out.println("Sent FIN packet (attempt " + (retries + 1) + "/" + MAX_RETRIES + ")");
-                break;
-            } catch (IOException e) {
-                retries++;
-                if (retries < MAX_RETRIES) {
-                    System.err.println("Error sending FIN, retrying...");
-                } else {
-                    System.err.println("Failed to send FIN packet after " + MAX_RETRIES + " attempts");
-                }
-            }
+            sendPacket(finJson);
+            System.out.println("Sent FIN packet (attempt " + (retries + 1) + "/" + MAX_RETRIES + ")");
+            break;
         }
     }
 
     private void requestFileList() throws IOException {
+        JsonObject listReqJson = new JsonObject();
+        listReqJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_LIST_REQ);
+        JsonObject dataJson = new JsonObject();
+        dataJson.addProperty("client_name", clientName);
+        listReqJson.add(Constants.KEY_DATA, dataJson);
+
         System.out.println("Requesting file list from server...");
-        String requestPayload = "LIST_REQ" + PACKET_DELIMITER + clientName;
-        sendPacket(requestPayload);
-        // Response will be handled by the receiver thread
+        sendPacket(listReqJson);
     }
 
     private void requestDownload(String filename) throws IOException {
+        JsonObject downReqJson = new JsonObject();
+        downReqJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_DOWN_REQ);
+        JsonObject dataJson = new JsonObject();
+        dataJson.addProperty("client_name", clientName);
+        dataJson.addProperty("file_name", filename);
+        downReqJson.add(Constants.KEY_DATA, dataJson);
+
         System.out.println("Requesting download of file: " + filename);
-        String requestPayload = "DOWNLOAD_REQ" + PACKET_DELIMITER + clientName + PACKET_DELIMITER + filename;
-        sendPacket(requestPayload);
+        sendPacket(downReqJson);
         // Response and data transfer handled by receiver thread
     }
 
     // Format: filename|:|filesize|:|totalpackets
-    private void handleDownloadMeta(String payload) {
+    private void handleDownloadMeta(JsonObject responseJson) {
         try {
-            String[] parts = payload.split(Pattern.quote(PACKET_DELIMITER));
-            if (parts.length != 3) {
-                System.err.println("\nInvalid DOWNLOAD_RESP_META format: " + payload);
-                System.out.print("> ");
-                return;
-            }
-            String filename = parts[0];
-            long fileSize = Long.parseLong(parts[1]);
-            int totalPackets = Integer.parseInt(parts[2]);
+            JsonObject dataJson = responseJson.getAsJsonObject(Constants.KEY_DATA);
+            String filename = dataJson.get("file_name").getAsString();
+            long fileSize = dataJson.get("file_size").getAsLong();
+            int totalPackets = dataJson.get("total_packets").getAsInt();
 
-            System.out.println("\nStarting download for '" + filename + "' (" + fileSize + " bytes, " + totalPackets + " packets).");
+            System.out.println("\nStarting download for '" + filename + "' (" + fileSize + " bytes, " + totalPackets
+                    + " packets).");
             System.out.print("> ");
 
             // Prepare to receive chunks
@@ -432,7 +443,7 @@ public class Client {
             downloadStates.put(filename, new FileDownloadState(filename, fileSize, totalPackets));
 
         } catch (NumberFormatException e) {
-            System.err.println("\nError parsing download metadata: " + payload + " - " + e.getMessage());
+            System.err.println("\nError parsing download metadata: " + e.getMessage());
             System.out.print("> ");
         } catch (Exception e) {
             System.err.println("\nError processing download metadata: " + e.getMessage());
@@ -441,68 +452,69 @@ public class Client {
     }
 
     // Format: filename|:|seqnum|:|DATA_BYTES
-    private void handleDownloadData(String metadataPayload, byte[] rawPacketData, int packetLength) {
+    private void handleDownloadData(JsonObject responseJson) {
         try {
-            String[] parts = metadataPayload.split(Pattern.quote(PACKET_DELIMITER));
-            if (parts.length < 3) { // filename|:|seqnum minimum
-                System.err.println("Invalid DOWNLOAD_RESP_DATA format (metadata): " + metadataPayload);
-                return;
-            }
-            String filename = parts[0];
-            int sequenceNumber = Integer.parseInt(parts[1]);
+            System.out.println(responseJson);
+            JsonObject dataJson = responseJson.getAsJsonObject(Constants.KEY_DATA);
+            String filename = dataJson.get("file_name").getAsString();
+            int sequenceNumber = dataJson.get("sequence_number").getAsInt();
+            String base64Data = dataJson.get("file_data").getAsString();
+            int chunkSize = dataJson.get("chunk_size").getAsInt();
+            byte[] dataChunk = Base64.getDecoder().decode(base64Data);
 
             ConcurrentSkipListMap<Integer, byte[]> chunks = incomingDownloads.get(filename);
             FileDownloadState state = downloadStates.get(filename);
 
             if (chunks != null && state != null) {
-                // Calculate where data starts
-                String metadataHeader = "DOWNLOAD_RESP_DATA" + PACKET_DELIMITER + metadataPayload.substring(0, metadataPayload.lastIndexOf(PACKET_DELIMITER) + PACKET_DELIMITER.length());
-                int metadataLength = metadataHeader.getBytes().length; // Use default charset
-
-                if (packetLength <= metadataLength) {
-                    System.err.println("DOWNLOAD_RESP_DATA packet has no data payload for seq " + sequenceNumber);
-                    return;
-                }
-
-                byte[] dataChunk = Arrays.copyOfRange(rawPacketData, metadataLength, packetLength);
                 chunks.put(sequenceNumber, dataChunk);
                 state.incrementReceivedPackets();
 
                 // Optional: Print progress
                 if (state.getReceivedPackets() % 50 == 0 || state.getReceivedPackets() == state.getTotalPackets()) {
-                    System.out.println("\nReceived packet " + state.getReceivedPackets() + "/" + state.getTotalPackets() + " for " + filename);
+                    System.out.println("\nReceived packet " + state.getReceivedPackets() + "/" + state.getTotalPackets()
+                            + " for " + filename);
                     System.out.print("> ");
                 }
 
             } else {
-                // Might receive data before META or after FIN due to UDP reordering/loss, ignore if state isn't ready
-                System.err.println("Received data chunk for unknown or completed download: " + filename + " seq " + sequenceNumber);
+                // Might receive data before META or after FIN due to UDP reordering/loss,
+                // ignore if state isn't ready
+                System.err.println("Received data chunk for unknown or completed download: " + filename + " seq "
+                        + sequenceNumber);
             }
         } catch (NumberFormatException e) {
-            System.err.println("Error parsing DOWNLOAD_RESP_DATA sequence number: " + metadataPayload + " - " + e.getMessage());
+            System.err.println(
+                    "Error parsing DOWNLOAD_RESP_DATA sequence number: " + e.getMessage());
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error processing DOWNLOAD_RESP_DATA packet structure: " + metadataPayload + " - " + e.getMessage());
+            System.err.println("Error processing DOWNLOAD_RESP_DATA packet structure: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Error handling download data chunk: " + e.getMessage());
         }
     }
 
     // Format: filename
-    private void handleDownloadFin(String filename) {
+    private void handleDownloadFin(JsonObject responseJson) {
+        JsonObject dataJson = responseJson.getAsJsonObject(Constants.KEY_DATA);
+        String filename = dataJson.get("file_name").getAsString();
+
         System.out.println("\nReceived FIN for download: " + filename);
 
         ConcurrentSkipListMap<Integer, byte[]> chunks = incomingDownloads.remove(filename);
         FileDownloadState state = downloadStates.remove(filename);
 
         if (chunks == null || state == null) {
-            System.err.println("Received FIN for '" + filename + "', but download was not in progress or already completed/failed.");
+            System.err.println("Received FIN for '" + filename
+                    + "', but download was not in progress or already completed/failed.");
             System.out.print("> ");
             return;
         }
 
         if (chunks.size() != state.getTotalPackets()) {
-            System.err.println("Warning: Download finished for '" + filename + "', but received " + chunks.size() + " packets instead of expected " + state.getTotalPackets() + ". File might be incomplete due to packet loss.");
-            // Decide whether to save the incomplete file or discard it. Let's save it with a warning.
+            System.err.println("Warning: Download finished for '" + filename + "', but received " + chunks.size()
+                    + " packets instead of expected " + state.getTotalPackets()
+                    + ". File might be incomplete due to packet loss.");
+            // Decide whether to save the incomplete file or discard it. Let's save it with
+            // a warning.
         } else {
             System.out.println("All expected packets received for '" + filename + "'. Assembling file...");
         }
@@ -516,11 +528,16 @@ public class Client {
                 totalBytesWritten += entry.getValue().length;
             }
             fos.flush();
-            System.out.println("File '" + filename + "' downloaded successfully (" + totalBytesWritten + " bytes) to " + clientStorageDir);
+            System.out.println("File '" + filename + "' downloaded successfully (" + totalBytesWritten + " bytes) to "
+                    + clientStorageDir);
 
-            // Verify size if possible (may differ slightly if last packet wasn't full but still counted)
-            if (totalBytesWritten != state.getExpectedSize() && state.getTotalPackets() > 0) { // Only warn if not an empty file download
-                System.out.println("Note: Final file size (" + totalBytesWritten + ") differs slightly from expected size (" + state.getExpectedSize() + "). This might be normal depending on chunking.");
+            // Verify size if possible (may differ slightly if last packet wasn't full but
+            // still counted)
+            if (totalBytesWritten != state.getExpectedSize() && state.getTotalPackets() > 0) { // Only warn if not an
+                                                                                               // empty file download
+                System.out.println(
+                        "Note: Final file size (" + totalBytesWritten + ") differs slightly from expected size ("
+                                + state.getExpectedSize() + "). This might be normal depending on chunking.");
             } else if (state.getTotalPackets() == 0 && totalBytesWritten == 0) {
                 System.out.println("Empty file '" + filename + "' downloaded successfully.");
             }
@@ -535,10 +552,15 @@ public class Client {
         }
     }
 
-    private void sendPacket(String payload) throws IOException {
-        byte[] sendData = payload.getBytes(); // Use default platform encoding
-        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, SERVER_PORT);
-        socket.send(sendPacket);
+    private void sendPacket(JsonObject payloadJson) {
+        try {
+            String payloadString = payloadJson.toString();
+            byte[] sendData = payloadString.getBytes(StandardCharsets.UTF_8);
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, SERVER_PORT);
+            socket.send(sendPacket);
+        } catch (IOException e) {
+            System.err.println("Error sending packet to " + serverAddress + ":" + SERVER_PORT + " - " + e.getMessage());
+        }
     }
 
     // Inner class to track download state
@@ -579,19 +601,6 @@ public class Client {
             return;
         }
         String clientName = args[0];
-
-        // JsonObject testJson = new JsonObject();
-        // testJson.addProperty("action", "test");
-        // testJson.addProperty("client_name", clientName);
-
-        // // Tạo data object
-        // JsonObject data = new JsonObject();
-        // data.addProperty("message", "Hello from " + clientName);
-        // testJson.add("data", data);
-
-        // // Convert to string và gửi
-        // String jsonString = testJson.toString();
-        // System.out.println(jsonString);
 
         try {
             Client client = new Client(clientName);

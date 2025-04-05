@@ -2,56 +2,50 @@ package UdpChatServer.handler.file;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.regex.Pattern;
+
+import com.google.gson.JsonObject;
 
 import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.model.Constants;
 
 public class FileDataHandler extends SendFileHandler {
     public FileDataHandler(UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO, DatagramSocket socket) {
         super(userDAO, roomDAO, fileDAO, socket);
     }
 
-    public void handleSendData(String metadataPayload, byte[] rawPacketData, int packetLength,
-            InetAddress clientAddress, int clientPort) {
+    public void handleSendData(JsonObject jsonPacket, InetAddress clientAddress, int clientPort) {
         try {
-            String[] parts = metadataPayload.split(Pattern.quote(PACKET_DELIMITER));
-            if (parts.length < 5) { // Check minimum parts before data
-                System.err.println("Invalid SEND_DATA format (metadata): " + metadataPayload);
-                return;
-            }
-            String sender = parts[0];
-            String receiver = parts[1];
-            String filename = parts[2];
-            int sequenceNumber = Integer.parseInt(parts[3]);
+            JsonObject dataJson = jsonPacket.getAsJsonObject(Constants.KEY_DATA);
+            String sender = dataJson.get("client_name").getAsString();
+            String receiver = dataJson.get("recipient").getAsString();
+            String filename = dataJson.get("file_name").getAsString();
+            int sequenceNumber = dataJson.get("sequence_number").getAsInt();
+            int chunkSize = dataJson.get("chunk_size").getAsInt();
+            String base64Data = dataJson.get("file_data").getAsString();
+            byte[] dataChunk = Base64.getDecoder().decode(base64Data);
 
             String fileIdentifier = sender + "_" + receiver + "_" + filename;
-
-            // Calculate where data starts
-            String metadataHeader = "SEND_DATA" + PACKET_DELIMITER + metadataPayload.substring(0, metadataPayload.lastIndexOf(PACKET_DELIMITER) + PACKET_DELIMITER.length());
-            int metadataLength = metadataHeader.getBytes().length;
-
-            if (packetLength <= metadataLength) {
-                System.err.println("SEND_DATA packet has no data payload for seq " + sequenceNumber);
-                return;
-            }
-
-            byte[] dataChunk = Arrays.copyOfRange(rawPacketData, metadataLength, packetLength);
 
             ConcurrentSkipListMap<Integer, byte[]> chunks = incomingFileChunks.get(fileIdentifier);
             if (chunks != null) {
                 chunks.put(sequenceNumber, dataChunk);
-                // System.out.println("DEBUG: Received chunk " + sequenceNumber + " for " + fileIdentifier); // Verbose debug
+                System.out.println("Received chunk " + sequenceNumber + " for " + fileIdentifier + 
+                    " (size: " + dataChunk.length + " bytes)");
             } else {
                 System.err.println("Received data chunk for unknown/uninitialized file transfer: " + fileIdentifier);
             }
-        } catch (NumberFormatException e) {
-            System.err.println("Error parsing SEND_DATA sequence number: " + metadataPayload + " - " + e.getMessage());
+
+            if (chunks != null) {
+                chunks.put(sequenceNumber, dataChunk);
+            } else {
+                System.err.println("Received data chunk for unknown/uninitialized file transfer: " + fileIdentifier);
+            }
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error processing SEND_DATA packet structure: " + metadataPayload + " - " + e.getMessage());
+            System.err.println(e.getMessage());
         } catch (Exception e) {
             System.err.println("Error in handleSendData: " + e.getMessage());
         }

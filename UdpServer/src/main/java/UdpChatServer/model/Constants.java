@@ -117,11 +117,13 @@ public final class Constants {
     // --- File Transfer Constants ---
     public static final int FILE_TRANSFER_SERVER_PORT = 9877; // Port for file transfer server
     public static final String PACKET_DELIMITER = "|:|";
-    public static final String CMD_SEND_INIT = "SEND_INIT";
-    public static final String CMD_SEND_DATA = "SEND_DATA";
-    public static final String CMD_SEND_FIN = "SEND_FIN";
-    public static final String CMD_LIST_REQ = "LIST_REQ";
-    public static final String CMD_DOWNLOAD_REQ = "DOWNLOAD_REQ";
+    public static final String ACTION_FILE_INIT = "file_init";
+    public static final String ACTION_FILE_DATA = "file_data";
+    public static final String ACTION_FILE_FIN = "file_fin";
+    public static final String ACTION_LIST_REQ = "list_req";
+    public static final String ACTION_DOWN_REQ = "down_req";
+    public static final String ACTION_DOWN_FIN= "down_fin";
+    public static final String ACTION_FILE_DOWN = "file_down";
 
     // --- Other ---
     public static final long SESSION_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes

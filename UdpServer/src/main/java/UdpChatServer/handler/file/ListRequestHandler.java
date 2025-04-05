@@ -5,9 +5,12 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gson.JsonObject;
+
 import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.model.Constants;
 import UdpChatServer.model.FileMetaData;
 
 public class ListRequestHandler extends SendFileHandler {
@@ -15,7 +18,10 @@ public class ListRequestHandler extends SendFileHandler {
         super(userDAO, roomDAO, fileDAO, socket);
     } 
 
-    public void handleListRequest(String clientName, InetAddress clientAddress, int clientPort) {
+    public void handleListRequest(JsonObject jsonPacket, InetAddress clientAddress, int clientPort) {
+        JsonObject dataJson = jsonPacket.getAsJsonObject(Constants.KEY_DATA);
+        String clientName = dataJson.get("client_name").getAsString();
+
         System.out.println("Received LIST request from client: " + clientName);
         List<FileMetaData> files = filesForClients.getOrDefault(clientName, Collections.emptyList());
 
@@ -32,8 +38,9 @@ public class ListRequestHandler extends SendFileHandler {
             }
         }
 
-        String responsePayload = "LIST_RESP" + PACKET_DELIMITER + fileListStr.toString();
-        sendPacket(responsePayload, clientAddress, clientPort);
+        JsonObject responseJson = jsonPacket;
+        responseJson.addProperty(Constants.KEY_MESSAGE, fileListStr.toString());
+        sendPacket(responseJson, clientAddress, clientPort);
         System.out.println("Sent file list to " + clientName + ": " + (files.isEmpty() ? "None" : fileListStr.toString()));
     } 
 }

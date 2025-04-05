@@ -5,18 +5,19 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.RoomDAO;
@@ -26,7 +27,6 @@ import UdpChatServer.handler.file.FileDownloadHandler;
 import UdpChatServer.handler.file.FileFinHandler;
 import UdpChatServer.handler.file.FileInitHandler;
 import UdpChatServer.handler.file.ListRequestHandler;
-import UdpChatServer.handler.file.SendFileHandler;
 import UdpChatServer.model.Constants;
 
 public class FileTransferServer {
@@ -45,8 +45,10 @@ public class FileTransferServer {
     private FileInitHandler fileInitHandler;
     private ListRequestHandler listRequestHandler;
 
-    public FileTransferServer(Properties config, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO) throws SocketException {
-        int port = Integer.parseInt(config.getProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT)));
+    public FileTransferServer(Properties config, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO)
+            throws SocketException {
+        int port = Integer
+                .parseInt(config.getProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT)));
         String storageDir = config.getProperty("file.storage.dir", "server_storage");
 
         this.userDAO = userDAO;
@@ -109,59 +111,38 @@ public class FileTransferServer {
 
     private void handlePacket(DatagramPacket packet) {
         try {
-            String receivedData = new String(packet.getData(), 0, packet.getLength()).trim();
-            String[] parts = receivedData.split(Pattern.quote(Constants.PACKET_DELIMITER), 2);
+            byte[] receivedData = packet.getData();
+            int receivedLength = packet.getLength();
+            String jsonString = new String(receivedData, 0, receivedLength, StandardCharsets.UTF_8);
+            JsonObject jsonPacket = JsonParser.parseString(jsonString).getAsJsonObject();
+            String action = jsonPacket.get(Constants.KEY_ACTION).getAsString();
 
-            if (parts.length < 1) {
-                log.warn("Received invalid packet format from {}:{}",
-                        packet.getAddress(), packet.getPort());
-                return;
-            }
-
-            String command = parts[0];
-            String payload = (parts.length > 1) ? parts[1] : "";
             InetAddress clientAddress = packet.getAddress();
             int clientPort = packet.getPort();
 
-            switch (command) {
-                case "TEST":
-                    JsonObject testJson = new JsonObject();
-                    testJson.addProperty("action", "test");
-                    testJson.addProperty("client_name", "clientName");
-
-                    // Tạo data object
-                    JsonObject data = new JsonObject();
-                    data.addProperty("message", "Hello from " + "clientName");
-                    testJson.add("data", data);
-
-                    // Convert to string và gửi
-                    String jsonString = testJson.toString();
-                    System.out.println(jsonString);
-                    SendFileHandler handler = new SendFileHandler(userDAO, roomDAO, fileDAO, socket);
-                    handler.test(clientAddress, clientPort);
-                    break;
-                case Constants.CMD_SEND_INIT:
+            switch (action) {
+                case Constants.ACTION_FILE_INIT:
                     fileInitHandler = new FileInitHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileInitHandler.handleSendInit(payload, clientAddress, clientPort);
+                    fileInitHandler.handleSendInit(jsonPacket, clientAddress, clientPort);
                     break;
-                case Constants.CMD_SEND_DATA:
+                case Constants.ACTION_FILE_DATA:
                     fileDataHandler = new FileDataHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileDataHandler.handleSendData(payload, packet.getData(), packet.getLength(), clientAddress, clientPort);
+                    fileDataHandler.handleSendData(jsonPacket, clientAddress, clientPort);
                     break;
-                case Constants.CMD_SEND_FIN:
+                case Constants.ACTION_FILE_FIN:
                     fileFinHandler = new FileFinHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileFinHandler.handleSendFin(payload, clientAddress, clientPort);
+                    fileFinHandler.handleSendFin(jsonPacket, clientAddress, clientPort);
                     break;
-                case Constants.CMD_LIST_REQ:
+                case Constants.ACTION_LIST_REQ:
                     listRequestHandler = new ListRequestHandler(userDAO, roomDAO, fileDAO, socket);
-                    listRequestHandler.handleListRequest(payload, clientAddress, clientPort);
+                    listRequestHandler.handleListRequest(jsonPacket, clientAddress, clientPort);
                     break;
-                case Constants.CMD_DOWNLOAD_REQ:
+                case Constants.ACTION_DOWN_REQ:
                     fileDownloadHandler = new FileDownloadHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileDownloadHandler.handleDownloadRequest(payload, clientAddress, clientPort);
+                    fileDownloadHandler.handleDownloadRequest(jsonPacket, clientAddress, clientPort);
                     break;
                 default:
-                    log.warn("Unknown command received: {}", command);
+                    log.warn("Unknown command received: {}", jsonString);
             }
         } catch (Exception e) {
             log.error("Error handling packet from {}:{} - {}",

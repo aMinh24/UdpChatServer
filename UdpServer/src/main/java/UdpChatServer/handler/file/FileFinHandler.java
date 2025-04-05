@@ -10,11 +10,13 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Pattern;
+
+import com.google.gson.JsonObject;
 
 import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.model.Constants;
 import UdpChatServer.model.File;
 import UdpChatServer.model.FileMetaData;
 
@@ -23,20 +25,13 @@ public class FileFinHandler extends SendFileHandler {
         super(userDAO, roomDAO, fileDAO, socket);
     }
 
-    public void handleSendFin(String payload, InetAddress clientAddress, int clientPort) {
+    public void handleSendFin(JsonObject jsonPacket, InetAddress clientAddress, int clientPort) {
         try {
-            String[] parts = payload.split(Pattern.quote(PACKET_DELIMITER));
-            if (parts.length != 3) {
-                System.err.println("Invalid SEND_FIN format: " + payload);
-                // Gửi phản hồi lỗi format
-                sendPacket("SEND_FIN_RESP" + PACKET_DELIMITER + "ERROR" + PACKET_DELIMITER
-                        + "Invalid format", clientAddress, clientPort);
-                return;
-            }
+            JsonObject dataJson = jsonPacket.getAsJsonObject(Constants.KEY_DATA);
+            String sender = dataJson.get("client_name").getAsString();
+            String receiver = dataJson.get("recipient").getAsString();
+            String filename = dataJson.get("file_name").getAsString();
 
-            String sender = parts[0];
-            String receiver = parts[1];
-            String filename = parts[2];
             String fileIdentifier = sender + "_" + receiver + "_" + filename;
 
             System.out.println("Received FIN for file '" + filename + "' from " + sender
@@ -47,8 +42,10 @@ public class FileFinHandler extends SendFileHandler {
                 System.err.println("Received FIN for file '" + filename
                         + "', but no chunks were received or already processed.");
                 // Gửi phản hồi lỗi không có chunks
-                sendPacket("SEND_FIN_RESP" + PACKET_DELIMITER + "ERROR" + PACKET_DELIMITER
-                        + "No file chunks found", clientAddress, clientPort);
+                JsonObject responJson = jsonPacket;
+                responJson.addProperty(Constants.KEY_MESSAGE, "No chunks received");
+                responJson.addProperty(Constants.KEY_STATUS, Constants.STATUS_ERROR);
+                sendPacket(responJson, clientAddress, clientPort);
                 return;
             }
 
@@ -67,13 +64,14 @@ public class FileFinHandler extends SendFileHandler {
                 // Add file metadata for the recipient client
                 FileMetaData metaData = new FileMetaData(filename, totalBytesWritten,
                         filePath.toString());
-                filesForClients.computeIfAbsent(receiver, k
-                        -> new CopyOnWriteArrayList<>()).add(metaData);
+                filesForClients.computeIfAbsent(receiver, k -> new CopyOnWriteArrayList<>()).add(metaData);
 
                 // Gửi phản hồi thành công
-                sendPacket("SEND_FIN_RESP" + PACKET_DELIMITER + "OK" + PACKET_DELIMITER
-                        + "File assembled successfully: " + totalBytesWritten + " bytes",
-                        clientAddress, clientPort);
+                JsonObject responJson = jsonPacket;
+                responJson.addProperty(Constants.KEY_MESSAGE,
+                        "File assembled successfully: " + totalBytesWritten + " bytes");
+                responJson.addProperty(Constants.KEY_STATUS, Constants.STATUS_SUCCESS);
+                sendPacket(responJson, clientAddress, clientPort);
 
                 System.out.println("File '" + filename + "' is now available for client '"
                         + receiver + "'");
@@ -88,8 +86,10 @@ public class FileFinHandler extends SendFileHandler {
                     System.err.println("Error deleting partial file: " + ex.getMessage());
                 }
                 // Gửi phản hồi lỗi khi ghi file
-                sendPacket("SEND_FIN_RESP" + PACKET_DELIMITER + "ERROR" + PACKET_DELIMITER
-                        + "Error writing file: " + e.getMessage(), clientAddress, clientPort);
+                JsonObject responJson = jsonPacket;
+                responJson.addProperty(Constants.KEY_MESSAGE, "Error writing file: " + e.getMessage());
+                responJson.addProperty(Constants.KEY_STATUS, Constants.STATUS_ERROR);
+                sendPacket(responJson, clientAddress, clientPort);
             }
 
             // TODO: Fix room here
@@ -100,8 +100,10 @@ public class FileFinHandler extends SendFileHandler {
         } catch (Exception e) {
             System.err.println("Error in handleSendFin: " + e.getMessage());
             // Gửi phản hồi lỗi chung
-            sendPacket("SEND_FIN_RESP" + PACKET_DELIMITER + "ERROR" + PACKET_DELIMITER
-                    + "Server error", clientAddress, clientPort);
+            JsonObject responJson = jsonPacket;
+            responJson.addProperty(Constants.KEY_MESSAGE, "Server error");
+            responJson.addProperty(Constants.KEY_STATUS, Constants.STATUS_ERROR);
+            sendPacket(responJson, clientAddress, clientPort);
         }
     }
 }
