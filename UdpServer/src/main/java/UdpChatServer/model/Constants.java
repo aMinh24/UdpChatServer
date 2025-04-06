@@ -116,7 +116,21 @@ public final class Constants {
     public static final String MSG_ACTION_CANCELLED = "Action cancelled by the user.";
     public static final String MSG_ACTION_PENDING = "Action is pending confirmation.";
 
+    // --- File Transfer Constants ---
+    public static final int FILE_TRANSFER_SERVER_PORT = 9877; // Port for file transfer server
+    public static final String PACKET_DELIMITER = "|:|";
+    public static final String ACTION_FILE_INIT = "file_init";
+    public static final String ACTION_FILE_DATA = "file_data";
+    public static final String ACTION_FILE_FIN = "file_fin";
+    public static final String ACTION_LIST_REQ = "list_req";
+    public static final String ACTION_DOWN_REQ = "down_req";
+    public static final String ACTION_DOWN_FIN= "down_fin";
+    public static final String ACTION_FILE_DOWN = "file_down";
 
+    // --- File Transfer Storage ---
+    public static final String STORAGE_DIR = "server_storage";
+    public static final int BUFFER_SIZE = 1024 * 64;
+    public static final int DATA_CHUNK_SIZE = 1024 * 32;
 
     // --- Other ---
     public static final long SESSION_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes

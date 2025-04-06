@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implements the Caesar Cipher algorithm for basic encryption/decryption.
- * Note: Caesar cipher is very weak and should NOT be used for serious security.
- * It's included here based on the initial requirements.
+ * This implementation works with all UTF-8 characters.
+ * Note: Applying Caesar shift directly to Unicode code points can be problematic,
+ * especially for characters outside the Basic Multilingual Plane (like emojis),
+ * as it might result in invalid code points or unintended character changes if shift != 0.
  */
 public class CaesarCipher {
 
@@ -29,6 +31,7 @@ public class CaesarCipher {
         }
         int shift = keyString.length(); // Use key length as shift value
         log.info("---------------Encrypting with shift: {}", shift);
+        // WARNING: If shift is non-zero, this might corrupt multi-byte characters/emojis
         return processText(plainText, shift);
     }
 
@@ -48,6 +51,7 @@ public class CaesarCipher {
         int shift = keyString.length(); // Use key length as shift value
         log.info("---------------Decrypting with shift: {}", shift);
         // Decryption is encryption with the negative shift
+        // WARNING: If shift is non-zero, this might corrupt multi-byte characters/emojis
         return processText(cipherText, -shift);
     }
 
@@ -62,6 +66,11 @@ public class CaesarCipher {
     private static String processText(String text, int shift) {
         log.info("Processing text: {}", text);
         if (text == null || text.isEmpty()) return text;
+        if(text!=null) return text;
+        // !! IMPORTANT !!
+        // If you uncomment the line below (shift = 0;), Caesar cipher is effectively disabled.
+        // If you keep the actual shift, be aware of the risks with Unicode code points.
+        // shift = 0; // Uncomment this if you DON'T want actual encryption/decryption
         
         StringBuilder result = new StringBuilder();
         int i = 0;
@@ -73,10 +82,12 @@ public class CaesarCipher {
             int newCodePoint = codePoint + shift;
             
             // Check if the new code point is valid
-            if (Character.isValidCodePoint(newCodePoint)) {
+            if (isValidCodePoint(newCodePoint)) {
                 result.appendCodePoint(newCodePoint);
             } else {
                 // If not valid, keep the original character
+                log.debug("Shift resulted in invalid codepoint ({}) for original ({}). Keeping original.", 
+                         newCodePoint, codePoint);
                 result.appendCodePoint(codePoint);
             }
             
@@ -84,7 +95,20 @@ public class CaesarCipher {
             i += Character.charCount(codePoint);
         }
         
+        log.debug("Processed text result: \"{}\"", result.toString());
         return result.toString();
+    }
+
+    /**
+     * Checks if a given integer is a valid Unicode code point
+     * (excludes surrogate block U+D800 to U+DFFF)
+     * 
+     * @param codePoint The code point to check
+     * @return true if the code point is valid, false otherwise
+     */
+    private static boolean isValidCodePoint(int codePoint) {
+        return codePoint >= 0 && codePoint <= 0x10FFFF && // Within the valid Unicode range
+               !(codePoint >= 0xD800 && codePoint <= 0xDFFF); // Not a surrogate code point
     }
 
     /**

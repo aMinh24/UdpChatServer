@@ -7,8 +7,38 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
-        <exec.mainClass>UdpChatServer.ServerMain</exec.mainClass> <!-- Updated main class -->
+        <!-- <exec.mainClass>UdpChatServer.ServerMain</exec.mainClass> -->
     </properties>
+
+    <profiles>
+        <profile>
+            <id>chat-server</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <exec.mainClass>UdpChatServer.ServerMain</exec.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>file-server</id>
+            <properties>
+                <exec.mainClass>UdpChatServer.FileTransferServer</exec.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>file-client</id>
+            <properties>
+                <exec.mainClass>UdpChatServer.UdpChatClient</exec.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>client</id>
+            <properties>
+                <exec.mainClass>UdpChatServer.Client</exec.mainClass>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencies>
         <!-- MySQL Database Connector -->
