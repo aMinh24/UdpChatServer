@@ -1,5 +1,4 @@
 package UdpChatClient.command;
-
 import com.google.gson.JsonObject;
 
 import UdpChatClient.ClientState;
