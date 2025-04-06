@@ -23,6 +23,7 @@ import UdpChatServer.model.Constants;
 import UdpChatServer.model.FileMetaData;
 
 public class FileDownloadHandler extends SendFileHandler {
+
     public FileDownloadHandler(UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO, DatagramSocket socket) {
         super(userDAO, roomDAO, fileDAO, socket);
     }
@@ -73,11 +74,10 @@ public class FileDownloadHandler extends SendFileHandler {
         }
     }
 
-    private void sendFileToClient(FileMetaData meta, Path filePath,
-            InetAddress clientAddress, int clientPort) {
+    private void sendFileToClient(FileMetaData meta, Path filePath, InetAddress clientAddress, int clientPort) {
         try (FileInputStream fis = new FileInputStream(filePath.toFile())) {
             long fileSize = meta.getFileSize();
-            int totalPackets = (int) Math.ceil((double) fileSize / DATA_CHUNK_SIZE);
+            int totalPackets = (int) Math.ceil((double) fileSize / Constants.DATA_CHUNK_SIZE);
 
             // 1. Send Meta Packet
             JsonObject responseJson = new JsonObject();
@@ -93,7 +93,7 @@ public class FileDownloadHandler extends SendFileHandler {
             Thread.sleep(10); // Small delay
 
             // 2. Send Data Packets
-            byte[] dataBuffer = new byte[DATA_CHUNK_SIZE];
+            byte[] dataBuffer = new byte[Constants.DATA_CHUNK_SIZE];
             int bytesRead;
             int sequenceNumber = 0;
 
@@ -110,15 +110,13 @@ public class FileDownloadHandler extends SendFileHandler {
                 dataDataJson.addProperty("file_data", base64Data);
                 dataPacketJson.add(Constants.KEY_DATA, dataDataJson);
 
-                System.out.println(dataPacketJson.toString());
-
                 String jsonHeaderString = dataPacketJson.toString();
                 byte[] packetBytes = jsonHeaderString.getBytes(StandardCharsets.UTF_8);
 
                 DatagramPacket dataPacket = new DatagramPacket(packetBytes, packetBytes.length, clientAddress,
                         clientPort);
                 socket.send(dataPacket);
-                Thread.sleep(500); // Small delay to avoid overwhelming the receiver buffer (basic rate control)
+                Thread.sleep(1); // Giảm delay xuống 1ms
             }
 
             // 3. Send Fin Packet

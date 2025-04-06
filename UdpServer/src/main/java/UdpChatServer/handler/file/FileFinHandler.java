@@ -50,7 +50,7 @@ public class FileFinHandler extends SendFileHandler {
             }
 
             // Assemble the file
-            Path filePath = Paths.get(STORAGE_DIR, filename);
+            Path filePath = Paths.get(Constants.STORAGE_DIR, filename);
             long totalBytesWritten = 0;
             try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
                 for (byte[] chunk : chunks.values()) {
@@ -59,7 +59,7 @@ public class FileFinHandler extends SendFileHandler {
                 }
                 fos.flush();
                 System.out.println("File '" + filename + "' assembled successfully ("
-                        + totalBytesWritten + " bytes) in " + STORAGE_DIR);
+                        + totalBytesWritten + " bytes) in " + Constants.STORAGE_DIR);
 
                 // Add file metadata for the recipient client
                 FileMetaData metaData = new FileMetaData(filename, totalBytesWritten,
