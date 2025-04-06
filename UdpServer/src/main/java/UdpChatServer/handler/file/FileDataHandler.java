@@ -38,12 +38,6 @@ public class FileDataHandler extends SendFileHandler {
             } else {
                 System.err.println("Received data chunk for unknown/uninitialized file transfer: " + fileIdentifier);
             }
-
-            if (chunks != null) {
-                chunks.put(sequenceNumber, dataChunk);
-            } else {
-                System.err.println("Received data chunk for unknown/uninitialized file transfer: " + fileIdentifier);
-            }
         } catch (ArrayIndexOutOfBoundsException e) {
             System.err.println(e.getMessage());
         } catch (Exception e) {
