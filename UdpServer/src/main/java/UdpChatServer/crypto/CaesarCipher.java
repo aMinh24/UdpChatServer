@@ -90,8 +90,8 @@ public class CaesarCipher {
     }
 
     /**
-     * Counts the frequency of each character in a string, treating surrogate pairs 
-     * as single characters and using the same approach as the Dart client.
+     * Counts the frequency of each character in a string, skipping surrogate pairs
+     * that typically represent emoji and special characters.
      *
      * @param text The string to analyze.
      * @return A map with characters as keys and their frequencies as values.
@@ -108,22 +108,15 @@ public class CaesarCipher {
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
             
-            // Check if this is part of a surrogate pair
+            // Check if this is part of a surrogate pair (emoji or special character)
             if (Character.isHighSurrogate(c) && 
                 i + 1 < text.length() && 
                 Character.isLowSurrogate(text.charAt(i + 1))) {
-                // For surrogate pairs, we count them as one character
-                // but we don't try to combine them since Map<Character, Integer>
-                // can only store BMP characters
-                frequencies.put(c, frequencies.getOrDefault(c, 0) + 1);
-                
-                // Also count the low surrogate
-                char lowSurrogate = text.charAt(i + 1);
-                frequencies.put(lowSurrogate, frequencies.getOrDefault(lowSurrogate, 0) + 1);
-                
+                // Skip surrogate pairs (emoji and special characters)
                 i++; // Skip the low surrogate
             } else {
-                // Regular character
+                // Regular character - count it
+                // This includes ASCII and Vietnamese characters with diacritical marks
                 frequencies.put(c, frequencies.getOrDefault(c, 0) + 1);
             }
         }
