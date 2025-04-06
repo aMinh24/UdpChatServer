@@ -325,7 +325,9 @@ public class HandshakeManager {
 
     public void sendClientRequestWithAck(JsonObject request, String action, String encryptionKey) {
         String tempId = UUID.randomUUID().toString();
+        System.out.println("\nSending action: " + action + " (TempID: " + tempId + ")");
         String jsonToSend = gson.toJson(request);
+        System.out.println("---------------------"+jsonToSend);
         ClientPendingRequest pendingReq = new ClientPendingRequest(action, jsonToSend);
         pendingClientRequestsByTempId.put(tempId, pendingReq);
 
