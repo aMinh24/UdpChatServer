@@ -79,9 +79,7 @@ public final class JsonHelper {
             log.info("Received raw encrypted string: {}", encryptedString); // Can be noisy
 
             // Decrypt using Caesar cipher
-            System.out.println("--------------*****-------------Decrypting with key: " + encryptedString); // Debugging line
             String decryptedJsonString = CaesarCipher.decrypt(encryptedString, keyString);
-            System.out.println("--------------*****-------------Decrypted string: " + decryptedJsonString); // Debugging line
             if (decryptedJsonString == null) {
                  log.error("Decryption returned null for packet from {}:{} with key length {}", packet.getAddress().getHostAddress(), packet.getPort(), keyString.length());
                  return null; // Decryption failed critically

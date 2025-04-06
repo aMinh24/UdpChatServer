@@ -108,3 +108,4 @@ public class ServerMain {
         return props;
     }
 }
+// mvn exec:java

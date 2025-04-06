@@ -16,15 +16,18 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-// Import DAOs and Managers
 import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.handler.CreateRoomHandler;
+import UdpChatServer.handler.GetUsersHandler;
+import UdpChatServer.handler.LoginHandler; // Import all handlers
+import UdpChatServer.handler.RegisterHandler;
+import UdpChatServer.handler.RoomManagementHandler;
+import UdpChatServer.handler.RoomMessageHandler;
+import UdpChatServer.handler.SendMessageHandler;
 import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.manager.RoomManager;
-// Import Handlers
-import UdpChatServer.handler.*; // Import all handlers
-// Import Models and Utils
 import UdpChatServer.model.Constants;
 import UdpChatServer.model.PendingMessageInfo;
 import UdpChatServer.util.JsonHelper;
@@ -70,7 +73,7 @@ public class UdpRequestHandler implements Runnable {
         this.udpSender = new UdpSender(this.socket, this.sessionManager);
 
         // Initialize all handlers, passing dependencies (including udpSender)
-        this.loginHandler = new LoginHandler(this.userDAO, this.sessionManager, this.udpSender);
+        this.loginHandler = new LoginHandler(this.userDAO, this.roomDAO, this.messageDAO, this.sessionManager, this.udpSender);
         this.registerHandler = new RegisterHandler(this.userDAO, this.udpSender);
         this.sendMessageHandler = new SendMessageHandler(this.sessionManager, this.roomManager, this.messageDAO, this.roomDAO, this.udpSender);
         this.createRoomHandler = new CreateRoomHandler(this.sessionManager, this.roomManager, this.roomDAO, this.userDAO, this.socket); // Needs socket? Check handler impl. Assuming yes for now.
