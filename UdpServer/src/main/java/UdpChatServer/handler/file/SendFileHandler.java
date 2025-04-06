@@ -30,11 +30,6 @@ public class SendFileHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendFileHandler.class);
 
-    protected static final int BUFFER_SIZE = 1024 * 4;
-    protected static final int DATA_CHUNK_SIZE = BUFFER_SIZE - 100;
-    protected static final String STORAGE_DIR = "server_storage";
-    protected static final String PACKET_DELIMITER = "|:|";
-
     protected final UserDAO userDAO;
     protected final RoomDAO roomDAO;
     protected final FileDAO fileDAO;

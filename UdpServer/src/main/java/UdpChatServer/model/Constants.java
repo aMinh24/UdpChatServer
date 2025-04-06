@@ -125,6 +125,11 @@ public final class Constants {
     public static final String ACTION_DOWN_FIN= "down_fin";
     public static final String ACTION_FILE_DOWN = "file_down";
 
+    // --- File Transfer Storage ---
+    public static final String STORAGE_DIR = "server_storage";
+    public static final int BUFFER_SIZE = 1024 * 64;
+    public static final int DATA_CHUNK_SIZE = 1024 * 32;
+
     // --- Other ---
     public static final long SESSION_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
     public static final long SESSION_MAX_INACTIVE_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes

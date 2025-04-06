@@ -36,9 +36,6 @@ public class Client {
 
     private static final int SERVER_PORT = 9877; // File transfer server port
     private static final String SERVER_ADDRESS = "localhost"; // Change if server is on a different machine
-    private static final int BUFFER_SIZE = 1024 * 4; // Must match server's buffer size for receiving
-    private static final int DATA_CHUNK_SIZE = BUFFER_SIZE - 100; // Data part size, matches server calculation
-    private static final String PACKET_DELIMITER = "|:|";
     private static final int TIMEOUT_MS = 5000; // Socket timeout for receiving responses (e.g., 5 seconds)
     private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 1000;
@@ -146,7 +143,7 @@ public class Client {
     }
 
     private void receivePackets() {
-        byte[] receiveBuffer = new byte[BUFFER_SIZE];
+        byte[] receiveBuffer = new byte[Constants.BUFFER_SIZE];
         while (!socket.isClosed()) {
             try {
                 DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
@@ -179,8 +176,6 @@ public class Client {
             String action = responseJson.get(Constants.KEY_ACTION).getAsString();
             String status;
             String message;
-
-            log.info("Processing confirmed server action: {}", action);
 
             switch (action) {
                 case Constants.ACTION_FILE_INIT:
@@ -247,7 +242,7 @@ public class Client {
         }
 
         long fileSize = file.length();
-        int totalPackets = (int) Math.ceil((double) fileSize / DATA_CHUNK_SIZE);
+        int totalPackets = (int) Math.ceil((double) fileSize / Constants.DATA_CHUNK_SIZE);
         if (totalPackets == 0 && fileSize > 0) {
             totalPackets = 1; // Handle small files
 
@@ -316,7 +311,7 @@ public class Client {
 
         // 2. Send DATA packets with retries and progress tracking
         try (FileInputStream fis = new FileInputStream(file)) {
-            byte[] dataBuffer = new byte[DATA_CHUNK_SIZE];
+            byte[] dataBuffer = new byte[Constants.DATA_CHUNK_SIZE];
             int bytesRead;
             int sequenceNumber = 0;
             long totalBytesSent = 0;
@@ -454,13 +449,49 @@ public class Client {
     // Format: filename|:|seqnum|:|DATA_BYTES
     private void handleDownloadData(JsonObject responseJson) {
         try {
-            System.out.println(responseJson);
+            if (!responseJson.has(Constants.KEY_DATA)) {
+                throw new IllegalArgumentException("Missing data object in response");
+            }
+
             JsonObject dataJson = responseJson.getAsJsonObject(Constants.KEY_DATA);
+            
+            // Validate all required fields exist
+            String[] requiredFields = {"file_name", "sequence_number", "chunk_size", "file_data"};
+            for (String field : requiredFields) {
+                if (!dataJson.has(field)) {
+                    throw new IllegalArgumentException("Missing required field: " + field);
+                }
+            }
+
             String filename = dataJson.get("file_name").getAsString();
             int sequenceNumber = dataJson.get("sequence_number").getAsInt();
-            String base64Data = dataJson.get("file_data").getAsString();
             int chunkSize = dataJson.get("chunk_size").getAsInt();
-            byte[] dataChunk = Base64.getDecoder().decode(base64Data);
+            String base64Data = dataJson.get("file_data").getAsString();
+
+            // Validate values
+            if (filename.isEmpty()) {
+                throw new IllegalArgumentException("Filename cannot be empty");
+            }
+            if (sequenceNumber < 1) {
+                throw new IllegalArgumentException("Invalid sequence number: " + sequenceNumber);
+            }
+            if (chunkSize < 0 || chunkSize > Constants.DATA_CHUNK_SIZE) {
+                throw new IllegalArgumentException("Invalid chunk size: " + chunkSize);
+            }
+            if (base64Data.isEmpty()) {
+                throw new IllegalArgumentException("Empty file data");
+            }
+
+            byte[] dataChunk;
+            try {
+                dataChunk = Base64.getDecoder().decode(base64Data);
+                if (dataChunk.length != chunkSize) {
+                    log.warn("Chunk size mismatch for {}: expected {} but got {}", 
+                        filename, chunkSize, dataChunk.length);
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid base64 data: " + e.getMessage());
+            }
 
             ConcurrentSkipListMap<Integer, byte[]> chunks = incomingDownloads.get(filename);
             FileDownloadState state = downloadStates.get(filename);
@@ -468,27 +499,35 @@ public class Client {
             if (chunks != null && state != null) {
                 chunks.put(sequenceNumber, dataChunk);
                 state.incrementReceivedPackets();
+                state.addBytesReceived(dataChunk.length);
 
-                // Optional: Print progress
-                if (state.getReceivedPackets() % 50 == 0 || state.getReceivedPackets() == state.getTotalPackets()) {
-                    System.out.println("\nReceived packet " + state.getReceivedPackets() + "/" + state.getTotalPackets()
-                            + " for " + filename);
-                    System.out.print("> ");
+                // In tiến trình mỗi 5% hoặc gói cuối cùng
+                long totalBytes = state.getExpectedSize();
+                long receivedBytes = state.getBytesReceived();
+                int currentPercent = (int)((receivedBytes * 100.0) / totalBytes);
+                
+                if (currentPercent % 5 == 0 && currentPercent != state.getLastPrintedPercent()) {
+                    System.out.printf("\rDownloading: %d%% (%d/%d bytes) - %d/%d packets", 
+                        currentPercent,
+                        receivedBytes,
+                        totalBytes,
+                        state.getReceivedPackets(),
+                        state.getTotalPackets());
+                    System.out.flush();
+                    state.setLastPrintedPercent(currentPercent);
                 }
 
+                // In newline khi hoàn thành
+                if (state.getReceivedPackets() == state.getTotalPackets()) {
+                    System.out.println("\nDownload completed!");
+                }
             } else {
-                // Might receive data before META or after FIN due to UDP reordering/loss,
-                // ignore if state isn't ready
-                System.err.println("Received data chunk for unknown or completed download: " + filename + " seq "
-                        + sequenceNumber);
+                log.debug("Received data chunk for unknown or completed download: {} seq {}", 
+                    filename, sequenceNumber);
             }
-        } catch (NumberFormatException e) {
-            System.err.println(
-                    "Error parsing DOWNLOAD_RESP_DATA sequence number: " + e.getMessage());
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error processing DOWNLOAD_RESP_DATA packet structure: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error handling download data chunk: " + e.getMessage());
+            log.error("Error handling download data: " + e.getMessage());
+            System.err.println("Error processing download chunk: " + e.getMessage());
         }
     }
 
@@ -569,21 +608,41 @@ public class Client {
         final String filename;
         final long expectedSize;
         final int totalPackets;
-        int receivedPackets;
+        private int receivedPackets;
+        private long bytesReceived;
+        private int lastPrintedPercent;
 
         FileDownloadState(String filename, long expectedSize, int totalPackets) {
             this.filename = filename;
             this.expectedSize = expectedSize;
             this.totalPackets = totalPackets;
             this.receivedPackets = 0;
+            this.bytesReceived = 0;
+            this.lastPrintedPercent = -1;
         }
 
         synchronized void incrementReceivedPackets() {
             this.receivedPackets++;
         }
 
+        synchronized void addBytesReceived(int bytes) {
+            this.bytesReceived += bytes;
+        }
+
         synchronized int getReceivedPackets() {
             return receivedPackets;
+        }
+
+        synchronized long getBytesReceived() {
+            return bytesReceived;
+        }
+
+        synchronized int getLastPrintedPercent() {
+            return lastPrintedPercent;
+        }
+
+        synchronized void setLastPrintedPercent(int percent) {
+            this.lastPrintedPercent = percent;
         }
 
         int getTotalPackets() {
