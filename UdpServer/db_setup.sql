@@ -40,6 +40,19 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (sender_chatid) REFERENCES users(chatid) ON DELETE CASCADE
 );
 
+-- Create the files table
+CREATE TABLE IF NOT EXISTS files (
+    file_id INT AUTO_INCREMENT PRIMARY KEY,
+    room_id VARCHAR(100) NOT NULL,
+    sender_chatid VARCHAR(50) NOT NULL,
+    reciver_chatid VARCHAR(50) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE,
+    -- FOREIGN KEY (sender_chatid) REFERENCES users(chatid) ON DELETE CASCADE,
+    -- FOREIGN KEY (reciver_chatid) REFERENCES users(chatid) ON DELETE CASCADE
+);
+
 -- Optional: Add some initial data for testing (example)
 INSERT INTO users (chatid, password) VALUES ('user1', 'pass1');
 INSERT INTO users (chatid, password) VALUES ('user2', 'pass2');
