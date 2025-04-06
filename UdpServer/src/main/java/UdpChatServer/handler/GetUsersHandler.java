@@ -8,18 +8,20 @@ package UdpChatServer.handler;
  *
  * @author nguye
  */
+import java.net.InetAddress;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import UdpChatServer.db.UserDAO;
 import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.model.Constants;
 import UdpChatServer.model.PendingMessageInfo;
 import UdpChatServer.net.UdpSender;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.util.List;
 
 public class GetUsersHandler {
     private static final Logger log = LoggerFactory.getLogger(GetUsersHandler.class);

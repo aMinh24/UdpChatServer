@@ -75,6 +75,7 @@ public final class Constants {
     public static final String ACTION_REMOVE_USER_FROM_ROOM = "remove_user_from_room";
     public static final String ACTION_DELETE_ROOM = "delete_room";
     public static final String ACTION_RENAME_ROOM = "rename_room";
+    public static final String ACTION_GET_USER_ROOMS = "get_user_rooms"; // New action to request room list
     
     // Room user list action
     public static final String ACTION_GET_ROOM_USERS = "get_room_users";
@@ -85,6 +86,7 @@ public final class Constants {
     public static final String ACTION_USER_REMOVED = "user_removed";
     public static final String ACTION_ROOM_DELETED = "room_deleted";
     public static final String ACTION_ROOM_RENAMED = "room_renamed";
+    public static final String ACTION_USER_ROOM_LIST = "user_room_list"; // New response for room list
 
     // --- Status Values ---
     public static final String STATUS_SUCCESS = "success";

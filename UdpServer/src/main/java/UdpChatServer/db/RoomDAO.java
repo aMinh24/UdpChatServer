@@ -6,8 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -471,5 +473,73 @@ public class RoomDAO {
             log.error("Unexpected error checking existence for room '{}': {}", roomId, e.getMessage(), e);
             return false;
         }
+    }
+
+    /**
+     * Retrieves a list of rooms a specific user is a participant in, along with the members of each room.
+     *
+     * @param chatid The ID of the user.
+     * @return A List of Maps, where each map represents a room and contains 'id', 'name', and 'members' (a List of chatids). Returns an empty list if the user is in no rooms or on error.
+     */
+    public List<Map<String, Object>> getRoomsAndMembersByUser(String chatid) {
+        List<Map<String, Object>> userRooms = new ArrayList<>();
+        if (chatid == null || chatid.trim().isEmpty()) {
+            log.warn("Attempted to get rooms for null or empty chatid.");
+            return userRooms; // Return empty list
+        }
+
+        // SQL query to get rooms the user is in and their names
+        // We also join with room_participants again to fetch all members of those rooms
+        String sql = "SELECT r.room_id, r.name, rp_all.chatid AS member_id " +
+                     "FROM rooms r " +
+                     "JOIN room_participants rp_user ON r.room_id = rp_user.room_id " +
+                     "JOIN room_participants rp_all ON r.room_id = rp_all.room_id " +
+                     "WHERE rp_user.chatid = ? " +
+                     "ORDER BY r.room_id, rp_all.chatid"; // Order to easily group members by room
+
+        Map<String, Map<String, Object>> roomDataMap = new HashMap<>();
+
+        try (Connection conn = DatabaseConnectionManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, chatid);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String roomId = rs.getString("room_id");
+                    String roomName = rs.getString("name");
+                    String memberId = rs.getString("member_id");
+
+                    // Check if we've already started processing this room
+                    Map<String, Object> roomInfo = roomDataMap.get(roomId);
+                    if (roomInfo == null) {
+                        // First time seeing this room for the user
+                        roomInfo = new HashMap<>();
+                        roomInfo.put("id", roomId);
+                        roomInfo.put("name", roomName);
+                        roomInfo.put("members", new ArrayList<String>());
+                        roomDataMap.put(roomId, roomInfo);
+                        userRooms.add(roomInfo); // Add to the final list
+                    }
+
+                    // Add the current member to the list for this room
+                    @SuppressWarnings("unchecked") // Safe cast due to initialization
+                    List<String> members = (List<String>) roomInfo.get("members");
+                    if (memberId != null && !members.contains(memberId)) { // Avoid duplicates if query returns multiple rows for same member
+                         members.add(memberId);
+                    }
+                }
+            }
+            log.info("Retrieved {} rooms and their members for user '{}'.", userRooms.size(), chatid);
+
+        } catch (SQLException e) {
+            log.error("SQL error retrieving rooms and members for user '{}': {}", chatid, e.getMessage(), e);
+            return Collections.emptyList(); // Return empty list on error
+        } catch (Exception e) {
+            log.error("Unexpected error retrieving rooms and members for user '{}': {}", chatid, e.getMessage(), e);
+            return Collections.emptyList(); // Return empty list on error
+        }
+
+        return userRooms;
     }
 }
