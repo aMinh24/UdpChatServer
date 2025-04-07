@@ -177,9 +177,9 @@ public class CreateRoomHandler {
             "New room.",
             data
         );
-
+        participants.add(creatorChatId); // Remove creator from participants for forwarding
+        log.info("Forwarding room creation message to participants: {}", participants);
         for (String recipientChatId : participants) {
-            if (!recipientChatId.equals(creatorChatId)) {
                 SessionInfo recipientSession = sessionManager.getSessionInfo(recipientChatId);
                 if (recipientSession != null && recipientSession.getKey() != null) {
                     // Initiate S2C flow for this recipient
@@ -195,7 +195,7 @@ public class CreateRoomHandler {
                     log.debug("Recipient '{}' in room '{}' is offline or key missing. Message saved in DB, not forwarded in real-time.", recipientChatId, roomId);
                     // Message is already saved, so offline users will get it later via get_messages
                 }
-            }
+            
         }
     }
 }
