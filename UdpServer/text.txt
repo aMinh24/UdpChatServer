@@ -1,1 +1,157 @@
-aduhwaiud
+// Request: Send File Init --> Khởi tạo yêu cầu gửi file đến Server 
+{
+  "action": "file_send_init",
+  "data": {
+    "chat_id": "user1",
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "file_size": 1234,
+    "file_type": "audio/video/...",
+    "total_packets": 1234
+  }
+}
+
+// Response: Send File Init --> Phản hồi yêu cầu gửi file về Client 
+{
+  "action": "file_send_init",
+  "status": "success",
+  "message": "File send init successful"
+}
+
+// Request: Send File Data --> Gửi các gói tin đã chia nhỏ của file đến Server 
+{
+  "action": "file_send_data",
+  "data": {
+    "chat_id": "user1",
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "sequence_number": 1,
+    "file_data": "abcdefgh"
+  }
+}
+
+// Response: Send File Data --> Phản hồi từng gói tin nhận được từ Client
+{
+  "action": "file_send_data",
+  "status": "success",
+  "message": "File send data successful",
+  "data": {
+    "chat_id": "user1",
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "sequence_number": 1,
+    "file_data": "abcdefgh"
+  },
+}
+
+// Request: Send File Finish --> Thông báo cho Server đã hoàn thành gửi các gói tin để Server kết hợp lại thành file hoàn chỉnh
+{
+  "action": "file_send_fin",
+  "data": {
+    "chat_id": "user1",
+    "room_id": "uu_369959f",
+    "file_path": "text.txt"
+  }
+}
+
+// Response: Send File Finish --> Sau khi kết hợp các gói tin thành file hoàn chỉnh thì gửi thông báo đến Client
+{
+  "action": "file_send_fin",
+  "status": "success",
+  "message": "File send finish successful"
+}
+
+// Request: List File In Room --> Yêu cầu Server trả về các file có trong room
+{
+  "action": "file_list_req",
+  "data": {
+    "room_id": "uu_369959f"
+  }
+}
+
+// Response: List File In Room --> Phản hồi về Client danh sách các file có trong room
+{
+  "action": "file_list_req",
+  "status": "success",
+  "message": "File in room"
+  "data": {
+    "file_list": "[file1.txt, file2.txt, file3.txt]"
+  }
+}
+
+// Request: Download File In Room --> Gửi yêu cầu đến Server để tải file về Client 
+{
+  "action": "file_down_req",
+  "data": {
+    "room_id": "uu_369959f"
+    "file_name": "filename"
+  }
+}
+
+// Response: Download File In Room --> Server phản hồi yêu cầu tải file cho Client nếu như xảy ra lỗi
+{
+  "action": "file_down_req",
+  "status": "error",
+  "message": "Can not download file"
+}
+
+// Request: Download File Meta --> Server gửi meta của file để bằng đầu quá trình tải file về (giống Send File Init)
+{
+  "action": "file_down_meta",
+  "data": {
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "file_size": 1234,
+    "file_type": "audio/video/...",
+    "total_packets": 1234
+  }
+}
+
+// Respon: Download File Meta --> Client thông báo nhận được meta và bắt đầu download
+{
+  "action": "file_down_meta",
+  "status": "success",
+  "message": "Receive file meta successful"
+}
+
+// Request: Download File Data --> Gửi các gói tin đã chia nhỏ đến Client
+{
+  "action": "file_down_data",
+  "data": {
+    "chat_id": "user1",
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "sequence_number": 1,
+    "file_data": "abcdefgh"
+  }
+}
+
+// Respon: Download File Data --> Client thông báo khi nhận được các gói tin từ Server
+{
+  "action": "file_down_data",
+  "status": "success",
+  "message": "File download data successful"
+  "data": {
+    "chat_id": "user1",
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "sequence_number": 1,
+    "file_data": "abcdefgh"
+  }
+}
+
+// Request: Download File Finish --> Thông báo cho Client đã hoàn thành gửi các gói tin để Client kết hợp lại thành file hoàn chỉnh
+{
+  "action": "file_down_fin",
+  "data": {
+    "room_id": "uu_369959f",
+    "file_path": "text.txt"
+  }
+}
+
+// Response: Download File Finish --> Sau khi kết hợp các gói tin thành file hoàn chỉnh thì gửi thông báo đến Server
+{
+  "action": "file_down_fin",
+  "status": "success",
+  "message": "File download finish successful"
+}
