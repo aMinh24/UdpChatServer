@@ -128,9 +128,8 @@ public class SendMessageHandler {
             "New message received.",
             data
         );
-
+        participants.add(senderChatId); // Include sender in the list to avoid missing ACKs
         for (String recipientChatId : participants) {
-            if (!recipientChatId.equals(senderChatId)) {
                 SessionInfo recipientSession = sessionManager.getSessionInfo(recipientChatId);
 
                 if (recipientSession != null && recipientSession.getKey() != null) {
@@ -147,7 +146,6 @@ public class SendMessageHandler {
                     log.debug("Recipient '{}' in room '{}' is offline or key missing. Message saved in DB, not forwarded in real-time.", recipientChatId, roomId);
                     // Message is already saved, so offline users will get it later via get_messages
                 }
-            }
         }
     }
 

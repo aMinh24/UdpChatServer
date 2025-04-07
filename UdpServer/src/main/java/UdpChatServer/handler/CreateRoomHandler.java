@@ -114,6 +114,7 @@ public class CreateRoomHandler {
 
             // 6. Add all participants to room in DB
             boolean allAdded = true;
+            participants.add(creatorChatId);
             for (String chatId : participants) {
                 if (!roomDAO.addParticipantToRoom(roomId, chatId)) {
                     allAdded = false;
