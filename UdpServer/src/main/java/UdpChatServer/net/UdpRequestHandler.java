@@ -74,9 +74,9 @@ public class UdpRequestHandler implements Runnable {
 
         // Initialize all handlers, passing dependencies (including udpSender)
         this.loginHandler = new LoginHandler(this.userDAO, this.roomDAO, this.messageDAO, this.sessionManager, this.udpSender);
-        this.registerHandler = new RegisterHandler(this.userDAO, this.udpSender);
+        this.registerHandler = new RegisterHandler(this.userDAO, this.udpSender, this.sessionManager);
         this.sendMessageHandler = new SendMessageHandler(this.sessionManager, this.roomManager, this.messageDAO, this.roomDAO, this.udpSender);
-        this.createRoomHandler = new CreateRoomHandler(this.sessionManager, this.roomManager, this.roomDAO, this.userDAO, this.socket); // Needs socket? Check handler impl. Assuming yes for now.
+        this.createRoomHandler = new CreateRoomHandler(this.sessionManager, this.roomManager, this.roomDAO, this.userDAO, this.socket, this.udpSender); // Needs socket? Check handler impl. Assuming yes for now.
         this.roomMessageHandler = new RoomMessageHandler(this.sessionManager, this.roomManager, this.roomDAO, this.messageDAO, this.socket, this.udpSender); // Needs socket? Check handler impl. Assuming yes for now.
         this.getUsersHandler = new GetUsersHandler(this.sessionManager, this.userDAO, this.udpSender);
         this.roomManagementHandler = new RoomManagementHandler(this.sessionManager, this.roomManager, this.roomDAO, this.udpSender);

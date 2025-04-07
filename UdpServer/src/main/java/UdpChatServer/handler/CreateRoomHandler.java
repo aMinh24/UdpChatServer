@@ -18,6 +18,9 @@ import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.manager.RoomManager;
 import UdpChatServer.model.Constants;
 import UdpChatServer.model.PendingMessageInfo;
+import UdpChatServer.model.SessionInfo;
+import UdpChatServer.net.UdpSender;
+import UdpChatServer.util.JsonHelper;
 
 /**
  * Handles the logic for processing confirmed "create_room" actions.
@@ -30,13 +33,15 @@ public class CreateRoomHandler {
     private final RoomManager roomManager;
     private final RoomDAO roomDAO;
     private final UserDAO userDAO;
+    private final UdpSender udpSender;
 
     public CreateRoomHandler(ClientSessionManager sessionManager, RoomManager roomManager,
-                           RoomDAO roomDAO, UserDAO userDAO, DatagramSocket socket) {
+                           RoomDAO roomDAO, UserDAO userDAO, DatagramSocket socket, UdpSender udpSender) {
         this.sessionManager = sessionManager;
         this.roomManager = roomManager;
         this.roomDAO = roomDAO;
         this.userDAO = userDAO;
+        this.udpSender = udpSender; 
     }
 
     /**
@@ -129,13 +134,68 @@ public class CreateRoomHandler {
             // 8. Success! UdpRequestHandler will send ACK(success)
             log.info("Room {} with name '{}' created successfully by {} for transaction {}",
                      roomId, roomName, creatorChatId, transactionId);
+            forwardRoomToUser(roomId, roomName, creatorChatId, participants);
             return true;
-
+   
         } catch (Exception e) {
             log.error("Error processing confirmed create_room from {} (Transaction ID: {}): {}",
                      creatorChatId, transactionId, e.getMessage(), e);
             // Consider more specific error handling or rollback
             return false;
+        }
+    }
+    
+    /**
+     * Forwards room creation information to all participants
+     * 
+     * @param roomId The ID of the created room
+     * @param roomName The name of the created room
+     * @param creatorChatId The chat ID of the user who created the room
+     * @param initialParticipants The initial set of participants (optional, will fetch from DB if null)
+     */
+    private void forwardRoomToUser(String roomId, String roomName, String creatorChatId, Set<String> initialParticipants) {
+        // Get participants from RoomDAO for persistence, or use the provided set
+        Set<String> participants = initialParticipants;
+        if (participants == null || participants.isEmpty()) {
+            participants = roomDAO.getParticipantsInRoom(roomId);
+        }
+
+        if (participants.isEmpty()) {
+             log.warn("No participants found in RoomDAO/RoomManager for room '{}' to forward message.", roomId);
+             return;
+        }
+
+
+        JsonObject data = new JsonObject();
+        data.addProperty(Constants.KEY_ROOM_ID, roomId);
+        data.addProperty(Constants.KEY_SENDER_CHAT_ID, creatorChatId);
+        data.addProperty(Constants.KEY_ROOM_NAME, roomName);
+        data.add(Constants.KEY_PARTICIPANTS, JsonHelper.convertSetToJsonArray(participants)); // Convert Set to JsonArray
+        JsonObject messageJson = JsonHelper.createReply(
+            Constants.ACTION_RECIEVE_ROOM,
+            Constants.STATUS_SUCCESS,
+            "New room.",
+            data
+        );
+
+        for (String recipientChatId : participants) {
+            if (!recipientChatId.equals(creatorChatId)) {
+                SessionInfo recipientSession = sessionManager.getSessionInfo(recipientChatId);
+                if (recipientSession != null && recipientSession.getKey() != null) {
+                    // Initiate S2C flow for this recipient
+                    log.debug("Initiating S2C flow to forward message from {} to {} in room {}", creatorChatId, recipientChatId, roomId);
+                    udpSender.initiateServerToClientFlow( // Changed from requestHandler
+                        Constants.ACTION_RECIEVE_ROOM,
+                        messageJson,
+                        recipientSession.getIpAddress(),
+                        recipientSession.getPort(),
+                        recipientSession.getKey() // Use recipient's session key
+                    );
+                } else {
+                    log.debug("Recipient '{}' in room '{}' is offline or key missing. Message saved in DB, not forwarded in real-time.", recipientChatId, roomId);
+                    // Message is already saved, so offline users will get it later via get_messages
+                }
+            }
         }
     }
 }
