@@ -87,7 +87,8 @@ public final class Constants {
     public static final String ACTION_ROOM_DELETED = "room_deleted";
     public static final String ACTION_ROOM_RENAMED = "room_renamed";
     public static final String ACTION_USER_ROOM_LIST = "user_room_list"; // New response for room list
-
+    public static final String ACTION_RECIEVE_ROOM = "recieve_room";
+    public static final String ACTION_RECIEVE_LISTUSER = "recieve_listuser"; // New action to receive room info
     // --- Status Values ---
     public static final String STATUS_SUCCESS = "success";
     public static final String STATUS_FAILURE = "failure";
@@ -117,7 +118,7 @@ public final class Constants {
     public static final String MSG_ACTION_PENDING = "Action is pending confirmation.";
 
     // --- File Transfer Constants ---
-    public static final int FILE_TRANSFER_SERVER_PORT = 9877; // Port for file transfer server
+    public static final int FILE_TRANSFER_SERVER_PORT = 9899; // Port for file transfer server
     public static final String PACKET_DELIMITER = "|:|";
     public static final String ACTION_FILE_INIT = "file_init";
     public static final String ACTION_FILE_DATA = "file_data";

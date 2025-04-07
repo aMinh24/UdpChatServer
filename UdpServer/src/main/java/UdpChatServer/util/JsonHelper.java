@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.nio.charset.StandardCharsets; // Use SLF4J Logger
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -186,5 +188,21 @@ public final class JsonHelper {
              log.error("Unexpected error sending encrypted UDP packet to {}:{}: {}", address.getHostAddress(), port, e.getMessage(), e);
              return false;
         }
+    }
+
+    /**
+     * Converts a Set<String> to a JsonArray
+     *
+     * @param set The Set of String values to convert
+     * @return JsonArray containing all values from the set
+     */
+    public static JsonArray convertSetToJsonArray(Set<String> set) {
+        JsonArray jsonArray = new JsonArray();
+        if (set != null) {
+            for (String value : set) {
+                jsonArray.add(value);
+            }
+        }
+        return jsonArray;
     }
 }
