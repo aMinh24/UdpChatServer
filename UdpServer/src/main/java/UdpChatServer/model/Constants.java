@@ -117,15 +117,15 @@ public final class Constants {
     public static final String MSG_ACTION_PENDING = "Action is pending confirmation.";
 
     // --- File Transfer Constants ---
-    public static final int FILE_TRANSFER_SERVER_PORT = 9877; // Port for file transfer server
-    public static final String PACKET_DELIMITER = "|:|";
-    public static final String ACTION_FILE_INIT = "file_init";
-    public static final String ACTION_FILE_DATA = "file_data";
-    public static final String ACTION_FILE_FIN = "file_fin";
-    public static final String ACTION_LIST_REQ = "list_req";
-    public static final String ACTION_DOWN_REQ = "down_req";
-    public static final String ACTION_DOWN_FIN= "down_fin";
-    public static final String ACTION_FILE_DOWN = "file_down";
+    public static final int FILE_TRANSFER_SERVER_PORT = 9877;
+    public static final String ACTION_FILE_SEND_INIT = "file_send_init";
+    public static final String ACTION_FILE_SEND_DATA = "file_send_data";
+    public static final String ACTION_FILE_SEND_FIN = "file_send_fin";
+    public static final String ACTION_FILE_LIST_REQ = "file_list_req";
+    public static final String ACTION_FILE_DOWN_REQ = "file_down_req";
+    public static final String ACTION_FILE_DOWN_META = "file_down_meta";
+    public static final String ACTION_FILE_DOWN_DATA = "file_down_data";
+    public static final String ACTION_FILE_DOWN_FIN = "file_down_fin";
 
     // --- File Transfer Storage ---
     public static final String STORAGE_DIR = "server_storage";

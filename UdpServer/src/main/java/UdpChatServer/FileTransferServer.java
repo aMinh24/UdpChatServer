@@ -20,13 +20,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import UdpChatServer.db.FileDAO;
+import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
-import UdpChatServer.handler.file.FileDataHandler;
-import UdpChatServer.handler.file.FileDownloadHandler;
-import UdpChatServer.handler.file.FileFinHandler;
-import UdpChatServer.handler.file.FileInitHandler;
-import UdpChatServer.handler.file.ListRequestHandler;
+import UdpChatServer.handler.file.FileSendDataHandler;
+import UdpChatServer.handler.file.FileSendFinHandler;
+import UdpChatServer.handler.file.FileSendInitHandler;
 import UdpChatServer.model.Constants;
 
 public class FileTransferServer {
@@ -36,21 +35,21 @@ public class FileTransferServer {
     private final DatagramSocket socket;
     private final ExecutorService executor;
     private volatile boolean running = true;
+    private final MessageDAO messageDAO;
     private final UserDAO userDAO;
     private final RoomDAO roomDAO;
     private final FileDAO fileDAO;
-    private FileDataHandler fileDataHandler;
-    private FileDownloadHandler fileDownloadHandler;
-    private FileFinHandler fileFinHandler;
-    private FileInitHandler fileInitHandler;
-    private ListRequestHandler listRequestHandler;
+    private FileSendDataHandler fileSendDataHandler;
+    //private FileDownloadHandler fileDownloadHandler;
+    private FileSendFinHandler fileSendFinHandler;
+    private FileSendInitHandler fileSendInitHandler;
+    //private ListRequestHandler listRequestHandler;
 
-    public FileTransferServer(Properties config, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO)
-            throws SocketException {
-        int port = Integer
-                .parseInt(config.getProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT)));
+    public FileTransferServer(Properties config, MessageDAO messageDAO, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO) throws SocketException {
+        int port = Integer.parseInt(config.getProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT)));
         String storageDir = config.getProperty("file.storage.dir", "server_storage");
 
+        this.messageDAO = messageDAO;
         this.userDAO = userDAO;
         this.roomDAO = roomDAO;
         this.fileDAO = fileDAO;
@@ -121,26 +120,48 @@ public class FileTransferServer {
             int clientPort = packet.getPort();
 
             switch (action) {
-                case Constants.ACTION_FILE_INIT:
-                    fileInitHandler = new FileInitHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileInitHandler.handleSendInit(jsonPacket, clientAddress, clientPort);
+                case Constants.ACTION_FILE_SEND_INIT:
+                    fileSendInitHandler = new FileSendInitHandler(messageDAO, userDAO, roomDAO, fileDAO, socket);
+                    fileSendInitHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
-                case Constants.ACTION_FILE_DATA:
-                    fileDataHandler = new FileDataHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileDataHandler.handleSendData(jsonPacket, clientAddress, clientPort);
+                case Constants.ACTION_FILE_SEND_DATA:
+                    fileSendDataHandler = new FileSendDataHandler(messageDAO, userDAO, roomDAO, fileDAO, socket);
+                    fileSendDataHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
-                case Constants.ACTION_FILE_FIN:
-                    fileFinHandler = new FileFinHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileFinHandler.handleSendFin(jsonPacket, clientAddress, clientPort);
+                case Constants.ACTION_FILE_SEND_FIN:
+                    fileSendFinHandler = new FileSendFinHandler(messageDAO, userDAO, roomDAO, fileDAO, socket);
+                    fileSendFinHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
-                case Constants.ACTION_LIST_REQ:
-                    listRequestHandler = new ListRequestHandler(userDAO, roomDAO, fileDAO, socket);
-                    listRequestHandler.handleListRequest(jsonPacket, clientAddress, clientPort);
+                case Constants.ACTION_FILE_LIST_REQ:
                     break;
-                case Constants.ACTION_DOWN_REQ:
-                    fileDownloadHandler = new FileDownloadHandler(userDAO, roomDAO, fileDAO, socket);
-                    fileDownloadHandler.handleDownloadRequest(jsonPacket, clientAddress, clientPort);
+                case Constants.ACTION_FILE_DOWN_REQ:
                     break;
+                case Constants.ACTION_FILE_DOWN_META:
+                    break;
+                case Constants.ACTION_FILE_DOWN_DATA:
+                    break;
+                case Constants.ACTION_FILE_DOWN_FIN:
+                    break;
+                // case Constants.ACTION_FILE_INIT:
+                //     fileInitHandler = new FileInitHandler(sessionManager, userDAO, roomDAO, fileDAO, socket);
+                //     fileInitHandler.handleSendInit(jsonPacket, clientAddress, clientPort);
+                //     break;
+                // case Constants.ACTION_FILE_DATA:
+                //     fileDataHandler = new FileDataHandler(sessionManager, userDAO, roomDAO, fileDAO, socket);
+                //     fileDataHandler.handleSendData(jsonPacket, clientAddress, clientPort);
+                //     break;
+                // case Constants.ACTION_FILE_FIN:
+                //     fileFinHandler = new FileFinHandler(sessionManager, userDAO, roomDAO, fileDAO, socket);
+                //     fileFinHandler.handleSendFin(jsonPacket, clientAddress, clientPort);
+                //     break;
+                // case Constants.ACTION_LIST_REQ:
+                //     listRequestHandler = new ListRequestHandler(sessionManager, userDAO, roomDAO, fileDAO, socket);
+                //     listRequestHandler.handleListRequest(jsonPacket, clientAddress, clientPort);
+                //     break;
+                // case Constants.ACTION_DOWN_REQ:
+                //     fileDownloadHandler = new FileDownloadHandler(sessionManager, userDAO, roomDAO, fileDAO, socket);
+                //     fileDownloadHandler.handleDownloadRequest(jsonPacket, clientAddress, clientPort);
+                //     break;
                 default:
                     log.warn("Unknown command received: {}", jsonString);
             }
@@ -157,7 +178,7 @@ public class FileTransferServer {
         config.setProperty("file.storage.dir", "server_storage");
 
         try {
-            FileTransferServer server = new FileTransferServer(config, new UserDAO(), new RoomDAO(), new FileDAO());
+            FileTransferServer server = new FileTransferServer(config, new MessageDAO(), new UserDAO(), new RoomDAO(), new FileDAO());
 
             // Add shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

@@ -12,7 +12,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import UdpChatServer.model.File;
+import UdpChatServer.model.FileState;
 
 /**
  * Data Access Object for File related operations.
@@ -28,26 +28,30 @@ public class FileDAO {
      * reciverChatid, and filename.
      * @return true if the file record was saved successfully, false otherwise.
      */
-    public boolean saveFile(File file) {
-        if (file == null || file.getRoomId() == null || file.getReceiverChatid() == null
-                || file.getReceiverChatid() == null || file.getFileName() == null) {
+    public boolean saveFile(FileState file) {
+        if (file == null || file.getRoomId() == null || file.getSenderChatid() == null
+                || file.getFileName() == null) {
             log.warn("Attempted to save invalid file object: {}", file);
             return false;
         }
 
-        String sql = "INSERT INTO files (room_id, sender_chatid, reciver_chatid, file_name, timestamp) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO files (room_id, sender_chatid, file_name, file_type, timestamp) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnectionManager.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, file.getRoomId());
             pstmt.setString(2, file.getSenderChatid());
-            pstmt.setString(3, file.getReceiverChatid());
-            pstmt.setString(4, file.getFileName());
-            pstmt.setTimestamp(5, file.getTimestamp() != null ? file.getTimestamp() : new Timestamp(System.currentTimeMillis()));
+            pstmt.setString(3, file.getFileName());
+            // Xác định file_type từ tên file
+            String fileType = getFileType(file.getFileName());
+            pstmt.setString(4, fileType);
+            pstmt.setTimestamp(5, file.getTimestamp() != null ? file.getTimestamp() : 
+                              new Timestamp(System.currentTimeMillis()));
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                log.info("File record saved successfully from '{}' to '{}' in room '{}'.",
-                        file.getSenderChatid(), file.getSenderChatid(), file.getRoomId());
+                log.info("File record saved successfully from '{}' in room '{}'.",
+                        file.getSenderChatid(), file.getRoomId());
                 return true;
             } else {
                 log.warn("Failed to save file record. No rows affected.");
@@ -62,6 +66,13 @@ public class FileDAO {
         }
     }
 
+    private String getFileType(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "unknown";
+        }
+        return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+    }
+
     /**
      * Retrieves a list of files for a specific room, ordered by timestamp.
      *
@@ -69,26 +80,26 @@ public class FileDAO {
      * @return A List of File objects, or an empty list if none are found or on
      * error.
      */
-    public List<File> getFilesByRoom(String roomId) {
+    public List<FileState> getFilesByRoom(String roomId) {
         if (roomId == null) {
             return Collections.emptyList();
         }
 
-        List<File> files = new ArrayList<>();
-        String sql = "SELECT file_id, room_id, sender_chatid, reciver_chatid, file_name, timestamp "
+        List<FileState> files = new ArrayList<>();
+        String sql = "SELECT file_id, room_id, sender_chatid, file_name, timestamp "
                 + "FROM files WHERE room_id = ? ORDER BY timestamp ASC";
 
-        try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnectionManager.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, roomId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    File file = new File(
+                    FileState file = new FileState(
                             rs.getLong("file_id"),
                             rs.getString("room_id"),
                             rs.getString("sender_chatid"),
-                            rs.getString("reciver_chatid"),
                             rs.getString("file_name"),
                             rs.getTimestamp("timestamp")
                     );
@@ -111,12 +122,12 @@ public class FileDAO {
      * @return A List of File objects, or an empty list if none are found or on
      * error.
      */
-    public List<File> getFilesBySender(String roomId, String senderChatid) {
+    public List<FileState> getFilesBySender(String roomId, String senderChatid) {
         if (roomId == null || senderChatid == null) {
             return Collections.emptyList();
         }
 
-        List<File> files = new ArrayList<>();
+        List<FileState> files = new ArrayList<>();
         String sql = "SELECT file_id, room_id, sender_chatid, reciver_chatid, file_name, timestamp "
                 + "FROM files WHERE room_id = ? AND sender_chatid = ? ORDER BY timestamp ASC";
 
@@ -127,11 +138,10 @@ public class FileDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    File file = new File(
+                    FileState file = new FileState(
                             rs.getLong("file_id"),
                             rs.getString("room_id"),
                             rs.getString("sender_chatid"),
-                            rs.getString("reciver_chatid"),
                             rs.getString("file_name"),
                             rs.getTimestamp("timestamp")
                     );
@@ -156,12 +166,12 @@ public class FileDAO {
      * @return A List of File objects, or an empty list if none are found or on
      * error.
      */
-    public List<File> getFilesByReceiver(String roomId, String reciverChatid) {
+    public List<FileState> getFilesByReceiver(String roomId, String reciverChatid) {
         if (roomId == null || reciverChatid == null) {
             return Collections.emptyList();
         }
 
-        List<File> files = new ArrayList<>();
+        List<FileState> files = new ArrayList<>();
         String sql = "SELECT file_id, room_id, sender_chatid, reciver_chatid, file_name, timestamp "
                 + "FROM files WHERE room_id = ? AND reciver_chatid = ? ORDER BY timestamp ASC";
 
@@ -172,11 +182,10 @@ public class FileDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    File file = new File(
+                    FileState file = new FileState(
                             rs.getLong("file_id"),
                             rs.getString("room_id"),
                             rs.getString("sender_chatid"),
-                            rs.getString("reciver_chatid"),
                             rs.getString("file_name"),
                             rs.getTimestamp("timestamp")
                     );
