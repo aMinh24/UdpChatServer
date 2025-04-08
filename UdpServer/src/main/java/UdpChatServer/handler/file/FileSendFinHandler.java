@@ -31,26 +31,31 @@ public class FileSendFinHandler extends FileTransferHandler {
     public void handle(JsonObject jsonPacket, InetAddress clientAddress, int clientPort) {
         try {
             JsonObject dataJson = jsonPacket.getAsJsonObject(Constants.KEY_DATA);
+            System.out.println("Received FIN packet: " + dataJson.toString());
             String senderChatId = dataJson.get("chat_id").getAsString();
             String roomId = dataJson.get("room_id").getAsString();
             String filePath = dataJson.get("file_path").getAsString();
-
             String fileIdentifier = senderChatId + "_" + roomId + "_" + filePath;
+            filePath = cleanFilePath(filePath);
 
             System.out.println("Received FIN for file '" + filePath + "' from " + senderChatId + " for " + roomId);
 
             ConcurrentSkipListMap<Integer, byte[]> chunks = incomingFileChunks.remove(fileIdentifier);
             if (chunks == null) {
-                System.out.println("No chunks found for file '" + filePath + "' from " + senderChatId + " for " + roomId);
-                JsonObject responJsonPacket = createJsonPacket(Constants.ACTION_FILE_SEND_FIN, Constants.STATUS_FAILURE, "No chunks found for file " + filePath, null);
-                sendPacket(responJsonPacket, clientAddress, clientPort);
+                // System.out.println("No chunks found for file '" + filePath + "' from " + senderChatId + " for " + roomId);
+                // JsonObject responJsonPacket = createJsonPacket(Constants.ACTION_FILE_SEND_FIN, Constants.STATUS_FAILURE, "No chunks found for file " + filePath, null);
+                // sendPacket(responJsonPacket, clientAddress, clientPort);
+                System.out.println("---------------------------------------------------------null--");
                 return;
             }
-
+           
             // Assemble the file
+            Files.createDirectories(Paths.get(Constants.STORAGE_DIR + "/" + roomId));
             Path storagePath = Paths.get(Constants.STORAGE_DIR + "/" + roomId, filePath);
             long totalBytesWritten = 0;
+            System.out.println("Storage path:----------------------- " + storagePath.toString());
             try (FileOutputStream fos = new FileOutputStream(storagePath.toFile())) {
+                System.out.println(" ------------9-----------------(*( --------------------))");
                 for (byte[] chunk : chunks.values()) {
                     fos.write(chunk);
                     totalBytesWritten += chunk.length;
@@ -63,7 +68,7 @@ public class FileSendFinHandler extends FileTransferHandler {
                 filesForClients.computeIfAbsent(roomId, k -> new CopyOnWriteArrayList<>()).add(metaData);
 
                 // Gửi phản hồi thành công
-                JsonObject responJsonPacket = createJsonPacket(Constants.ACTION_FILE_SEND_FIN, Constants.STATUS_SUCCESS, "File assembled successfully: " + totalBytesWritten + " bytes", null);
+                JsonObject responJsonPacket = createJsonPacket(Constants.ACTION_FILE_SEND_FIN, Constants.STATUS_SUCCESS, "File assembled successfully: " + totalBytesWritten + " bytes", jsonPacket);
                 sendPacket(responJsonPacket, clientAddress, clientPort);
 
                 System.out.println("File '" + filePath + "' is now available for client '"  + roomId + "'");
@@ -99,7 +104,15 @@ public class FileSendFinHandler extends FileTransferHandler {
             sendPacket(responJson, clientAddress, clientPort);
         }
     }
-
+    private String cleanFilePath(String filePath) {
+        // Lấy tên file từ đường dẫn đầy đủ
+        String fileName = Paths.get(filePath).getFileName().toString();
+        
+        // Loại bỏ các ký tự không hợp lệ
+        fileName = fileName.replaceAll("[:\\\\/*?|<>]", "_");
+        
+        return fileName;
+    }
     // private void forwardMessageToRoom(String sender, String receiver, String roomId, String filename,
     //         Timestamp timestamp, InetAddress clientAddress, int clientPort) {
     //     // Get participants from RoomDAO for persistence, or RoomManager for in-memory

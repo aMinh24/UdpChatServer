@@ -52,9 +52,9 @@ public class ServerMain {
 
             // Initialize FileTransferServer
             // log.info("Initializing File Transfer Server...");
-            // fileTransferServer = new FileTransferServer(configProps, sessionManager, userDAO, roomDAO, fileDAO);
-            // Thread fileServerThread = new Thread(() -> fileTransferServer.listen(), "File-Transfer-Server-Thread");
-            // fileServerThread.start();
+            fileTransferServer = new FileTransferServer(configProps, messageDAO, userDAO, roomDAO, fileDAO);
+            Thread fileServerThread = new Thread(() -> fileTransferServer.listen(), "File-Transfer-Server-Thread");
+            fileServerThread.start();
 
             // Initialize Request Handler
             log.info("Initializing UDP Request Handler on port {}...", serverPort);

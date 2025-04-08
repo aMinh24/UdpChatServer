@@ -71,9 +71,11 @@ public class FileTransferHandler {
     public void sendPacket(JsonObject jsonPacket, InetAddress address, int port) {
         try {
             String jsonString = jsonPacket.toString();
+            System.out.println(" -------------------json  _-------------"+jsonString);
             byte[] sendData = jsonString.getBytes(StandardCharsets.UTF_8);
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, address, port);
             System.out.println("Sent packet to " + address + ":" + port + ": " + jsonString);
+            System.out.println(" 0--------------------------------");
             socket.send(sendPacket);
         } catch (IOException e) {
             System.err.println("Error sending packet to " + address + ":" + port + ": " + e.getMessage()); 

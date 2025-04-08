@@ -121,6 +121,7 @@ public class FileTransferServer {
 
             switch (action) {
                 case Constants.ACTION_FILE_SEND_INIT:
+                    
                     fileSendInitHandler = new FileSendInitHandler(messageDAO, userDAO, roomDAO, fileDAO, socket);
                     fileSendInitHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;

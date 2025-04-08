@@ -47,7 +47,7 @@ public class FileSendInitHandler extends FileTransferHandler {
 
             // Send an ACK back to the sender
             JsonObject responJsonPacket = createJsonPacket(Constants.ACTION_FILE_SEND_INIT, Constants.STATUS_SUCCESS,
-                    "Send file init: Server accepted.", null);
+                    "Send file init: Server accepted.", dataJson);
             sendPacket(responJsonPacket, clientAddress, clientPort);
         } catch (NumberFormatException e) {
             System.err.println("Send file init: Invalid number format: " + e.getMessage());
