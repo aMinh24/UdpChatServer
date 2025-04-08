@@ -51,8 +51,9 @@ public class ServerMain {
             log.info("Managers and DAOs initialized.");
 
             // Initialize FileTransferServer
-            // log.info("Initializing File Transfer Server...");
-            fileTransferServer = new FileTransferServer(configProps, messageDAO, userDAO, roomDAO, fileDAO);
+
+            log.info("Initializing File Transfer Server...");
+            fileTransferServer = new FileTransferServer(configProps, sessionManager, messageDAO, userDAO, roomDAO, fileDAO);
             Thread fileServerThread = new Thread(() -> fileTransferServer.listen(), "File-Transfer-Server-Thread");
             fileServerThread.start();
 

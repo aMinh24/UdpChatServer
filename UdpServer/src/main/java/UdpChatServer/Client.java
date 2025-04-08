@@ -77,6 +77,9 @@ public class Client {
         System.out.println("  test - Test Json file transfer");
         System.out.println("  send <recipient_client_name> <local_filepath>");
         System.out.println("  list");
+
+        System.out.println("  send <room_id> <local_filepath>");
+        System.out.println("  list <room_id>");
         System.out.println("  download <filename>");
         System.out.println("  exit");
 
@@ -102,6 +105,7 @@ public class Client {
                             String recipient = parts[1];
                             String filepath = parts[2];
                             sendFile(recipient, filepath);
+
                         } else {
                             System.out.println("Usage: send <recipient_client_name> <local_filepath>");
                         }
@@ -109,15 +113,25 @@ public class Client {
                     case "list":
                         if (parts.length == 1) {
                             requestFileList();
+
+                        if (parts.length == 2) {
+                            String roomId = parts[1];
+                            requestFileList(roomId);
                         } else {
                             System.out.println("Usage: list");
                         }
                         break;
                     case "download":
+
                         if (parts.length == 2) {
                             String filename = parts[1];
                             requestDownload(filename);
-                        } else {
+
+                        if (parts.length == 3) {
+                            String roomId = parts[1];
+                            String filename = parts[2];
+                            requestDownload(roomId, filename);
+     } else {
                             System.out.println("Usage: download <filename>");
                         }
                         break;
@@ -174,53 +188,83 @@ public class Client {
             String jsonString = new String(receivedData, 0, receivedLength, StandardCharsets.UTF_8);
             JsonObject responseJson = JsonParser.parseString(jsonString).getAsJsonObject();
             String action = responseJson.get(Constants.KEY_ACTION).getAsString();
-            String status;
-            String message;
+
+            String status = responseJson.get(Constants.KEY_STATUS).getAsString();
+            String message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
 
             switch (action) {
-                case Constants.ACTION_FILE_INIT:
-                    status = responseJson.get(Constants.KEY_STATUS).getAsString();
+                case Constants.ACTION_FILE_SEND_INIT:
                     if (status.equals(Constants.STATUS_SUCCESS)) {
                         serverAccepted = true;
-                        System.out.println("Server accepted file transfer request.");
+                        System.out.println("Send file init: Server accepted file transfer request: " + message);
                     } else {
-                        System.err.println("Server rejected file transfer request.");
-                    }
-                    waitingForResponse = false;
-                    System.out.print("> ");
-                    break;
-                case Constants.ACTION_FILE_FIN:
-                    message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
-                    System.out.println("\nReceived FIN from Server: " + message);
-                    break;
-                case Constants.ACTION_LIST_REQ:
-                    message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
-                    System.out.println("\nFiles available for you on the server:");
-                    System.out.println(" " + message);
-                    System.out.print("> ");
-                    break;
-                case Constants.ACTION_FILE_DOWN:
-                    handleDownloadMeta(responseJson);
-                    break;
-                case Constants.ACTION_DOWN_REQ:
-                    status = responseJson.get(Constants.KEY_STATUS).getAsString();
-                    if (status.equals(Constants.STATUS_ERROR)) {
-                        message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
-                        System.out.println(message);
+                        System.err.println("Send file init: Server rejected file transfer request: " + message);
                     }
                     break;
-                case Constants.ACTION_FILE_DATA:
-                    handleDownloadData(responseJson);
-                    break;
-                case Constants.ACTION_DOWN_FIN:
-                    status = responseJson.get(Constants.KEY_STATUS).getAsString();
-                    if (status.equals(Constants.STATUS_ERROR)) {
-                        message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
-                        System.out.println(message);
+                case Constants.ACTION_FILE_SEND_DATA:
+                    if (status.equals(Constants.STATUS_SUCCESS)) {
+                        System.out.println("Send file data: " + message);
                     } else {
-                        handleDownloadFin(responseJson);
+                        System.err.println("Send file data error: " + message);
                     }
                     break;
+                case Constants.ACTION_FILE_SEND_FIN:
+                    if (status.equals(Constants.STATUS_SUCCESS)) {
+                        System.out.println("Send file fin: " + message);
+                    } else {
+                        System.err.println("Send file fin error: " + message);
+                    }
+                    break;
+                case Constants.ACTION_FILE_LIST_REQ:
+                    System.out.println("hello");
+                    JsonObject data = responseJson.get(Constants.KEY_DATA).getAsJsonObject();
+                    String files = data.get("file_list").getAsString();
+                    System.out.println(files);
+                    break;
+                // case Constants.ACTION_FILE_INIT:
+                //     status = responseJson.get(Constants.KEY_STATUS).getAsString();
+                //     if (status.equals(Constants.STATUS_SUCCESS)) {
+                //         serverAccepted = true;
+                //         System.out.println("Server accepted file transfer request.");
+                //     } else {
+                //         System.err.println("Server rejected file transfer request.");
+                //     }
+                //     waitingForResponse = false;
+                //     System.out.print("> ");
+                //     break;
+                // case Constants.ACTION_FILE_FIN:
+                //     message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
+                //     System.out.println("\nReceived FIN from Server: " + message);
+                //     break;
+                // case Constants.ACTION_LIST_REQ:
+                //     message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
+                //     System.out.println("\nFiles available for you on the server:");
+                //     System.out.println(" " + message);
+                //     System.out.print("> ");
+                //     break;
+                // case Constants.ACTION_FILE_DOWN:
+                //     handleDownloadMeta(responseJson);
+                //     break;
+                // case Constants.ACTION_DOWN_REQ:
+                //     status = responseJson.get(Constants.KEY_STATUS).getAsString();
+                //     if (status.equals(Constants.STATUS_ERROR)) {
+                //         message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
+                //         System.out.println(message);
+                //     }
+                //     break;
+                // case Constants.ACTION_FILE_DATA:
+                //     handleDownloadData(responseJson);
+                //     break;
+                // case Constants.ACTION_DOWN_FIN:
+                //     status = responseJson.get(Constants.KEY_STATUS).getAsString();
+                //     if (status.equals(Constants.STATUS_ERROR)) {
+                //         message = responseJson.get(Constants.KEY_MESSAGE).getAsString();
+                //         System.out.println(message);
+                //     } else {
+                //         handleDownloadFin(responseJson);
+                //     }
+                //     break;
+>>>>>>> origin/Tan
                 default:
                     System.err.println("Received unknown response from server: " + jsonString);
                     break;
@@ -230,7 +274,8 @@ public class Client {
         }
     }
 
-    private void sendFile(String recipient, String filepath) throws IOException {
+
+    private void sendFile(String roomId, String filepath) throws IOException {
         File file = new File(filepath);
         if (!file.exists() || !file.isFile()) {
             System.err.println("Error: File not found or is not a regular file: " + filepath);
@@ -250,7 +295,8 @@ public class Client {
         if (fileSize == 0) {
             totalPackets = 0; // Handle empty file case
         }
-        System.out.println("Preparing to send file '" + file.getName() + "' (" + fileSize + " bytes) to " + recipient
+
+        System.out.println("Preparing to send file '" + file.getName() + "' (" + fileSize + " bytes) to " + roomId
                 + " in " + totalPackets + " packets.");
 
         // 1. Send INIT packet
@@ -258,12 +304,13 @@ public class Client {
         serverAccepted = false;
 
         JsonObject initJson = new JsonObject();
-        initJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_INIT);
+        initJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_SEND_INIT);
         JsonObject dataJson = new JsonObject();
-        dataJson.addProperty("client_name", clientName);
-        dataJson.addProperty("recipient", recipient);
-        dataJson.addProperty("file_name", file.getName());
+        dataJson.addProperty("chat_id", clientName);
+        dataJson.addProperty("room_id", roomId);
+        dataJson.addProperty("file_path", file.getName());
         dataJson.addProperty("file_size", fileSize);
+        dataJson.addProperty("file_type", "document");
         dataJson.addProperty("total_packets", totalPackets);
         initJson.add(Constants.KEY_DATA, dataJson);
 
@@ -321,13 +368,13 @@ public class Client {
 
                 String base64Data = Base64.getEncoder().encodeToString(Arrays.copyOf(dataBuffer, bytesRead));
                 JsonObject dataPacketJson = new JsonObject();
-                dataPacketJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_DATA);
+
+                dataPacketJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_SEND_DATA);
                 JsonObject dataDataJson = new JsonObject();
-                dataDataJson.addProperty("client_name", clientName);
-                dataDataJson.addProperty("recipient", recipient);
-                dataDataJson.addProperty("file_name", file.getName());
+                dataDataJson.addProperty("chat_id", clientName);
+                dataDataJson.addProperty("room_id", roomId);
+                dataDataJson.addProperty("file_path", file.getName());
                 dataDataJson.addProperty("sequence_number", sequenceNumber);
-                dataDataJson.addProperty("chunk_size", bytesRead);
                 dataDataJson.addProperty("file_data", base64Data);
                 dataPacketJson.add(Constants.KEY_DATA, dataDataJson);
 
@@ -381,11 +428,11 @@ public class Client {
 
         // 3. Send FIN with retry
         JsonObject finJson = new JsonObject();
-        finJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_FIN);
+        finJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_SEND_FIN);
         JsonObject finDataJson = new JsonObject();
-        finDataJson.addProperty("client_name", clientName);
-        finDataJson.addProperty("recipient", recipient);
-        finDataJson.addProperty("file_name", file.getName());
+        finDataJson.addProperty("chat_id", clientName);
+        finDataJson.addProperty("room_id", roomId);
+        finDataJson.addProperty("file_path", file.getName());
         finJson.add(Constants.KEY_DATA, finDataJson);
 
         retries = 0;
@@ -397,22 +444,24 @@ public class Client {
         }
     }
 
-    private void requestFileList() throws IOException {
+
+    private void requestFileList(String roomId) throws IOException {
         JsonObject listReqJson = new JsonObject();
-        listReqJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_LIST_REQ);
+        listReqJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_LIST_REQ);
         JsonObject dataJson = new JsonObject();
-        dataJson.addProperty("client_name", clientName);
+        dataJson.addProperty("room_id", roomId);
         listReqJson.add(Constants.KEY_DATA, dataJson);
 
         System.out.println("Requesting file list from server...");
         sendPacket(listReqJson);
     }
 
-    private void requestDownload(String filename) throws IOException {
+
+    private void requestDownload(String roomId, String filename) throws IOException {
         JsonObject downReqJson = new JsonObject();
-        downReqJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_DOWN_REQ);
+        downReqJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_FILE_DOWN_REQ);
         JsonObject dataJson = new JsonObject();
-        dataJson.addProperty("client_name", clientName);
+        dataJson.addProperty("room_id", roomId);
         dataJson.addProperty("file_name", filename);
         downReqJson.add(Constants.KEY_DATA, dataJson);
 
