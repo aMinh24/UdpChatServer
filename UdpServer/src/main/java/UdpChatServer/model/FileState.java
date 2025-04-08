@@ -9,14 +9,16 @@ public class FileState {
     private final Long fileId;
     private final String roomId;
     private final String senderChatid;
-    private final String filename;
+    private final String filePath;
+    private final String fileType;
     private final Timestamp timestamp;
 
-    public FileState(Long fileId, String roomId, String senderChatid, String fileName, Timestamp timestamp) {
+    public FileState(Long fileId, String roomId, String senderChatid, String filePath, String fileType, Timestamp timestamp) {
         this.fileId = fileId;
         this.roomId = roomId;
         this.senderChatid = senderChatid;
-        this.filename = fileName;
+        this.filePath = filePath;
+        this.fileType = fileType;
         this.timestamp = timestamp;
     }
 
@@ -32,8 +34,12 @@ public class FileState {
         return senderChatid;
     }
 
-    public String getFileName() {
-        return filename;
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public String getFileType() {
+        return  fileType;
     }
 
     public Timestamp getTimestamp() {
@@ -42,7 +48,7 @@ public class FileState {
 
     @Override
     public String toString() {
-        return String.format("file[id=%d, room=%s, sender=%s, time=%s, fileName=%s]",
-                fileId, roomId, senderChatid, timestamp, filename);
+        return String.format("file[id=%d, room=%s, sender=%s, filePath=%s, fileType=%s, time=%s]",
+                fileId, roomId, senderChatid, filePath, fileType, timestamp);
     }
 }
