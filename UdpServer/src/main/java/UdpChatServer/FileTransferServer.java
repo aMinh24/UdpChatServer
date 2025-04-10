@@ -176,6 +176,7 @@ public class FileTransferServer {
         // Add default config values
         config.setProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT));
         config.setProperty("file.storage.dir", "server_storage");
+        System.out.println("File Transfer Server started with default config:------------ " + Constants.FILE_TRANSFER_SERVER_PORT + " " + Constants.STORAGE_DIR);
 
         try {
             FileTransferServer server = new FileTransferServer(config, new MessageDAO(), new UserDAO(), new RoomDAO(), new FileDAO());
