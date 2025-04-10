@@ -19,6 +19,7 @@ import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.model.Constants;
 import UdpChatServer.model.FileMetaData;
 
@@ -31,26 +32,28 @@ public class FileTransferHandler {
 
     protected static final Logger log = LoggerFactory.getLogger(FileTransferHandler.class);
 
-    protected final UserDAO userDAO;
-    protected final RoomDAO roomDAO;
-    protected final FileDAO fileDAO;
-    protected final MessageDAO messageDAO;
-    protected final DatagramSocket socket;
+    protected UserDAO userDAO;
+    protected RoomDAO roomDAO;
+    protected FileDAO fileDAO;
+    protected MessageDAO messageDAO;
+    protected DatagramSocket socket;
+    protected ClientSessionManager sessionManager;
 
-    protected String fileType;
+    protected static ConcurrentMap<String, String> fileTypes = new ConcurrentHashMap<>();
 
     // Stores metadata about files available for download for each client
-    protected static final ConcurrentMap<String, List<FileMetaData>> filesForClients = new ConcurrentHashMap<>();
+    protected static ConcurrentMap<String, List<FileMetaData>> filesForClients = new ConcurrentHashMap<>();
 
     // Temporarily stores incoming file chunks during upload
-    protected static final ConcurrentMap<String, ConcurrentSkipListMap<Integer, byte[]>> incomingFileChunks = new ConcurrentHashMap<>();
+    protected static ConcurrentMap<String, ConcurrentSkipListMap<Integer, byte[]>> incomingFileChunks = new ConcurrentHashMap<>();
 
-    public FileTransferHandler(MessageDAO messageDAO, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO, DatagramSocket socket) {
+    public FileTransferHandler(ClientSessionManager sessionManager, MessageDAO messageDAO, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO, DatagramSocket socket) {
         this.messageDAO = messageDAO;
         this.socket = socket;
         this.userDAO = userDAO;
         this.roomDAO = roomDAO;
         this.fileDAO = fileDAO;
+        this.sessionManager = sessionManager;
     }
 
     public JsonObject createJsonPacket(String action, String status, String message, JsonObject dataJson) {
@@ -71,9 +74,11 @@ public class FileTransferHandler {
     public void sendPacket(JsonObject jsonPacket, InetAddress address, int port) {
         try {
             String jsonString = jsonPacket.toString();
+            System.out.println(" -------------------json  _-------------"+jsonString);
             byte[] sendData = jsonString.getBytes(StandardCharsets.UTF_8);
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, address, port);
             System.out.println("Sent packet to " + address + ":" + port + ": " + jsonString);
+            System.out.println(" 0--------------------------------");
             socket.send(sendPacket);
         } catch (IOException e) {
             System.err.println("Error sending packet to " + address + ":" + port + ": " + e.getMessage()); 

@@ -51,10 +51,11 @@ public class ServerMain {
             log.info("Managers and DAOs initialized.");
 
             // Initialize FileTransferServer
-            // log.info("Initializing File Transfer Server...");
-            // fileTransferServer = new FileTransferServer(configProps, sessionManager, userDAO, roomDAO, fileDAO);
-            // Thread fileServerThread = new Thread(() -> fileTransferServer.listen(), "File-Transfer-Server-Thread");
-            // fileServerThread.start();
+
+            log.info("Initializing File Transfer Server...");
+            fileTransferServer = new FileTransferServer(configProps, sessionManager, messageDAO, userDAO, roomDAO, fileDAO);
+            Thread fileServerThread = new Thread(() -> fileTransferServer.listen(), "File-Transfer-Server-Thread");
+            fileServerThread.start();
 
             // Initialize Request Handler
             log.info("Initializing UDP Request Handler on port {}...", serverPort);
@@ -121,3 +122,4 @@ public class ServerMain {
     }
 }
 // mvn exec:java
+//vcl
