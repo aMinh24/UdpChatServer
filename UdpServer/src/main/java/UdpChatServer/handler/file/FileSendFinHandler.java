@@ -112,7 +112,7 @@ public class FileSendFinHandler extends FileTransferHandler {
             JsonObject responJson = jsonPacket;
             responJson.addProperty(Constants.KEY_MESSAGE, "Server error");
             responJson.addProperty(Constants.KEY_STATUS, Constants.STATUS_ERROR);
-            sendPacket(responJson, clientAddress, clientPort);
+            // sendPacket(responJson, clientAddress, clientPort);
         }
     }
 
@@ -125,15 +125,6 @@ public class FileSendFinHandler extends FileTransferHandler {
         
         return fileName;
     }
-    // private void forwardMessageToRoom(String sender, String receiver, String roomId, String filename,
-    //         Timestamp timestamp, InetAddress clientAddress, int clientPort) {
-    //     // Get participants from RoomDAO for persistence, or RoomManager for in-memory
-    //     // state
-    //     // Using RoomDAO might be slightly safer if RoomManager state could be
-    //     // inconsistent
-    //     Set<String> participants = roomDAO.getParticipantsInRoom(roomId);
-    //     // Set<String> participants = roomManager.getUsersInRoom(roomId); // Alternative
-    //     // using in-memory state
 
 
     private void forwardFileNotiToRoom(String senderChatId, String roomId, String fileMessage, Timestamp timestamp) {
@@ -159,14 +150,17 @@ public class FileSendFinHandler extends FileTransferHandler {
         log.debug("Forwarding message in room '{}' from '{}' to participants: {}", roomId, senderChatId, participants);
 
         for (String recipientChatId : participants) {
+            log.debug(" ********************************** {} to {} in room {}", senderChatId, recipientChatId, roomId);
+
             if (!recipientChatId.equals(senderChatId)) {
                 SessionInfo recipientSession = sessionManager.getSessionInfo(recipientChatId);
-                System.out.println(recipientSession.getIpAddress());
+                System.out.println(recipientSession.getIpAddress());                
                 if (recipientSession.getKey() != null) {
                     // Initiate S2C flow for this recipient
-                    log.debug("Initiating S2C flow to forward message from {} to {} in room {}", senderChatId, recipientChatId, roomId);
+                    log.debug("-------------------------------Initiating S2C flow to forward message from {} to {} in room {} , {}", senderChatId, recipientChatId, roomId,recipientSession.getPort());
                     
-                    sendPacket(messageJsonPacket, recipientSession.getIpAddress(), recipientSession.getPort() + 1);
+                    sendPacket(messageJsonPacket, recipientSession.getIpAddress(), recipientSession.getPort()+1);
+                    log.info("File message forwarded: {}", messageJsonPacket);
                 } else {
                     log.debug("Recipient '{}' in room '{}' is offline or key missing. Message saved in DB, not forwarded in real-time.", recipientChatId, roomId);
                     // Message is already saved, so offline users will get it later via get_messages
