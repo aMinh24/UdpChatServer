@@ -128,12 +128,15 @@ public class SendMessageHandler {
             "New message received.",
             data
         );
-        participants.add(senderChatId); // Include sender in the list to avoid missing ACKs
+        participants.remove(senderChatId);
+        // participants.add(senderChatId); // Include sender in the list to avoid missing ACKs
         for (String recipientChatId : participants) {
+
                 SessionInfo recipientSession = sessionManager.getSessionInfo(recipientChatId);
 
                 if (recipientSession != null && recipientSession.getKey() != null) {
                     // Initiate S2C flow for this recipient
+                    System.out.println("Recipient session: " + recipientSession);
                     log.debug("Initiating S2C flow to forward message from {} to {} in room {}", senderChatId, recipientChatId, roomId);
                     udpSender.initiateServerToClientFlow( // Changed from requestHandler
                         Constants.ACTION_RECEIVE_MESSAGE,
