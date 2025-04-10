@@ -10,12 +10,13 @@ import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.model.Constants;
 
 public class FileSendInitHandler extends FileTransferHandler {
     public FileSendInitHandler(MessageDAO messageDAO, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO,
-            DatagramSocket socket) {
-        super(messageDAO, userDAO, roomDAO, fileDAO, socket);
+            DatagramSocket socket, ClientSessionManager sessionManager) {
+        super(sessionManager, messageDAO, userDAO, roomDAO, fileDAO, socket);
     }
 
     public void handle(JsonObject jsonPacket, InetAddress clientAddress, int clientPort) {
@@ -39,15 +40,17 @@ public class FileSendInitHandler extends FileTransferHandler {
                 return;
             }
 
-            this.fileType = localFileType;
+            fileTypes.put(fileIdentifier, localFileType);
             incomingFileChunks.put(fileIdentifier, new ConcurrentSkipListMap<>()); // Prepare to receive chunks
+
+            System.out.println(incomingFileChunks.get(fileIdentifier));
 
             System.out.println("Receiving file '" + filePath + "' from " + senderChatId + " for " + roomId + " ("
                     + fileSize + " bytes, " + totalPackets + " packets)");
 
             // Send an ACK back to the sender
             JsonObject responJsonPacket = createJsonPacket(Constants.ACTION_FILE_SEND_INIT, Constants.STATUS_SUCCESS,
-                    "Send file init: Server accepted.", null);
+                    "Send file init: Server accepted.", dataJson);
             sendPacket(responJsonPacket, clientAddress, clientPort);
         } catch (NumberFormatException e) {
             System.err.println("Send file init: Invalid number format: " + e.getMessage());
