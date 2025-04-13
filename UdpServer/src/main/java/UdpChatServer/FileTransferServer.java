@@ -23,9 +23,12 @@ import UdpChatServer.db.FileDAO;
 import UdpChatServer.db.MessageDAO;
 import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
+import UdpChatServer.handler.file.FileDownHandler;
+import UdpChatServer.handler.file.FileListReqHandler;
 import UdpChatServer.handler.file.FileSendDataHandler;
 import UdpChatServer.handler.file.FileSendFinHandler;
 import UdpChatServer.handler.file.FileSendInitHandler;
+import UdpChatServer.manager.ClientSessionManager;
 import UdpChatServer.model.Constants;
 
 public class FileTransferServer {
@@ -40,15 +43,16 @@ public class FileTransferServer {
     private final RoomDAO roomDAO;
     private final FileDAO fileDAO;
     private FileSendDataHandler fileSendDataHandler;
-    //private FileDownloadHandler fileDownloadHandler;
     private FileSendFinHandler fileSendFinHandler;
     private FileSendInitHandler fileSendInitHandler;
-    //private ListRequestHandler listRequestHandler;
+    private FileListReqHandler fileListReqHandler;
+    private ClientSessionManager sessionManager;
+    private FileDownHandler fileDownHandler;
 
-    public FileTransferServer(Properties config, MessageDAO messageDAO, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO) throws SocketException {
+    public FileTransferServer(Properties config, ClientSessionManager sessionManager, MessageDAO messageDAO, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO) throws SocketException {
         int port = Integer.parseInt(config.getProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT)));
         String storageDir = config.getProperty("file.storage.dir", "server_storage");
-
+        this.sessionManager = sessionManager;
         this.messageDAO = messageDAO;
         this.userDAO = userDAO;
         this.roomDAO = roomDAO;
@@ -119,22 +123,29 @@ public class FileTransferServer {
             InetAddress clientAddress = packet.getAddress();
             int clientPort = packet.getPort();
 
+            System.out.println(jsonString);
+
             switch (action) {
                 case Constants.ACTION_FILE_SEND_INIT:
-                    fileSendInitHandler = new FileSendInitHandler(messageDAO, userDAO, roomDAO, fileDAO, socket);
+
+                    fileSendInitHandler = new FileSendInitHandler(messageDAO, userDAO, roomDAO, fileDAO, socket, sessionManager);
                     fileSendInitHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
                 case Constants.ACTION_FILE_SEND_DATA:
-                    fileSendDataHandler = new FileSendDataHandler(messageDAO, userDAO, roomDAO, fileDAO, socket);
+                    fileSendDataHandler = new FileSendDataHandler(messageDAO, userDAO, roomDAO, fileDAO, socket, sessionManager);
                     fileSendDataHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
                 case Constants.ACTION_FILE_SEND_FIN:
-                    fileSendFinHandler = new FileSendFinHandler(messageDAO, userDAO, roomDAO, fileDAO, socket);
+                    fileSendFinHandler = new FileSendFinHandler(messageDAO, userDAO, roomDAO, fileDAO, socket, sessionManager);
                     fileSendFinHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
                 case Constants.ACTION_FILE_LIST_REQ:
+                    fileListReqHandler = new FileListReqHandler(messageDAO, userDAO, roomDAO, fileDAO, socket, sessionManager);
+                    fileListReqHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
                 case Constants.ACTION_FILE_DOWN_REQ:
+                    fileDownHandler = new FileDownHandler(messageDAO, userDAO, roomDAO, fileDAO, socket, sessionManager);
+                    fileDownHandler.handle(jsonPacket, clientAddress, clientPort);
                     break;
                 case Constants.ACTION_FILE_DOWN_META:
                     break;
@@ -176,9 +187,10 @@ public class FileTransferServer {
         // Add default config values
         config.setProperty("file.server.port", String.valueOf(Constants.FILE_TRANSFER_SERVER_PORT));
         config.setProperty("file.storage.dir", "server_storage");
+        System.out.println("File Transfer Server started with default config:------------ " + Constants.FILE_TRANSFER_SERVER_PORT + " " + Constants.STORAGE_DIR);
 
         try {
-            FileTransferServer server = new FileTransferServer(config, new MessageDAO(), new UserDAO(), new RoomDAO(), new FileDAO());
+            FileTransferServer server = new FileTransferServer(config, new ClientSessionManager(), new MessageDAO(), new UserDAO(), new RoomDAO(), new FileDAO());
 
             // Add shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

@@ -30,21 +30,21 @@ public class FileDAO {
      */
     public boolean saveFile(FileState file) {
         if (file == null || file.getRoomId() == null || file.getSenderChatid() == null
-                || file.getFileName() == null) {
+                || file.getFilePath() == null) {
             log.warn("Attempted to save invalid file object: {}", file);
             return false;
         }
 
-        String sql = "INSERT INTO files (room_id, sender_chatid, file_name, file_type, timestamp) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO files (room_id, sender_chatid, file_path, file_type, timestamp) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnectionManager.getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, file.getRoomId());
             pstmt.setString(2, file.getSenderChatid());
-            pstmt.setString(3, file.getFileName());
+            pstmt.setString(3, file.getFilePath());
             // Xác định file_type từ tên file
-            String fileType = getFileType(file.getFileName());
-            pstmt.setString(4, fileType);
+            // String fileType = getFileType(file.getFilePath());
+            pstmt.setString(4, file.getFileType());
             pstmt.setTimestamp(5, file.getTimestamp() != null ? file.getTimestamp() : 
                               new Timestamp(System.currentTimeMillis()));
 
@@ -66,13 +66,6 @@ public class FileDAO {
         }
     }
 
-    private String getFileType(String fileName) {
-        if (fileName == null || !fileName.contains(".")) {
-            return "unknown";
-        }
-        return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-    }
-
     /**
      * Retrieves a list of files for a specific room, ordered by timestamp.
      *
@@ -86,7 +79,7 @@ public class FileDAO {
         }
 
         List<FileState> files = new ArrayList<>();
-        String sql = "SELECT file_id, room_id, sender_chatid, file_name, timestamp "
+        String sql = "SELECT file_id, room_id, sender_chatid, file_path, file_type, timestamp "
                 + "FROM files WHERE room_id = ? ORDER BY timestamp ASC";
 
         try (Connection conn = DatabaseConnectionManager.getConnection(); 
@@ -100,7 +93,8 @@ public class FileDAO {
                             rs.getLong("file_id"),
                             rs.getString("room_id"),
                             rs.getString("sender_chatid"),
-                            rs.getString("file_name"),
+                            rs.getString("file_path"),
+                            rs.getString("file_type"),
                             rs.getTimestamp("timestamp")
                     );
                     files.add(file);
@@ -128,7 +122,7 @@ public class FileDAO {
         }
 
         List<FileState> files = new ArrayList<>();
-        String sql = "SELECT file_id, room_id, sender_chatid, reciver_chatid, file_name, timestamp "
+        String sql = "SELECT file_id, room_id, sender_chatid, file_path, file_type, timestamp "
                 + "FROM files WHERE room_id = ? AND sender_chatid = ? ORDER BY timestamp ASC";
 
         try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -142,7 +136,8 @@ public class FileDAO {
                             rs.getLong("file_id"),
                             rs.getString("room_id"),
                             rs.getString("sender_chatid"),
-                            rs.getString("file_name"),
+                            rs.getString("file_path"),
+                            rs.getString("file_type"),
                             rs.getTimestamp("timestamp")
                     );
                     files.add(file);
@@ -154,50 +149,6 @@ public class FileDAO {
         } catch (Exception e) {
             log.error("Unexpected error retrieving files for sender '{}' in room '{}': {}",
                     senderChatid, roomId, e.getMessage(), e);
-        }
-        return files;
-    }
-
-    /**
-     * Retrieves a list of files received by a specific receiver in a room.
-     *
-     * @param roomId The ID of the room.
-     * @param reciverChatid The chatid of the receiver.
-     * @return A List of File objects, or an empty list if none are found or on
-     * error.
-     */
-    public List<FileState> getFilesByReceiver(String roomId, String reciverChatid) {
-        if (roomId == null || reciverChatid == null) {
-            return Collections.emptyList();
-        }
-
-        List<FileState> files = new ArrayList<>();
-        String sql = "SELECT file_id, room_id, sender_chatid, reciver_chatid, file_name, timestamp "
-                + "FROM files WHERE room_id = ? AND reciver_chatid = ? ORDER BY timestamp ASC";
-
-        try (Connection conn = DatabaseConnectionManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, roomId);
-            pstmt.setString(2, reciverChatid);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    FileState file = new FileState(
-                            rs.getLong("file_id"),
-                            rs.getString("room_id"),
-                            rs.getString("sender_chatid"),
-                            rs.getString("file_name"),
-                            rs.getTimestamp("timestamp")
-                    );
-                    files.add(file);
-                }
-            }
-        } catch (SQLException e) {
-            log.error("SQL error retrieving files for receiver '{}' in room '{}': {}",
-                    reciverChatid, roomId, e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Unexpected error retrieving files for receiver '{}' in room '{}': {}",
-                    reciverChatid, roomId, e.getMessage(), e);
         }
         return files;
     }
