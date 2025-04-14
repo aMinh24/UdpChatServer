@@ -21,7 +21,7 @@ import UdpChatServer.db.RoomDAO;
 import UdpChatServer.db.UserDAO;
 import UdpChatServer.handler.CreateRoomHandler;
 import UdpChatServer.handler.GetUsersHandler;
-import UdpChatServer.handler.LoginHandler; // Import all handlers
+import UdpChatServer.handler.LoginHandler;
 import UdpChatServer.handler.RegisterHandler;
 import UdpChatServer.handler.RoomManagementHandler;
 import UdpChatServer.handler.RoomMessageHandler;
@@ -72,12 +72,12 @@ public class UdpRequestHandler implements Runnable {
         // Initialize UdpSender with its required dependencies
         this.udpSender = new UdpSender(this.socket, this.sessionManager);
 
-        // Initialize all handlers, passing dependencies (including udpSender)
+        // Initialize all handlers, passing dependencies (including udpSender and createRoomHandler)
         this.loginHandler = new LoginHandler(this.userDAO, this.roomDAO, this.messageDAO, this.sessionManager, this.udpSender);
-        this.registerHandler = new RegisterHandler(this.userDAO, this.udpSender, this.sessionManager);
+        this.createRoomHandler = new CreateRoomHandler(this.sessionManager, this.roomManager, this.roomDAO, this.userDAO, this.socket, this.udpSender);
+        this.registerHandler = new RegisterHandler(this.userDAO, this.udpSender, this.sessionManager, this.createRoomHandler);
         this.sendMessageHandler = new SendMessageHandler(this.sessionManager, this.roomManager, this.messageDAO, this.roomDAO, this.udpSender);
-        this.createRoomHandler = new CreateRoomHandler(this.sessionManager, this.roomManager, this.roomDAO, this.userDAO, this.socket, this.udpSender); // Needs socket? Check handler impl. Assuming yes for now.
-        this.roomMessageHandler = new RoomMessageHandler(this.sessionManager, this.roomManager, this.roomDAO, this.messageDAO, this.socket, this.udpSender); // Needs socket? Check handler impl. Assuming yes for now.
+        this.roomMessageHandler = new RoomMessageHandler(this.sessionManager, this.roomManager, this.roomDAO, this.messageDAO, this.socket, this.udpSender);
         this.getUsersHandler = new GetUsersHandler(this.sessionManager, this.userDAO, this.udpSender);
         this.roomManagementHandler = new RoomManagementHandler(this.sessionManager, this.roomManager, this.roomDAO, this.udpSender);
 
@@ -319,7 +319,6 @@ public class UdpRequestHandler implements Runnable {
         }
 
         String chatid = data.get(Constants.KEY_CHAT_ID).getAsString();
-        String roomId = data.get(Constants.KEY_ROOM_ID).getAsString();
 
         // Validate the session
         if (!sessionManager.validateSession(chatid, clientAddress, clientPort)) {

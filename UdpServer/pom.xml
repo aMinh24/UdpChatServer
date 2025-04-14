@@ -78,6 +78,16 @@
     </dependencies>
 
     <build>
+        <resources> <!-- Added resources section -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.sql</include> <!-- Ensure .sql files are included -->
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

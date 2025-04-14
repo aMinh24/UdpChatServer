@@ -137,4 +137,8 @@ public final class Constants {
     public static final long SESSION_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
     public static final long SESSION_MAX_INACTIVE_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
     public static final long PENDING_MESSAGE_TIMEOUT_MS = 60 * 1000; // 1 minute timeout for pending confirmations/acks
+
+    // Default Bot Constants
+    public static final String GEMINI_BOT_CHAT_ID = "gemini_bot";
+    public static final String DEFAULT_BOT_ROOM_NAME = "Chat with Gemini Bot";
 }
