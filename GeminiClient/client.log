@@ -182,3 +182,211 @@ Signal received, shutting down AI client...
 2025-04-14 08:40:47,787 - AIClientLogger - INFO - MainThread - Session cleared (logged out or disconnected).
 2025-04-14 08:40:47,787 - AIClientLogger - INFO - MainThread - AI Client stopped.
 2025-04-14 08:40:47,788 - AIClientLogger - INFO - MainThread - Exiting main application.
+2025-04-14 13:47:54,283 - AIClientLogger - INFO - MainThread - Logger setup complete.
+2025-04-14 13:47:54,283 - AIClientLogger - INFO - MainThread - --- Gemini AI Chat Client ---
+2025-04-14 13:47:54,284 - AIClientLogger - WARNING - MainThread - GEMINI_API_KEY is not set or is the placeholder in config.py.
+2025-04-14 13:47:54,284 - AIClientLogger - WARNING - MainThread - AI responses will likely fail.
+2025-04-14 13:47:54,284 - AIClientLogger - INFO - MainThread - UDP Socket bound to ('0.0.0.0', 59840)
+2025-04-14 13:47:54,284 - AIClientLogger - INFO - MainThread - Gemini API URL configured: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=***
+2025-04-14 13:47:54,284 - AIClientLogger - INFO - MainThread - Starting UDP Manager...
+2025-04-14 13:47:54,285 - AIClientLogger - INFO - MainThread - Receiver thread started.
+2025-04-14 13:47:54,285 - AIClientLogger - INFO - MainThread - Sender thread started.
+2025-04-14 13:47:54,285 - AIClientLogger - INFO - MainThread - Attempting login as gemini_bot...
+2025-04-14 13:47:54,286 - AIClientLogger - INFO - MainThread - Login request sent.
+2025-04-14 13:47:54,286 - AIClientLogger - DEBUG - UDPSendThread - Sending 80 bytes to ('127.0.0.1', 9876)
+2025-04-14 13:47:54,286 - AIClientLogger - ERROR - UDPReceiveThread - Socket error during receive: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-04-14 13:48:12,898 - AIClientLogger - INFO - MainThread - Logger setup complete.
+2025-04-14 13:48:12,898 - AIClientLogger - INFO - MainThread - --- Gemini AI Chat Client ---
+2025-04-14 13:48:12,898 - AIClientLogger - WARNING - MainThread - GEMINI_API_KEY is not set or is the placeholder in config.py.
+2025-04-14 13:48:12,898 - AIClientLogger - WARNING - MainThread - AI responses will likely fail.
+2025-04-14 13:48:12,898 - AIClientLogger - INFO - MainThread - UDP Socket bound to ('0.0.0.0', 54062)
+2025-04-14 13:48:12,898 - AIClientLogger - INFO - MainThread - Gemini API URL configured: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=***
+2025-04-14 13:48:12,898 - AIClientLogger - INFO - MainThread - Starting UDP Manager...
+2025-04-14 13:48:12,899 - AIClientLogger - INFO - MainThread - Receiver thread started.
+2025-04-14 13:48:12,899 - AIClientLogger - INFO - MainThread - Sender thread started.
+2025-04-14 13:48:12,900 - AIClientLogger - INFO - MainThread - Attempting login as gemini_bot...
+2025-04-14 13:48:12,900 - AIClientLogger - INFO - MainThread - Login request sent.
+2025-04-14 13:48:12,900 - AIClientLogger - DEBUG - UDPSendThread - Sending 80 bytes to ('127.0.0.1', 9876)
+2025-04-14 13:48:12,900 - AIClientLogger - ERROR - UDPReceiveThread - Socket error during receive: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-04-14 14:38:10,430 - AIClientLogger - INFO - MainThread - 
+Signal received, shutting down AI client...
+2025-04-14 14:38:10,433 - AIClientLogger - INFO - MainThread - AI Client stopping...
+2025-04-14 14:38:11,440 - AIClientLogger - INFO - MainThread - 
+Signal received, shutting down AI client...
+2025-04-14 14:38:11,441 - AIClientLogger - INFO - MainThread - AI Client stopping...
+2025-04-14 14:38:12,450 - AIClientLogger - INFO - MainThread - Stopping UDP Manager...
+2025-04-14 14:38:12,452 - AIClientLogger - INFO - MainThread - UDP Socket closed.
+2025-04-14 14:38:12,452 - AIClientLogger - INFO - MainThread - UDP Manager stopped.
+2025-04-14 14:38:12,453 - AIClientLogger - DEBUG - MainThread - Clearing session - logged_in set to False
+2025-04-14 14:38:12,453 - AIClientLogger - INFO - MainThread - Session cleared (logged out or disconnected).
+2025-04-14 14:38:12,453 - AIClientLogger - INFO - MainThread - AI Client stopped.
+2025-04-14 14:38:12,453 - AIClientLogger - INFO - MainThread - Exiting main application.
+2025-04-14 14:38:24,258 - AIClientLogger - INFO - MainThread - Logger setup complete.
+2025-04-14 14:38:24,258 - AIClientLogger - INFO - MainThread - --- Gemini AI Chat Client ---
+2025-04-14 14:38:24,258 - AIClientLogger - WARNING - MainThread - GEMINI_API_KEY is not set or is the placeholder in config.py.
+2025-04-14 14:38:24,258 - AIClientLogger - WARNING - MainThread - AI responses will likely fail.
+2025-04-14 14:38:24,259 - AIClientLogger - INFO - MainThread - UDP Socket bound to ('0.0.0.0', 55114)
+2025-04-14 14:38:24,259 - AIClientLogger - INFO - MainThread - Gemini API URL configured: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=***
+2025-04-14 14:38:24,259 - AIClientLogger - INFO - MainThread - Starting UDP Manager...
+2025-04-14 14:38:24,260 - AIClientLogger - INFO - MainThread - Receiver thread started.
+2025-04-14 14:38:24,260 - AIClientLogger - INFO - MainThread - Sender thread started.
+2025-04-14 14:38:24,260 - AIClientLogger - INFO - MainThread - Attempting login as gemini_bot...
+2025-04-14 14:38:24,260 - AIClientLogger - INFO - MainThread - Login request sent.
+2025-04-14 14:38:24,260 - AIClientLogger - DEBUG - UDPSendThread - Sending 80 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:38:24,263 - AIClientLogger - DEBUG - UDPReceiveThread - Received 317 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:38:24,263 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 317 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:38:24,263 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_12","original_action":"login","le'...
+2025-04-14 14:38:24,263 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_12', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:38:24,264 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_12', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:38:24,264 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_login_12, Decryption: UTF-8 Decode
+2025-04-14 14:38:24,264 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
+2025-04-14 14:38:24,264 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_login_12)
+2025-04-14 14:38:24,264 - AIClientLogger - DEBUG - UDPReceiveThread - Encrypting CONFIRM_COUNT with login key for Server TX: C2S_login_12
+2025-04-14 14:38:24,264 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_login_12
+2025-04-14 14:38:24,271 - AIClientLogger - DEBUG - UDPSendThread - Sending 88 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - Received 140 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 140 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_12","original_action":"login"}}'...
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_12', 'original_action': 'login'}}
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_12', 'original_action': 'login'}}
+2025-04-14 14:38:24,274 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: failure, TX_ID: C2S_login_12, Decryption: UTF-8 Decode
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_login_12, Status: failure)
+2025-04-14 14:38:24,274 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_login_12, Status: failure, OrigActionInData: login
+2025-04-14 14:38:24,274 - AIClientLogger - ERROR - UDPReceiveThread - Login handshake failed at ACK stage (Server TX: C2S_login_12, Status: failure): Action processing failed.
+2025-04-14 14:38:24,274 - AIClientLogger - INFO - UDPReceiveThread - AI Client stopping...
+2025-04-14 14:38:25,261 - AIClientLogger - INFO - MainThread - Exiting main application.
+2025-04-14 14:39:44,991 - AIClientLogger - INFO - MainThread - Logger setup complete.
+2025-04-14 14:39:44,992 - AIClientLogger - INFO - MainThread - --- Gemini AI Chat Client ---
+2025-04-14 14:39:44,992 - AIClientLogger - INFO - MainThread - UDP Socket bound to ('0.0.0.0', 61232)
+2025-04-14 14:39:44,992 - AIClientLogger - INFO - MainThread - Gemini API URL configured: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=***
+2025-04-14 14:39:44,992 - AIClientLogger - INFO - MainThread - Starting UDP Manager...
+2025-04-14 14:39:44,993 - AIClientLogger - INFO - MainThread - Receiver thread started.
+2025-04-14 14:39:44,993 - AIClientLogger - INFO - MainThread - Sender thread started.
+2025-04-14 14:39:44,993 - AIClientLogger - INFO - MainThread - Attempting login as gemini_bot...
+2025-04-14 14:39:44,994 - AIClientLogger - INFO - MainThread - Login request sent.
+2025-04-14 14:39:44,994 - AIClientLogger - DEBUG - UDPSendThread - Sending 80 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:39:44,996 - AIClientLogger - DEBUG - UDPReceiveThread - Received 317 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:39:44,996 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 317 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:39:44,996 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_13","original_action":"login","le'...
+2025-04-14 14:39:44,996 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_13', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:39:44,996 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_13', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:39:44,996 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_login_13, Decryption: UTF-8 Decode
+2025-04-14 14:39:44,997 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
+2025-04-14 14:39:44,997 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_login_13)
+2025-04-14 14:39:44,997 - AIClientLogger - DEBUG - UDPReceiveThread - Encrypting CONFIRM_COUNT with login key for Server TX: C2S_login_13
+2025-04-14 14:39:44,997 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_login_13
+2025-04-14 14:39:45,004 - AIClientLogger - DEBUG - UDPSendThread - Sending 88 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - Received 140 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 140 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_13","original_action":"login"}}'...
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_13', 'original_action': 'login'}}
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_13', 'original_action': 'login'}}
+2025-04-14 14:39:45,009 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: failure, TX_ID: C2S_login_13, Decryption: UTF-8 Decode
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_login_13, Status: failure)
+2025-04-14 14:39:45,009 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_login_13, Status: failure, OrigActionInData: login
+2025-04-14 14:39:45,009 - AIClientLogger - ERROR - UDPReceiveThread - Login handshake failed at ACK stage (Server TX: C2S_login_13, Status: failure): Action processing failed.
+2025-04-14 14:39:45,009 - AIClientLogger - INFO - UDPReceiveThread - AI Client stopping...
+2025-04-14 14:39:45,994 - AIClientLogger - INFO - MainThread - Exiting main application.
+2025-04-14 14:39:53,962 - AIClientLogger - INFO - MainThread - Logger setup complete.
+2025-04-14 14:39:53,962 - AIClientLogger - INFO - MainThread - --- Gemini AI Chat Client ---
+2025-04-14 14:39:53,963 - AIClientLogger - INFO - MainThread - UDP Socket bound to ('0.0.0.0', 62368)
+2025-04-14 14:39:53,963 - AIClientLogger - INFO - MainThread - Gemini API URL configured: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=***
+2025-04-14 14:39:53,963 - AIClientLogger - INFO - MainThread - Starting UDP Manager...
+2025-04-14 14:39:53,963 - AIClientLogger - INFO - MainThread - Receiver thread started.
+2025-04-14 14:39:53,964 - AIClientLogger - INFO - MainThread - Sender thread started.
+2025-04-14 14:39:53,964 - AIClientLogger - INFO - MainThread - Attempting login as gemini_bot...
+2025-04-14 14:39:53,964 - AIClientLogger - INFO - MainThread - Login request sent.
+2025-04-14 14:39:53,964 - AIClientLogger - DEBUG - UDPSendThread - Sending 80 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - Received 317 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 317 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_14","original_action":"login","le'...
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_14', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_14', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:39:53,967 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_login_14, Decryption: UTF-8 Decode
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_login_14)
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - Encrypting CONFIRM_COUNT with login key for Server TX: C2S_login_14
+2025-04-14 14:39:53,967 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_login_14
+2025-04-14 14:39:53,974 - AIClientLogger - DEBUG - UDPSendThread - Sending 88 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:39:53,978 - AIClientLogger - DEBUG - UDPReceiveThread - Received 140 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:39:53,978 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 140 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:39:53,978 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_14","original_action":"login"}}'...
+2025-04-14 14:39:53,979 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_14', 'original_action': 'login'}}
+2025-04-14 14:39:53,979 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_14', 'original_action': 'login'}}
+2025-04-14 14:39:53,979 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: failure, TX_ID: C2S_login_14, Decryption: UTF-8 Decode
+2025-04-14 14:39:53,979 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
+2025-04-14 14:39:53,979 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_login_14, Status: failure)
+2025-04-14 14:39:53,979 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_login_14, Status: failure, OrigActionInData: login
+2025-04-14 14:39:53,979 - AIClientLogger - ERROR - UDPReceiveThread - Login handshake failed at ACK stage (Server TX: C2S_login_14, Status: failure): Action processing failed.
+2025-04-14 14:39:53,979 - AIClientLogger - INFO - UDPReceiveThread - AI Client stopping...
+2025-04-14 14:39:54,964 - AIClientLogger - INFO - MainThread - Exiting main application.
+2025-04-14 14:40:07,834 - AIClientLogger - INFO - MainThread - Logger setup complete.
+2025-04-14 14:40:07,834 - AIClientLogger - INFO - MainThread - --- Gemini AI Chat Client ---
+2025-04-14 14:40:07,834 - AIClientLogger - INFO - MainThread - UDP Socket bound to ('0.0.0.0', 63762)
+2025-04-14 14:40:07,834 - AIClientLogger - INFO - MainThread - Gemini API URL configured: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=***
+2025-04-14 14:40:07,834 - AIClientLogger - INFO - MainThread - Starting UDP Manager...
+2025-04-14 14:40:07,835 - AIClientLogger - INFO - MainThread - Receiver thread started.
+2025-04-14 14:40:07,835 - AIClientLogger - INFO - MainThread - Sender thread started.
+2025-04-14 14:40:07,836 - AIClientLogger - INFO - MainThread - Attempting login as gemini_bot...
+2025-04-14 14:40:07,836 - AIClientLogger - INFO - MainThread - Login request sent.
+2025-04-14 14:40:07,836 - AIClientLogger - DEBUG - UDPSendThread - Sending 80 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - Received 317 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 317 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_15","original_action":"login","le'...
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_15', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_15', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:40:07,838 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_login_15, Decryption: UTF-8 Decode
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_login_15)
+2025-04-14 14:40:07,838 - AIClientLogger - DEBUG - UDPReceiveThread - Encrypting CONFIRM_COUNT with login key for Server TX: C2S_login_15
+2025-04-14 14:40:07,839 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_login_15
+2025-04-14 14:40:07,846 - AIClientLogger - DEBUG - UDPSendThread - Sending 88 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:40:07,849 - AIClientLogger - DEBUG - UDPReceiveThread - Received 140 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:40:07,849 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 140 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:40:07,849 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_15","original_action":"login"}}'...
+2025-04-14 14:40:07,850 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_15', 'original_action': 'login'}}
+2025-04-14 14:40:07,850 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_15', 'original_action': 'login'}}
+2025-04-14 14:40:07,850 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: failure, TX_ID: C2S_login_15, Decryption: UTF-8 Decode
+2025-04-14 14:40:07,850 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
+2025-04-14 14:40:07,850 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_login_15, Status: failure)
+2025-04-14 14:40:07,850 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_login_15, Status: failure, OrigActionInData: login
+2025-04-14 14:40:07,850 - AIClientLogger - ERROR - UDPReceiveThread - Login handshake failed at ACK stage (Server TX: C2S_login_15, Status: failure): Action processing failed.
+2025-04-14 14:40:07,850 - AIClientLogger - INFO - UDPReceiveThread - AI Client stopping...
+2025-04-14 14:40:08,836 - AIClientLogger - INFO - MainThread - Exiting main application.
+2025-04-14 14:41:44,866 - AIClientLogger - INFO - MainThread - Logger setup complete.
+2025-04-14 14:41:44,866 - AIClientLogger - INFO - MainThread - --- Gemini AI Chat Client ---
+2025-04-14 14:41:44,867 - AIClientLogger - WARNING - MainThread - GEMINI_API_KEY is not set or is the placeholder in config.py.
+2025-04-14 14:41:44,867 - AIClientLogger - WARNING - MainThread - AI responses will likely fail.
+2025-04-14 14:41:44,867 - AIClientLogger - INFO - MainThread - UDP Socket bound to ('0.0.0.0', 57955)
+2025-04-14 14:41:44,867 - AIClientLogger - INFO - MainThread - Gemini API URL configured: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=***
+2025-04-14 14:41:44,867 - AIClientLogger - INFO - MainThread - Starting UDP Manager...
+2025-04-14 14:41:44,868 - AIClientLogger - INFO - MainThread - Receiver thread started.
+2025-04-14 14:41:44,868 - AIClientLogger - INFO - MainThread - Sender thread started.
+2025-04-14 14:41:44,868 - AIClientLogger - INFO - MainThread - Attempting login as gemini_bot...
+2025-04-14 14:41:44,868 - AIClientLogger - INFO - MainThread - Login request sent.
+2025-04-14 14:41:44,868 - AIClientLogger - DEBUG - UDPSendThread - Sending 80 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - Received 317 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 317 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_login_16","original_action":"login","le'...
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_16', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_login_16', 'original_action': 'login', 'letter_frequencies': {' ': 6, 'a': 7, '"': 14, 'b': 1, 'c': 2, 'd': 4, 'e': 1, 'g': 2, 'h': 1, 'i': 6, 'l': 1, ',': 2, 'm': 1, 'n': 3, 'o': 5, 'p': 2, 'r': 2, 's': 4, 't': 4, 'w': 2, ':': 4, '{': 2, '}': 2, '_': 2}}}
+2025-04-14 14:41:44,871 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_login_16, Decryption: UTF-8 Decode
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_login_16)
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - Encrypting CONFIRM_COUNT with login key for Server TX: C2S_login_16
+2025-04-14 14:41:44,871 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_login_16
+2025-04-14 14:41:44,879 - AIClientLogger - DEBUG - UDPSendThread - Sending 88 bytes to ('127.0.0.1', 9876)
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - Received 140 bytes from server ('127.0.0.1', 9876)
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 140 bytes from ('127.0.0.1', 9876)
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"failure","message":"Action processing failed.","data":{"transaction_id":"C2S_login_16","original_action":"login"}}'...
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_16', 'original_action': 'login'}}
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'failure', 'message': 'Action processing failed.', 'data': {'transaction_id': 'C2S_login_16', 'original_action': 'login'}}
+2025-04-14 14:41:44,882 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: failure, TX_ID: C2S_login_16, Decryption: UTF-8 Decode
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_login_16, Status: failure)
+2025-04-14 14:41:44,882 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_login_16, Status: failure, OrigActionInData: login
+2025-04-14 14:41:44,882 - AIClientLogger - ERROR - UDPReceiveThread - Login handshake failed at ACK stage (Server TX: C2S_login_16, Status: failure): Action processing failed.
+2025-04-14 14:41:44,883 - AIClientLogger - INFO - UDPReceiveThread - AI Client stopping...
+2025-04-14 14:41:45,869 - AIClientLogger - INFO - MainThread - Exiting main application.
