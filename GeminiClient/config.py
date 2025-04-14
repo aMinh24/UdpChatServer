@@ -7,7 +7,7 @@ SERVER_PORT = constants.DEFAULT_SERVER_PORT
 
 # --- AI Client Credentials ---
 AI_CHAT_ID = "gemini_bot" # Choose a unique chat ID for the AI
-AI_PASSWORD = "ai_password" # Choose a secure password
+AI_PASSWORD = "password_ai" # Choose a secure password
 
 # --- Gemini API Configuration ---
 # IMPORTANT: Keep your API key secure. Consider environment variables or a secrets manager.

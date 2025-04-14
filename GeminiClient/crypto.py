@@ -12,8 +12,8 @@ def caesar_cipher(text: str, shift: int) -> str:
         return None
     if not text:
         return ""
-    shift = 0 # REMOVED: Re-enable cipher logic
-
+    # shift = 0 # REMOVED: Re-enable cipher logic
+    log.info(f"Caesar cipher: Original text='{text[:10]}', Shift={shift}.") # Use logger
     result = []
     # Iterate directly over Unicode characters (code points) in the string
     for char in text:

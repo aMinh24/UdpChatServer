@@ -1,145 +1,4 @@
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - Received 274 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 274 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"gu_52b4a417","sender_chatid":"user1","content":"jo'...
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - UTF-8 decoded packet needs encryption (Action: receive_message). Clearing for decryption attempt.
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - Entering decryption block (logged_in=True)
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - Attempting session key decryption...
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - Raw data before session decode: b'{"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"'...
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - Data after session decode (before decrypt): {"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"...
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - Session key decryption successful: {'action': 'receive_message', 'status': 'success', 'message': 'New message received.', 'data': {'room_id': 'gu_52b4a417', 'sender_chatid': 'user1', 'content': 'joke 1 câu mới cho ngày thêm vui nào', 'timestamp': '2025-04-14T01:28:10.029Z', 'transaction_id': 'S2C_receive_message_18'}}
-2025-04-14 08:28:10,038 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'receive_message', 'status': 'success', 'message': 'New message received.', 'data': {'room_id': 'gu_52b4a417', 'sender_chatid': 'user1', 'content': 'joke 1 câu mới cho ngày thêm vui nào', 'timestamp': '2025-04-14T01:28:10.029Z', 'transaction_id': 'S2C_receive_message_18'}}
-2025-04-14 08:28:10,038 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: receive_message, Status: success, TX_ID: S2C_receive_message_18, Decryption: Session Key
-2025-04-14 08:28:10,039 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_receive_message
-2025-04-14 08:28:10,039 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_receive_message (TX: S2C_receive_message_18)
-2025-04-14 08:28:10,039 - AIClientLogger - INFO - UDPReceiveThread - Received message in room gu_52b4a417 from user1 at 2025-04-14T01:28:10.029Z: joke 1 câu mới cho ngày thêm vui nào...
-2025-04-14 08:28:10,039 - AIClientLogger - DEBUG - UDPReceiveThread - Sending prompt to Gemini: joke 1 câu mới cho ngày thêm vui nào...
-2025-04-14 08:28:11,181 - AIClientLogger - DEBUG - UDPReceiveThread - Gemini raw response: {'candidates': [{'content': {'parts': [{'text': 'Tại sao con mèo lại học piano?\n\n... Vì nó muốn chơi bản "Meo-lody" cho mọi người nghe! 😂\n'}], 'role': 'model'}, 'finishReason': 'STOP', 'safetyRatings': [{'category': 'HARM_CATEGORY_HATE_SPEECH', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_DANGEROUS_CONTENT', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_HARASSMENT', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'probability': 'NEGLIGIBLE'}], 'avgLogprobs': -0.5837400370630724}], 'usageMetadata': {'promptTokenCount': 10, 'candidatesTokenCount': 29, 'totalTokenCount': 39, 'promptTokensDetails': [{'modality': 'TEXT', 'tokenCount': 10}], 'candidatesTokensDetails': [{'modality': 'TEXT', 'tokenCount': 29}]}, 'modelVersion': 'gemini-2.0-flash'}
-2025-04-14 08:28:11,181 - AIClientLogger - DEBUG - UDPReceiveThread - Gemini generated text: Tại sao con mèo lại học piano?
-
-... Vì nó muốn chơi bản "Meo-lody" cho mọi người nghe! 😂...
-2025-04-14 08:28:11,181 - AIClientLogger - INFO - UDPReceiveThread - Sending message to room gu_52b4a417: Tại sao con mèo lại học piano?...
-2025-04-14 08:28:11,182 - AIClientLogger - INFO - UDPReceiveThread - Sent SEND_MESSAGE (Client TX: 3cce3581-5e7e-4494-821e-8878f48555f2). Waiting for CHARACTER_COUNT...
-2025-04-14 08:28:11,182 - AIClientLogger - DEBUG - UDPSendThread - Sending 359 bytes to ('127.0.0.1', 9876)
-2025-04-14 08:28:11,187 - AIClientLogger - DEBUG - UDPReceiveThread - Received 465 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:28:11,187 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 465 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:28:11,187 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_send_message_19","original_action":"sen'...
-2025-04-14 08:28:11,187 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_send_message_19', 'original_action': 'send_message', 'letter_frequencies': {'M': 1, 'T': 2, 'V': 1, 'Z': 1, '\\': 18, '_': 5, ' ': 29, 'a': 15, '!': 1, '"': 28, 'b': 4, 'c': 13, 'd': 14, 'e': 22, 'f': 3, 'g': 5, 'h': 5, 'i': 14, ',': 5, 'l': 2, 'm': 8, '-': 7, 'n': 16, '.': 3, 'o': 13, '0': 13, 'p': 2, '1': 20, 'r': 2, '2': 7, 's': 6, '3': 5, 't': 10, '4': 8, 'u': 16, '5': 7, '7': 3, '8': 9, 'y': 1, '9': 1, ':': 9, '{': 2, '}': 2, '?': 1}}}
-2025-04-14 08:28:11,187 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_send_message_19', 'original_action': 'send_message', 'letter_frequencies': {'M': 1, 'T': 2, 'V': 1, 'Z': 1, '\\': 18, '_': 5, ' ': 29, 'a': 15, '!': 1, '"': 28, 'b': 4, 'c': 13, 'd': 14, 'e': 22, 'f': 3, 'g': 5, 'h': 5, 'i': 14, ',': 5, 'l': 2, 'm': 8, '-': 7, 'n': 16, '.': 3, 'o': 13, '0': 13, 'p': 2, '1': 20, 'r': 2, '2': 7, 's': 6, '3': 5, 't': 10, '4': 8, 'u': 16, '5': 7, '7': 3, '8': 9, 'y': 1, '9': 1, ':': 9, '{': 2, '}': 2, '?': 1}}}
-2025-04-14 08:28:11,187 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_send_message_19, Decryption: UTF-8 Decode
-2025-04-14 08:28:11,187 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
-2025-04-14 08:28:11,188 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_send_message_19)
-2025-04-14 08:28:11,188 - AIClientLogger - DEBUG - UDPReceiveThread - Handling CHARACTER_COUNT for SEND_MESSAGE (Server TX: C2S_send_message_19). Searching for latest pending send...
-2025-04-14 08:28:11,188 - AIClientLogger - DEBUG - UDPReceiveThread - Found corresponding pending send (Client TX: 3cce3581-5e7e-4494-821e-8878f48555f2) for Server TX: C2S_send_message_19
-2025-04-14 08:28:11,188 - AIClientLogger - DEBUG - UDPReceiveThread - Sending CONFIRM_COUNT unencrypted for Server TX: C2S_send_message_19
-2025-04-14 08:28:11,188 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_send_message_19
-2025-04-14 08:28:11,193 - AIClientLogger - DEBUG - UDPSendThread - Sending 95 bytes to ('127.0.0.1', 9876)
-2025-04-14 08:28:11,211 - AIClientLogger - DEBUG - UDPReceiveThread - Received 159 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:28:11,211 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 159 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:28:11,211 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_send_message_19","original_action":"send_m'...
-2025-04-14 08:28:11,211 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'success', 'message': 'Action processed successfully.', 'data': {'transaction_id': 'C2S_send_message_19', 'original_action': 'send_message'}}
-2025-04-14 08:28:11,211 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'success', 'message': 'Action processed successfully.', 'data': {'transaction_id': 'C2S_send_message_19', 'original_action': 'send_message'}}
-2025-04-14 08:28:11,211 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: success, TX_ID: C2S_send_message_19, Decryption: UTF-8 Decode
-2025-04-14 08:28:11,211 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
-2025-04-14 08:28:11,212 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_send_message_19, Status: success)
-2025-04-14 08:28:11,212 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_send_message_19, Status: success, OrigActionInData: send_message
-2025-04-14 08:28:11,212 - AIClientLogger - DEBUG - UDPReceiveThread - Received ACK for SEND_MESSAGE (Server TX: C2S_send_message_19, Status: success). Attempting to find and remove corresponding pending send...
-2025-04-14 08:28:11,212 - AIClientLogger - INFO - UDPReceiveThread - Server acknowledged successful processing of 'send_message' (Server TX: C2S_send_message_19, Client TX: 3cce3581-5e7e-4494-821e-8878f48555f2).
-2025-04-14 08:28:11,212 - AIClientLogger - DEBUG - UDPReceiveThread - Attempted to remove pending send 3cce3581-5e7e-4494-821e-8878f48555f2. Found: True
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Received 262 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 262 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"gu_52b4a417","sender_chatid":"user1","content":"th'...
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - UTF-8 decoded packet needs encryption (Action: receive_message). Clearing for decryption attempt.
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Entering decryption block (logged_in=True)
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Attempting session key decryption...
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Raw data before session decode: b'{"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"'...
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Data after session decode (before decrypt): {"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"...
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Session key decryption successful: {'action': 'receive_message', 'status': 'success', 'message': 'New message received.', 'data': {'room_id': 'gu_52b4a417', 'sender_chatid': 'user1', 'content': 'thêm 1 và joke nào đó đi', 'timestamp': '2025-04-14T01:29:04.784Z', 'transaction_id': 'S2C_receive_message_22'}}
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'receive_message', 'status': 'success', 'message': 'New message received.', 'data': {'room_id': 'gu_52b4a417', 'sender_chatid': 'user1', 'content': 'thêm 1 và joke nào đó đi', 'timestamp': '2025-04-14T01:29:04.784Z', 'transaction_id': 'S2C_receive_message_22'}}
-2025-04-14 08:29:04,792 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: receive_message, Status: success, TX_ID: S2C_receive_message_22, Decryption: Session Key
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_receive_message
-2025-04-14 08:29:04,792 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_receive_message (TX: S2C_receive_message_22)
-2025-04-14 08:29:04,792 - AIClientLogger - INFO - UDPReceiveThread - Received message in room gu_52b4a417 from user1 at 2025-04-14T01:29:04.784Z: thêm 1 và joke nào đó đi...
-2025-04-14 08:29:04,793 - AIClientLogger - DEBUG - UDPReceiveThread - Sending prompt to Gemini: thêm 1 và joke nào đó đi...
-2025-04-14 08:29:07,364 - AIClientLogger - DEBUG - UDPReceiveThread - Gemini raw response: {'candidates': [{'content': {'parts': [{'text': 'Tuyệt vời! Để tôi giúp bạn nhé:\n\n**Thêm 1:**\n\n*   Bạn có 11 người bạn. Bạn thêm 1 người nữa. Bây giờ bạn có bao nhiêu người bạn?\n    *   Đáp án: 12 (mười hai)\n\n**Joke:**\n\n*   Tại sao con mèo lại sợ cây cối?\n    *   Trả lời: Vì nó hay sủa "gâu gâu"!\n\nHy vọng bạn thấy vui! Bạn có muốn nghe thêm không?'}], 'role': 'model'}, 'finishReason': 'STOP', 'safetyRatings': [{'category': 'HARM_CATEGORY_HATE_SPEECH', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_DANGEROUS_CONTENT', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_HARASSMENT', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'probability': 'NEGLIGIBLE'}], 'avgLogprobs': -0.305515254309418}], 'usageMetadata': {'promptTokenCount': 9, 'candidatesTokenCount': 109, 'totalTokenCount': 118, 'promptTokensDetails': [{'modality': 'TEXT', 'tokenCount': 9}], 'candidatesTokensDetails': [{'modality': 'TEXT', 'tokenCount': 109}]}, 'modelVersion': 'gemini-2.0-flash'}
-2025-04-14 08:29:07,364 - AIClientLogger - DEBUG - UDPReceiveThread - Gemini generated text: Tuyệt vời! Để tôi giúp bạn nhé:
-
-**Thêm 1:**
-
-*   Bạn có 11 người bạn. Bạn thêm 1 người nữa. Bây giờ...
-2025-04-14 08:29:07,365 - AIClientLogger - INFO - UDPReceiveThread - Sending message to room gu_52b4a417: Tuyệt vời! Để tôi giúp bạn nhé...
-2025-04-14 08:29:07,365 - AIClientLogger - INFO - UDPReceiveThread - Sent SEND_MESSAGE (Client TX: a9089452-8706-4e40-81e3-088100095ddd). Waiting for CHARACTER_COUNT...
-2025-04-14 08:29:07,366 - AIClientLogger - DEBUG - UDPSendThread - Sending 775 bytes to ('127.0.0.1', 9876)
-2025-04-14 08:29:07,374 - AIClientLogger - DEBUG - UDPReceiveThread - Received 520 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:29:07,374 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 520 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:29:07,374 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_send_message_23","original_action":"sen'...
-2025-04-14 08:29:07,374 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_send_message_23', 'original_action': 'send_message', 'letter_frequencies': {' ': 84, '!': 3, '"': 28, '(': 1, ')': 1, '*': 12, ',': 5, '-': 6, '.': 2, '0': 63, '1': 59, '2': 10, '3': 8, '4': 9, '5': 5, '6': 1, '7': 5, '8': 6, '9': 5, ':': 14, '?': 3, 'B': 4, 'H': 1, 'J': 1, 'T': 5, 'V': 1, 'Z': 1, '\\': 67, '_': 5, 'a': 33, 'b': 12, 'c': 14, 'd': 25, 'e': 53, 'f': 8, 'g': 13, 'h': 11, 'i': 23, 'k': 2, 'l': 2, 'm': 11, 'n': 40, 'o': 11, 'p': 3, 'r': 3, 's': 8, 't': 15, 'u': 60, 'v': 3, 'y': 6, '{': 2, '}': 2}}}
-2025-04-14 08:29:07,374 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_send_message_23', 'original_action': 'send_message', 'letter_frequencies': {' ': 84, '!': 3, '"': 28, '(': 1, ')': 1, '*': 12, ',': 5, '-': 6, '.': 2, '0': 63, '1': 59, '2': 10, '3': 8, '4': 9, '5': 5, '6': 1, '7': 5, '8': 6, '9': 5, ':': 14, '?': 3, 'B': 4, 'H': 1, 'J': 1, 'T': 5, 'V': 1, 'Z': 1, '\\': 67, '_': 5, 'a': 33, 'b': 12, 'c': 14, 'd': 25, 'e': 53, 'f': 8, 'g': 13, 'h': 11, 'i': 23, 'k': 2, 'l': 2, 'm': 11, 'n': 40, 'o': 11, 'p': 3, 'r': 3, 's': 8, 't': 15, 'u': 60, 'v': 3, 'y': 6, '{': 2, '}': 2}}}
-2025-04-14 08:29:07,374 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_send_message_23, Decryption: UTF-8 Decode
-2025-04-14 08:29:07,375 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
-2025-04-14 08:29:07,375 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_send_message_23)
-2025-04-14 08:29:07,375 - AIClientLogger - DEBUG - UDPReceiveThread - Handling CHARACTER_COUNT for SEND_MESSAGE (Server TX: C2S_send_message_23). Searching for latest pending send...
-2025-04-14 08:29:07,375 - AIClientLogger - DEBUG - UDPReceiveThread - Found corresponding pending send (Client TX: a9089452-8706-4e40-81e3-088100095ddd) for Server TX: C2S_send_message_23
-2025-04-14 08:29:07,375 - AIClientLogger - DEBUG - UDPReceiveThread - Sending CONFIRM_COUNT unencrypted for Server TX: C2S_send_message_23
-2025-04-14 08:29:07,375 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_send_message_23
-2025-04-14 08:29:07,378 - AIClientLogger - DEBUG - UDPSendThread - Sending 95 bytes to ('127.0.0.1', 9876)
-2025-04-14 08:29:07,392 - AIClientLogger - DEBUG - UDPReceiveThread - Received 159 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:29:07,392 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 159 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_send_message_23","original_action":"send_m'...
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'success', 'message': 'Action processed successfully.', 'data': {'transaction_id': 'C2S_send_message_23', 'original_action': 'send_message'}}
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'success', 'message': 'Action processed successfully.', 'data': {'transaction_id': 'C2S_send_message_23', 'original_action': 'send_message'}}
-2025-04-14 08:29:07,393 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: success, TX_ID: C2S_send_message_23, Decryption: UTF-8 Decode
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_send_message_23, Status: success)
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_send_message_23, Status: success, OrigActionInData: send_message
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - Received ACK for SEND_MESSAGE (Server TX: C2S_send_message_23, Status: success). Attempting to find and remove corresponding pending send...
-2025-04-14 08:29:07,393 - AIClientLogger - INFO - UDPReceiveThread - Server acknowledged successful processing of 'send_message' (Server TX: C2S_send_message_23, Client TX: a9089452-8706-4e40-81e3-088100095ddd).
-2025-04-14 08:29:07,393 - AIClientLogger - DEBUG - UDPReceiveThread - Attempted to remove pending send a9089452-8706-4e40-81e3-088100095ddd. Found: True
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - Received 284 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 284 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"gu_52b4a417","sender_chatid":"user1","content":"ha'...
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - UTF-8 decoded packet needs encryption (Action: receive_message). Clearing for decryption attempt.
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - Entering decryption block (logged_in=True)
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - Attempting session key decryption...
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - Raw data before session decode: b'{"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"'...
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - Data after session decode (before decrypt): {"action":"receive_message","status":"success","message":"New message received.","data":{"room_id":"...
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - Session key decryption successful: {'action': 'receive_message', 'status': 'success', 'message': 'New message received.', 'data': {'room_id': 'gu_52b4a417', 'sender_chatid': 'user1', 'content': 'hay đấy tuyệt vời tiếp tục phát huy nhé', 'timestamp': '2025-04-14T01:34:06.420Z', 'transaction_id': 'S2C_receive_message_27'}}
-2025-04-14 08:34:06,433 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'receive_message', 'status': 'success', 'message': 'New message received.', 'data': {'room_id': 'gu_52b4a417', 'sender_chatid': 'user1', 'content': 'hay đấy tuyệt vời tiếp tục phát huy nhé', 'timestamp': '2025-04-14T01:34:06.420Z', 'transaction_id': 'S2C_receive_message_27'}}
-2025-04-14 08:34:06,433 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: receive_message, Status: success, TX_ID: S2C_receive_message_27, Decryption: Session Key
-2025-04-14 08:34:06,434 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_receive_message
-2025-04-14 08:34:06,434 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_receive_message (TX: S2C_receive_message_27)
-2025-04-14 08:34:06,434 - AIClientLogger - INFO - UDPReceiveThread - Received message in room gu_52b4a417 from user1 at 2025-04-14T01:34:06.420Z: hay đấy tuyệt vời tiếp tục phát huy nhé...
-2025-04-14 08:34:06,434 - AIClientLogger - DEBUG - UDPReceiveThread - Sending prompt to Gemini: hay đấy tuyệt vời tiếp tục phát huy nhé...
-2025-04-14 08:34:08,036 - AIClientLogger - DEBUG - UDPReceiveThread - Gemini raw response: {'candidates': [{'content': {'parts': [{'text': 'Cảm ơn bạn rất nhiều vì lời động viên! Mình rất vui khi bạn thấy những gì mình làm là hay và tuyệt vời. Mình sẽ cố gắng hết sức để tiếp tục phát huy và mang đến những điều tốt đẹp hơn nữa. \n\nBạn có góp ý hay mong muốn gì cụ thể hơn không? Mình luôn sẵn lòng lắng nghe để cải thiện và phát triển hơn nữa.'}], 'role': 'model'}, 'finishReason': 'STOP', 'safetyRatings': [{'category': 'HARM_CATEGORY_HATE_SPEECH', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_DANGEROUS_CONTENT', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_HARASSMENT', 'probability': 'NEGLIGIBLE'}, {'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'probability': 'NEGLIGIBLE'}], 'avgLogprobs': -0.1566101356788918}], 'usageMetadata': {'promptTokenCount': 9, 'candidatesTokenCount': 81, 'totalTokenCount': 90, 'promptTokensDetails': [{'modality': 'TEXT', 'tokenCount': 9}], 'candidatesTokensDetails': [{'modality': 'TEXT', 'tokenCount': 81}]}, 'modelVersion': 'gemini-2.0-flash'}
-2025-04-14 08:34:08,037 - AIClientLogger - DEBUG - UDPReceiveThread - Gemini generated text: Cảm ơn bạn rất nhiều vì lời động viên! Mình rất vui khi bạn thấy những gì mình làm là hay và tuyệt v...
-2025-04-14 08:34:08,037 - AIClientLogger - INFO - UDPReceiveThread - Sending message to room gu_52b4a417: Cảm ơn bạn rất nhiều vì lời độ...
-2025-04-14 08:34:08,038 - AIClientLogger - INFO - UDPReceiveThread - Sent SEND_MESSAGE (Client TX: cbd6237f-cd79-4542-9a9e-94bff08b6d9f). Waiting for CHARACTER_COUNT...
-2025-04-14 08:34:08,038 - AIClientLogger - DEBUG - UDPSendThread - Sending 841 bytes to ('127.0.0.1', 9876)
-2025-04-14 08:34:08,044 - AIClientLogger - DEBUG - UDPReceiveThread - Received 495 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 495 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"character_count","status":"success","message":"Provide confirmation.","data":{"transaction_id":"C2S_send_message_28","original_action":"sen'...
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_send_message_28', 'original_action': 'send_message', 'letter_frequencies': {'B': 1, 'C': 1, 'M': 3, 'T': 1, 'Z': 1, '\\': 70, '_': 5, ' ': 81, 'a': 30, '!': 1, '"': 26, 'b': 13, 'c': 27, 'd': 18, 'e': 67, 'f': 19, 'g': 17, 'h': 23, 'i': 19, 'k': 2, ',': 5, 'l': 6, 'm': 11, '-': 6, 'n': 42, '.': 3, 'o': 7, '0': 62, 'p': 6, '1': 76, 'r': 5, '2': 6, 's': 8, '3': 10, 't': 25, '4': 10, 'u': 76, '5': 9, 'v': 7, '6': 2, '7': 5, '8': 2, '9': 8, 'y': 5, ':': 9, '{': 2, '}': 2, '?': 1}}}
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'character_count', 'status': 'success', 'message': 'Provide confirmation.', 'data': {'transaction_id': 'C2S_send_message_28', 'original_action': 'send_message', 'letter_frequencies': {'B': 1, 'C': 1, 'M': 3, 'T': 1, 'Z': 1, '\\': 70, '_': 5, ' ': 81, 'a': 30, '!': 1, '"': 26, 'b': 13, 'c': 27, 'd': 18, 'e': 67, 'f': 19, 'g': 17, 'h': 23, 'i': 19, 'k': 2, ',': 5, 'l': 6, 'm': 11, '-': 6, 'n': 42, '.': 3, 'o': 7, '0': 62, 'p': 6, '1': 76, 'r': 5, '2': 6, 's': 8, '3': 10, 't': 25, '4': 10, 'u': 76, '5': 9, 'v': 7, '6': 2, '7': 5, '8': 2, '9': 8, 'y': 5, ':': 9, '{': 2, '}': 2, '?': 1}}}
-2025-04-14 08:34:08,045 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: character_count, Status: success, TX_ID: C2S_send_message_28, Decryption: UTF-8 Decode
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_character_count
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_character_count (TX: C2S_send_message_28)
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Handling CHARACTER_COUNT for SEND_MESSAGE (Server TX: C2S_send_message_28). Searching for latest pending send...
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Found corresponding pending send (Client TX: cbd6237f-cd79-4542-9a9e-94bff08b6d9f) for Server TX: C2S_send_message_28
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Sending CONFIRM_COUNT unencrypted for Server TX: C2S_send_message_28
-2025-04-14 08:34:08,045 - AIClientLogger - DEBUG - UDPReceiveThread - Sent CONFIRM_COUNT (Confirm: True) for Server TX: C2S_send_message_28
-2025-04-14 08:34:08,050 - AIClientLogger - DEBUG - UDPSendThread - Sending 95 bytes to ('127.0.0.1', 9876)
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - Received 159 bytes from server ('127.0.0.1', 9876)
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - handle_raw_packet called with 159 bytes from ('127.0.0.1', 9876)
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - handle_packet received raw data: b'{"action":"ack","status":"success","message":"Action processed successfully.","data":{"transaction_id":"C2S_send_message_28","original_action":"send_m'...
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - Successfully decoded unencrypted packet: {'action': 'ack', 'status': 'success', 'message': 'Action processed successfully.', 'data': {'transaction_id': 'C2S_send_message_28', 'original_action': 'send_message'}}
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - Final Packet Dict: {'action': 'ack', 'status': 'success', 'message': 'Action processed successfully.', 'data': {'transaction_id': 'C2S_send_message_28', 'original_action': 'send_message'}}
-2025-04-14 08:34:08,063 - AIClientLogger - INFO - UDPReceiveThread - Routing Action: ack, Status: success, TX_ID: C2S_send_message_28, Decryption: UTF-8 Decode
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - Calling handler: handle_ack
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - Entered handle_ack (Server TX: C2S_send_message_28, Status: success)
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - ACK details - Server TX: C2S_send_message_28, Status: success, OrigActionInData: send_message
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - Received ACK for SEND_MESSAGE (Server TX: C2S_send_message_28, Status: success). Attempting to find and remove corresponding pending send...
-2025-04-14 08:34:08,063 - AIClientLogger - INFO - UDPReceiveThread - Server acknowledged successful processing of 'send_message' (Server TX: C2S_send_message_28, Client TX: cbd6237f-cd79-4542-9a9e-94bff08b6d9f).
-2025-04-14 08:34:08,063 - AIClientLogger - DEBUG - UDPReceiveThread - Attempted to remove pending send cbd6237f-cd79-4542-9a9e-94bff08b6d9f. Found: True
-2025-04-14 08:35:10,560 - AIClientLogger - INFO - MainThread - 
+2025-04-14 15:05:03,375 - AIClientLogger - INFO - MainThread - 
 Signal received, shutting down AI client...
 2025-04-14 08:35:10,561 - AIClientLogger - INFO - MainThread - AI Client stopping...
 2025-04-14 08:35:11,224 - AIClientLogger - INFO - MainThread - Stopping UDP Manager...
@@ -390,3 +249,12 @@ Signal received, shutting down AI client...
 2025-04-14 14:41:44,882 - AIClientLogger - ERROR - UDPReceiveThread - Login handshake failed at ACK stage (Server TX: C2S_login_16, Status: failure): Action processing failed.
 2025-04-14 14:41:44,883 - AIClientLogger - INFO - UDPReceiveThread - AI Client stopping...
 2025-04-14 14:41:45,869 - AIClientLogger - INFO - MainThread - Exiting main application.
+2025-04-14 15:05:03,376 - AIClientLogger - INFO - MainThread - AI Client stopping...
+2025-04-14 15:05:04,318 - AIClientLogger - INFO - MainThread - Stopping UDP Manager...
+2025-04-14 15:05:05,172 - AIClientLogger - INFO - MainThread - UDP Socket closed.
+2025-04-14 15:05:05,172 - AIClientLogger - INFO - MainThread - UDP Manager stopped.
+2025-04-14 15:05:05,172 - AIClientLogger - DEBUG - MainThread - Clearing session - logged_in set to False
+2025-04-14 15:05:05,172 - AIClientLogger - INFO - MainThread - Session cleared (logged out or disconnected).
+2025-04-14 15:05:05,172 - AIClientLogger - INFO - MainThread - AI Client stopped.
+2025-04-14 15:05:05,173 - AIClientLogger - INFO - MainThread - Exiting main application.
+

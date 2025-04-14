@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -124,11 +125,38 @@ public class DatabaseConnectionManager {
     }
 
     /**
-     * Executes the database setup script (db_setup.sql) to ensure tables exist.
+     * Checks if a key table exists. If not, executes the database setup script.
      * Assumes the database itself exists and the dataSource is initialized.
-     * Skips CREATE DATABASE and USE statements. Handles comments more robustly.
+     * Skips CREATE DATABASE and USE statements within the script. Handles comments.
      */
     private static void ensureTablesExist() {
+        // Check if a key table (e.g., 'users') already exists
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+            log.debug("Checking for existence of 'users' table...");
+            // Try a simple query. If it fails with "table not found", the script needs to run.
+            try (ResultSet rs = stmt.executeQuery("SELECT 1 FROM users LIMIT 1")) {
+                 // If query succeeds, table exists.
+                 log.info("Key table 'users' found. Skipping database setup script execution.");
+                 return; // Exit the method, don't run the script
+            }
+        } catch (SQLException e) {
+            // MySQL specific error code for "Table doesn't exist" is 1146, SQLState is '42S02'
+            if ("42S02".equals(e.getSQLState()) || e.getErrorCode() == 1146) {
+                log.info("Key table 'users' not found (SQLState: {}, ErrorCode: {}). Proceeding with database setup script.", e.getSQLState(), e.getErrorCode());
+                // Proceed to execute the script below
+            } else {
+                // Different SQL error, might be a connection issue or other problem
+                log.error("SQL error while checking for 'users' table existence. Cannot ensure schema.", e);
+                throw new RuntimeException("SQL error checking table existence", e);
+            }
+        } catch (Exception e) {
+             log.error("Unexpected error while checking for 'users' table existence.", e);
+             throw new RuntimeException("Unexpected error checking table existence", e);
+        }
+
+        // --- If the code reaches here, the 'users' table likely doesn't exist ---
+
         String scriptContent;
         try {
             scriptContent = loadSqlScript(DB_SETUP_SCRIPT);
@@ -141,10 +169,10 @@ public class DatabaseConnectionManager {
         String[] statements = scriptContent.split(";");
         log.debug("Split db_setup.sql into {} potential statements.", statements.length);
 
-        try (Connection conn = getConnection();
+        try (Connection conn = getConnection(); // Get a new connection for script execution
              Statement stmt = conn.createStatement()) {
 
-            log.info("Executing database setup script '{}' to ensure tables exist...", DB_SETUP_SCRIPT);
+            log.info("Executing database setup script '{}' as key table was missing...", DB_SETUP_SCRIPT);
             int executedCount = 0;
             int statementIndex = 0;
             for (String sql : statements) {
@@ -178,18 +206,20 @@ public class DatabaseConnectionManager {
                     executedCount++;
                     log.info("Successfully executed SQL statement #{}", statementIndex);
                 } catch (SQLException e) {
-                    if (e.getErrorCode() == 1050) { // MySQL specific code for "Table already exists"
+                    if (e.getErrorCode() == 1050) { // MySQL: Table already exists
                          log.warn("Table already exists (skipped execution for statement #{}): {}", statementIndex, processedSql.length() > 100 ? processedSql.substring(0, 100) + "..." : processedSql);
-                    } else {
+                    } else if (e.getErrorCode() == 1062) { // MySQL: Duplicate entry for key
+                         log.warn("Duplicate entry detected (skipped execution for statement #{}): {}", statementIndex, processedSql.length() > 100 ? processedSql.substring(0, 100) + "..." : processedSql);
+                    }
+                    else {
                         log.error("Error executing SQL statement #{}: {} - SQLState: {}, ErrorCode: {}, Message: {}",
                                   statementIndex,
                                   processedSql.length() > 100 ? processedSql.substring(0, 100) + "..." : processedSql,
                                   e.getSQLState(), e.getErrorCode(), e.getMessage(), e); // Log the exception too
-                        // Consider re-throwing critical errors
                     }
                 }
             }
-            log.info("Database setup script execution finished. Attempted to execute {} DDL statements.", executedCount);
+            log.info("Database setup script execution finished. Attempted to execute {} DDL/DML statements.", executedCount);
 
         } catch (SQLException e) {
             log.error("Failed to get connection or execute database setup script '{}'. Critical error.", DB_SETUP_SCRIPT, e);
