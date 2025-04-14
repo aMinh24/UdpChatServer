@@ -1,0 +1,54 @@
+// Client --> Server: Yêu cầu tải file từ Client gửi cho Server (Server không phản hồi)
+{
+  "action": "file_down_req",
+  "data": {
+    "room_id": "uu_369959f"
+    "file_name": "filename"
+  }
+}
+
+// Server --> Client: Nếu yêu cầu tải file lỗi thì mới gửi file này
+{
+  "action": "file_down_req",
+  "status": "error",
+  "message": "Lỗi
+}
+
+// Server --> Client: Sau khi server nhận được và yêu cầu tải file sẽ gửi thông tin của file cần tải cho Client. (không cần phản hồi)
+{
+  "action": "file_down_meta",
+  "data": {
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "file_size": 1234,
+    "total_packets": 1234
+  }
+}
+
+// Server --> Client: gửi các gói tin đến Client 
+{
+  "action": "file_down_data",
+  "data": {
+    "room_id": "uu_369959f",
+    "file_path": "text.txt",
+    "sequence_number": 1,
+    "chunk_size": 32123,
+    "file_data": "abcdefgh"
+  }
+}
+
+// Server --> Client: sau khi gửi hết các gói tin thì gửi cái này để thông báo.
+{
+  "action": "file_down_fin",
+  "data": {
+    "room_id": "uu_369959f",
+    "file_path": "text.txt"
+  }
+}
+
+// Server --> Client: Nếu fin lỗi thì gửi các này.
+{
+  "action": "file_down_fin",
+  "status": "error",
+  "message": "Server error during file transmission."
+}
