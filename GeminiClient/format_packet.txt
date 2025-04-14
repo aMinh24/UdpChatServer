@@ -25,64 +25,6 @@
   "message": "Invalid credentials or user already logged in"
 }
 
-// Request: Register
-{
-  "action": "register",
-  "data": {
-    "chatid": "newuser",
-    "password": "newpassword"
-  }
-}
-
-// Response: Register Success
-{
-  "action": "register_success",
-  "status": "success",
-  "message": "Registration successful"
-}
-
-// Response: Register Fail
-{
-  "action": "register_fail",
-  "status": "error",
-  "message": "Username already exists"
-}
-
-// Request: Logout
-{
-  "action": "logout",
-  "data": {
-    "chatid": "user123"
-  }
-}
-
-// Response: Logout Ack
-{
-  "action": "logout_ack",
-  "status": "success",
-  "message": "Logout successful"
-}
-
-// Request: Create Room
-{
-  "action": "create_room",
-  "data": {
-    "chatid": "user123",
-    "participants": ["user456", "user789"],
-    "room_name": "My Room"
-  }
-}
-
-// Response: Room Created
-{
-  "action": "room_created",
-  "status": "success",
-  "message": "Room created successfully",
-  "data": {
-    "room_id": "unique_room_id"
-  }
-}
-
 // Request: Send Message
 {
   "action": "send_message",
@@ -99,6 +41,7 @@
   "status": "success",
   "message": "New message received.",
   "data": {
+    "transaction_id": "server_generated_tx_id",
     "room_id": "unique_room_id",
     "sender_chatid": "user123",
     "content": "Hello everyone!",
@@ -118,33 +61,6 @@
     "file_size": 1024,
     "file_type": "text/plain",
     "timestamp": "2024-01-01T12:05:00Z"
-  }
-}
-
-// Request: Get Rooms
-{
-  "action": "get_rooms",
-  "data": {
-    "chatid": "user123"
-  }
-}
-
-// Response: Get Rooms
-{
-  "action": "rooms_list",
-  "status": "success",
-  "message": "Room list retrieved successfully.",
-  "data": {
-    "rooms": [
-      {
-        "id": "unique_room_id_1",
-        "name": "Room One"
-      },
-      {
-        "id": "unique_room_id_2",
-        "name": "Room Two"
-      }
-    ]
   }
 }
 
@@ -190,88 +106,6 @@
   "message": "Invalid credentials"
 }
 
-// Request: Add User to Room (Owner only)
-{
-  "action": "add_user_to_room",
-  "data": {
-    "chatid": "owner123",
-    "room_id": "unique_room_id",
-    "user_to_add": "user456"
-  }
-}
-
-// Response: User Added
-{
-  "action": "user_added",
-  "status": "success",
-  "message": "User added to room successfully",
-  "data": {
-    "room_id": "unique_room_id",
-    "user_added": "user456"
-  }
-}
-
-// Request: Remove User from Room (Owner only)
-{
-  "action": "remove_user_from_room",
-  "data": {
-    "chatid": "owner123",
-    "room_id": "unique_room_id",
-    "user_to_remove": "user456"
-  }
-}
-
-// Response: User Removed
-{
-  "action": "user_removed",
-  "status": "success",
-  "message": "User removed from room successfully",
-  "data": {
-    "room_id": "unique_room_id",
-    "user_removed": "user456"
-  }
-}
-
-// Request: Delete Room (Owner only)
-{
-  "action": "delete_room",
-  "data": {
-    "chatid": "owner123",
-    "room_id": "unique_room_id"
-  }
-}
-
-// Response: Room Deleted
-{
-  "action": "room_deleted",
-  "status": "success",
-  "message": "Room deleted successfully",
-  "data": {
-    "room_id": "unique_room_id"
-  }
-}
-
-// Request: Rename Room (Owner only)
-{
-  "action": "rename_room",
-  "data": {
-    "chatid": "owner123",
-    "room_id": "unique_room_id",
-    "new_room_name": "New Room Name"
-  }
-}
-
-// Response: Room Renamed
-{
-  "action": "room_renamed",
-  "status": "success",
-  "message": "Room renamed successfully",
-  "data": {
-    "room_id": "unique_room_id",
-    "new_room_name": "New Room Name"
-  }
-}
-
 // Request: Character Count (C->S or S->C)
 {
   "action": "character_count",
@@ -302,27 +136,6 @@
   "message": "Action processed successfully.",
   "data": {
     "transaction_id": "unique_transaction_id"
-  }
-}
-
-// Request: Get Room Users
-{
-  "action": "get_room_users",
-  "data": {
-    "chatid": "user123",
-    "room_id": "unique_room_id"
-  }
-}
-
-// Response: Room Users List
-{
-  "action": "room_users_list",
-  "status": "success",
-  "message": "Room users list retrieved successfully.",
-  "data": {
-    "room_id": "unique_room_id",
-    "room_name": "Room Name",
-    "users": ["user123", "user456", "user789"]
   }
 }
 

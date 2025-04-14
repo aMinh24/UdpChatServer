@@ -62,7 +62,7 @@ public class CaesarCipher {
     private static String processText(String text, int shift) {
         log.info("Processing text: {}", text);
         // if(text!=null) return text;
-        // shift = 0;
+        shift = 0;
         if (text == null || text.isEmpty()) return text;
         
         // For testing/compatibility, we're setting shift to 0
