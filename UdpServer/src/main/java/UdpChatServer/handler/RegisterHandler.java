@@ -16,8 +16,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import UdpChatServer.db.UserDAO;
@@ -33,12 +31,13 @@ public class RegisterHandler {
     private final UserDAO userDAO;
     private final UdpSender udpSender;
     private final ClientSessionManager sessionManager;
-    private final Gson gson = new Gson(); // Added Gson instance
+    private final CreateRoomHandler createRoomHandler;
 
-    public RegisterHandler(UserDAO userDAO, UdpSender udpSender, ClientSessionManager sessionManager) {
+    public RegisterHandler(UserDAO userDAO, UdpSender udpSender, ClientSessionManager sessionManager, CreateRoomHandler createRoomHandler) {
         this.userDAO = userDAO;
         this.udpSender = udpSender;
         this.sessionManager = sessionManager;
+        this.createRoomHandler = createRoomHandler;
     }
 
     public boolean processConfirmedRegister(PendingMessageInfo pendingInfo) {
@@ -68,23 +67,25 @@ public class RegisterHandler {
                 return false;
             }
 
+            boolean botRoomCreated = createRoomHandler.createRoomWithBot(chatid);
+            if (!botRoomCreated) {
+                log.error("Failed to create default bot room for user '{}', but registration succeeded.", chatid);
+            }
+
             JsonObject responseData = new JsonObject();
             responseData.addProperty(Constants.KEY_CHAT_ID, chatid);
             responseData.addProperty(Constants.KEY_MESSAGE, "Registration successful. Please login with /login chatid password");
 
             JsonObject responseJson = new JsonObject();
-            responseJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_REGISTER_SUCCESS); // Dùng hằng số
+            responseJson.addProperty(Constants.KEY_ACTION, Constants.ACTION_REGISTER_SUCCESS);
             responseJson.add(Constants.KEY_DATA, responseData);
 
             udpSender.initiateServerToClientFlow(Constants.ACTION_REGISTER_SUCCESS, responseJson, clientAddress, clientPort, transactionKey);
             log.info("User {} registered successfully.", chatid);
 
             List<String> allUserIds = userDAO.getAllChatIds();
-            System.out.println("------------------------s---------------"+allUserIds);
-            JsonArray allUsersJsonArray = gson.toJsonTree(allUserIds).getAsJsonArray();
-            // Convert List to Set before passing to the forwardRoomToUser method
             Set<String> userIdSet = new HashSet<>(allUserIds);
-            forwardRoomToUser(userIdSet, chatid);
+            forwardUserListUpdate(userIdSet, chatid);
             return true;
 
         } catch (Exception e) {
@@ -94,33 +95,39 @@ public class RegisterHandler {
             return false;
         }
     }
-     private void forwardRoomToUser(Set<String> initialParticipants, String creatorChatId) {
-        // Get participants from RoomDAO for persistence, or use the provided set
-        Set<String> participants = initialParticipants;
+
+    private void forwardUserListUpdate(Set<String> allParticipants, String newUserChatId) {
+        Set<String> participants = allParticipants;
+
+        if (participants.isEmpty()) {
+            log.warn("No users found to forward user list update.");
+            return;
+        }
 
         JsonObject data = new JsonObject();
-        data.add(Constants.KEY_PARTICIPANTS, JsonHelper.convertSetToJsonArray(participants)); // Convert Set to JsonArray
+        data.add(Constants.KEY_PARTICIPANTS, JsonHelper.convertSetToJsonArray(participants));
         JsonObject messageJson = JsonHelper.createReply(
             Constants.ACTION_RECIEVE_LISTUSER,
             Constants.STATUS_SUCCESS,
-            "New room.",
+            "User list updated.",
             data
         );
 
+        log.info("Forwarding updated user list to online users (excluding new user '{}').", newUserChatId);
         for (String recipientChatId : participants) {
-            if (!recipientChatId.equals(creatorChatId)) {
+            if (!recipientChatId.equals(newUserChatId)) {
                 SessionInfo recipientSession = sessionManager.getSessionInfo(recipientChatId);
                 if (recipientSession != null && recipientSession.getKey() != null) {
-                    udpSender.initiateServerToClientFlow( // Changed from requestHandler
+                    udpSender.initiateServerToClientFlow(
                         Constants.ACTION_RECIEVE_LISTUSER,
                         messageJson,
                         recipientSession.getIpAddress(),
                         recipientSession.getPort(),
-                        recipientSession.getKey() // Use recipient's session key
+                        recipientSession.getKey()
                     );
+                    log.debug("Sent updated user list to online user '{}'", recipientChatId);
                 } else {
-                    log.debug("Recipient '{}' in room '{}' is offline or key missing. Message saved in DB, not forwarded in real-time.", recipientChatId);
-                    // Message is already saved, so offline users will get it later via get_messages
+                    log.trace("User '{}' is offline or session key missing. Skipping user list update.", recipientChatId);
                 }
             }
         }

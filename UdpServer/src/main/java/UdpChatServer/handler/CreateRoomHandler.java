@@ -147,6 +147,62 @@ public class CreateRoomHandler {
     }
     
     /**
+     * Creates a default room for a newly registered user with the Gemini Bot.
+     *
+     * @param userChatId The chat ID of the newly registered user.
+     * @return true if the room was created successfully, false otherwise.
+     */
+    public boolean createRoomWithBot(String userChatId) {
+        log.info("Attempting to create default bot room for new user '{}'", userChatId);
+
+        // 1. Check if bot user exists
+        if (!userDAO.userExists(Constants.GEMINI_BOT_CHAT_ID)) {
+            log.error("Cannot create default room: Bot user '{}' does not exist in the database.", Constants.GEMINI_BOT_CHAT_ID);
+            return false;
+        }
+
+        // 2. Define participants
+        Set<String> participants = new HashSet<>();
+        participants.add(userChatId);
+        participants.add(Constants.GEMINI_BOT_CHAT_ID);
+
+        // 3. Generate room ID
+        String roomId = RoomManager.generateRoomId(participants);
+        String roomName = Constants.DEFAULT_BOT_ROOM_NAME;
+
+        try {
+            // 4. Create room in DB (user is the owner)
+            if (!roomDAO.createRoomIfNotExists(roomId, roomName, userChatId)) {
+                log.error("Failed to create default bot room '{}' with owner '{}' in DB.", roomId, userChatId);
+                // Room might already exist, proceed to add participants if needed, but log error
+            }
+
+            // 5. Add participants to room in DB
+            boolean userAdded = roomDAO.addParticipantToRoom(roomId, userChatId);
+            boolean botAdded = roomDAO.addParticipantToRoom(roomId, Constants.GEMINI_BOT_CHAT_ID);
+
+            if (!userAdded || !botAdded) {
+                log.warn("Failed to add one or both participants ('{}', '{}') to default bot room '{}' in DB. Proceeding...", userChatId, Constants.GEMINI_BOT_CHAT_ID, roomId);
+                // Continue even if adding fails, maybe they already exist
+            }
+
+            // 6. Update in-memory room manager
+            roomManager.createOrJoinRoom(roomId, participants);
+
+            // 7. Notify the new user about the room creation (S2C flow)
+            log.info("Default bot room {} created/joined for user {}. Notifying user.", roomId, userChatId);
+            // Pass the userChatId as the 'creator' here, as they are the one receiving the notification
+            forwardRoomToUser(roomId, roomName, userChatId, participants);
+
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error creating default bot room for user '{}': {}", userChatId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
      * Forwards room creation information to all participants
      * 
      * @param roomId The ID of the created room

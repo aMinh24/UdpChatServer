@@ -3,6 +3,8 @@ package UdpChatServer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
+import java.sql.Connection; // Added import
+import java.sql.SQLException; // Added import
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -38,9 +40,27 @@ public class ServerMain {
         UdpRequestHandler requestHandler = null;
 
         try {
+            // Explicitly check database connection and trigger table setup early
+            log.info("Checking database connection and ensuring tables exist...");
+            try (Connection conn = DatabaseConnectionManager.getConnection()) {
+                if (conn == null || conn.isClosed()) {
+                     throw new SQLException("Failed to get a valid database connection from the pool.");
+                }
+                log.info("Database connection successful. Pool initialized and tables checked/created.");
+                // Connection is automatically closed by try-with-resources
+            } catch (SQLException e) {
+                log.error("Database connection failed. Server cannot start.", e);
+                // Ensure pool is closed if initialization failed partially
+                DatabaseConnectionManager.closeDataSource();
+                System.exit(1); // Exit if DB connection fails
+            } catch (RuntimeException e) {
+                 log.error("Failed during database initialization (likely config or script error). Server cannot start.", e);
+                 // DatabaseConnectionManager static block might throw RuntimeException
+                 DatabaseConnectionManager.closeDataSource(); // Ensure pool is closed
+                 System.exit(1);
+            }
+
             // Initialize Managers and DAOs
-            // (DAOs don't need explicit initialization as they have static methods or are stateless,
-            // but DatabaseConnectionManager initializes its pool statically)
             log.info("Initializing managers...");
             ClientSessionManager sessionManager = new ClientSessionManager();
             RoomManager roomManager = new RoomManager(); // RoomDAO could be injected if needed
@@ -51,7 +71,6 @@ public class ServerMain {
             log.info("Managers and DAOs initialized.");
 
             // Initialize FileTransferServer
-
             log.info("Initializing File Transfer Server...");
             fileTransferServer = new FileTransferServer(configProps, sessionManager, messageDAO, userDAO, roomDAO, fileDAO);
             Thread fileServerThread = new Thread(() -> fileTransferServer.listen(), "File-Transfer-Server-Thread");
