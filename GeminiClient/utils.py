@@ -55,21 +55,3 @@ def calculate_frequencies(text: str) -> dict:
     # Count every character in the string
     return dict(Counter(char for char in text))
 
-def needs_session_encryption(action: str) -> bool:
-    """Checks if a packet action requires session key encryption/decryption."""
-    # Login uses its own fixed key encryption
-    # Handshake packets are not encrypted with session key
-    unencrypted_actions = {
-        constants.ACTION_LOGIN, # Uses fixed key
-        constants.ACTION_LOGIN_SUCCESS, # Uses fixed key
-        constants.ACTION_CHARACTER_COUNT,
-        constants.ACTION_CONFIRM_COUNT,
-        constants.ACTION_ACK,
-        constants.ACTION_ERROR # Often sent before session is established or if it fails
-    }
-    return action not in unencrypted_actions
-
-def needs_login_encryption(action: str) -> bool:
-    """Checks if a packet action requires fixed login key encryption/decryption."""
-    return action in {constants.ACTION_LOGIN, constants.ACTION_LOGIN_SUCCESS}
-
