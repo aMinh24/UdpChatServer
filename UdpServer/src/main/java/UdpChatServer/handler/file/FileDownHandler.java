@@ -25,7 +25,7 @@ import UdpChatServer.model.FileState;
 public class FileDownHandler extends FileTransferHandler {
     // MAX_RETRIES không còn cần thiết ở đây vì việc gửi không cần đợi ACK từ client
     // trong mô hình đơn giản này. Client sẽ tự xử lý việc thiếu gói tin nếu cần.
-
+    String chat_id =null;
     public FileDownHandler(MessageDAO messageDAO, UserDAO userDAO, RoomDAO roomDAO, FileDAO fileDAO,
             DatagramSocket socket, ClientSessionManager sessionManager) {
         // Gọi constructor của lớp cha với đầy đủ tham số
@@ -38,13 +38,15 @@ public class FileDownHandler extends FileTransferHandler {
      */
     public void handle(JsonObject jsonPacket, InetAddress clientAddress, int clientPort) {
         String requestedFilename = null;
+    
         try {
             JsonObject dataJson = jsonPacket.getAsJsonObject(Constants.KEY_DATA);
             String roomId = dataJson.get("room_id").getAsString(); // Lấy roomId từ request
             requestedFilename = dataJson.get("file_name").getAsString(); // Lấy tên file từ request
-
-            System.out.println("Received DOWNLOAD request from " + clientAddress + ":" + clientPort +
-                    " (Room: " + roomId + ") for file: " + requestedFilename);
+            chat_id = dataJson.get("chat_id").getAsString(); // Lấy chat_id từ request
+            
+            System.out.println("*****************************Received DOWNLOAD request from " + clientAddress + ":" + clientPort +
+                    " (Room: " + roomId + ") for file: " + requestedFilename+ " chat_id: " + chat_id);
 
             // Tìm thông tin file trong cơ sở dữ liệu
             List<FileState> roomFiles = fileDAO.getFilesByRoom(roomId);
@@ -63,7 +65,7 @@ public class FileDownHandler extends FileTransferHandler {
                             clientAddress + ":" + clientPort);
                     // Khởi chạy việc gửi file trong một luồng riêng biệt
                     // Truyền thông tin cần thiết: fileState, filePath, địa chỉ client, socket
-                    new Thread(() -> sendFileToClient(fileState, roomId, filePath, clientAddress, clientPort)).start();
+                    new Thread(() -> sendFileToClient(chat_id,fileState, roomId, filePath, clientAddress, clientPort)).start();
 
                 } else {
                     System.err.println("File '" + requestedFilename + "' not found or not readable on server at path: "
@@ -95,7 +97,7 @@ public class FileDownHandler extends FileTransferHandler {
      * @param clientAddress The client's IP address.
      * @param clientPort    The client's port.
      */
-    private void sendFileToClient(FileState fileState, String roomId, Path filePath, InetAddress clientAddress, int clientPort) {
+    private void sendFileToClient(String chat_id, FileState fileState, String roomId, Path filePath, InetAddress clientAddress, int clientPort) {
         String filename = fileState.getFilePath(); // Lấy tên file gốc
         try (FileInputStream fis = new FileInputStream(filePath.toFile())) {
             long fileSize = Files.size(filePath); // Lấy kích thước file thực tế
@@ -107,6 +109,7 @@ public class FileDownHandler extends FileTransferHandler {
 
             // --- 1. Send META Packet ---
             JsonObject metaDataJson = new JsonObject();
+            metaDataJson.addProperty("chat_id", chat_id); 
             metaDataJson.addProperty("room_id", roomId);
             metaDataJson.addProperty("file_path", filename);
             metaDataJson.addProperty("file_size", fileSize);
@@ -129,6 +132,7 @@ public class FileDownHandler extends FileTransferHandler {
                 String base64Data = Base64.getEncoder().encodeToString(Arrays.copyOf(dataBuffer, bytesRead));
 
                 JsonObject dataJson = new JsonObject();
+                dataJson.addProperty("chat_id", chat_id); 
                 dataJson.addProperty("room_id", roomId);
                 dataJson.addProperty("file_name", filename);
                 dataJson.addProperty("sequence_number", sequenceNumber);
@@ -159,6 +163,7 @@ public class FileDownHandler extends FileTransferHandler {
 
             // --- 3. Send FIN Packet (Success) ---
             JsonObject dataFinJson = new JsonObject();
+            dataFinJson.addProperty("chat_id", chat_id); 
             dataFinJson.addProperty("room_id", roomId);
             dataFinJson.addProperty("file_path", filename);
             JsonObject finJsonPacket = createJsonPacket(Constants.ACTION_FILE_DOWN_FIN, null, null, dataFinJson);
